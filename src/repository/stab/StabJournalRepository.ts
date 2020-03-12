@@ -4,7 +4,7 @@ import IJournal from "../../model/interface/IJournal";
 import StabRepositoryBase from "./StabRepositoryBase";
 import IJournalDate from "../../model/interface/IJournalDate";
 import { DJournal } from "../../model/interface/DJournal";
-import JournalConverter from "../converter/JournalConverter";
+import JournalTransformer from "../transformer/JournalTransformer";
 
 @singleton()
 export default class StabJournalRepository
@@ -15,8 +15,12 @@ export default class StabJournalRepository
     this.jsonKey = "journal";
   }
 
-  public async convert(journal: DJournal): Promise<IJournal> {
-    return container.resolve(JournalConverter).convert(journal);
+  public async aggregate(journal: DJournal): Promise<IJournal> {
+    return container.resolve(JournalTransformer).aggregate(journal);
+  }
+
+  public simplify(journal: IJournal): DJournal {
+    return container.resolve(JournalTransformer).simplify(journal);
   }
 
   public getByAccountedAt(

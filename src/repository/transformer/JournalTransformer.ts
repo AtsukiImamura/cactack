@@ -1,4 +1,4 @@
-import Converter from "./Converter";
+import Transformer from "./Transformer";
 import { DJournal } from "../../model/interface/DJournal";
 import IJournal from "../../model/interface/IJournal";
 
@@ -7,8 +7,11 @@ import Journal from "../../model/Journal";
 import IJournalDetailRepository from "../interface/IJournalDetailRepository";
 
 @singleton()
-export default class JournalConverter extends Converter<DJournal, IJournal> {
-  public async convert(journal: DJournal): Promise<IJournal> {
+export default class JournalTransformer extends Transformer<
+  DJournal,
+  IJournal
+> {
+  public async aggregate(journal: DJournal): Promise<IJournal> {
     const jounalDetailRepo = container.resolve(
       "JournalDetailRepository"
     ) as IJournalDetailRepository;
@@ -32,5 +35,17 @@ export default class JournalConverter extends Converter<DJournal, IJournal> {
       debit
       // badget // TODO: 予算詰める
     );
+  }
+
+  public simplify(journal: IJournal): DJournal {
+    return {
+      transactionId: journal.transactionId,
+      id: journal.id,
+      accountedAt: journal.accountedAt.toString(),
+      executedAt: journal.executedAt.toString(),
+      creditId: journal.credit.id,
+      debitId: journal.debit.id,
+      badgetId: journal.badget?.id
+    };
   }
 }

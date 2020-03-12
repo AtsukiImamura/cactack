@@ -62,17 +62,24 @@ export class JournalDate implements IJournalDate {
     return token.split("/").map(t => Number(t));
   }
 
-  private _date: string;
+  private _date: string = "";
+
+  private _items: number[] = [];
+
+  private set date(date: string) {
+    this._date = date;
+    this._items = JournalDate.parse(date);
+  }
 
   public constructor(date: string) {
-    this._date = date;
+    this.date = date;
   }
 
   public get year(): number {
     if (!this._date) {
       return -1;
     }
-    const tokens = JournalDate.parse(this._date);
+    const tokens = this._items;
     return tokens[0];
   }
 
@@ -80,7 +87,7 @@ export class JournalDate implements IJournalDate {
     if (!this._date) {
       return -1;
     }
-    const tokens = JournalDate.parse(this._date);
+    const tokens = this._items;
     if (tokens.length < 2) {
       return -1;
     }
@@ -91,7 +98,7 @@ export class JournalDate implements IJournalDate {
     if (!this._date) {
       return -1;
     }
-    const tokens = JournalDate.parse(this._date);
+    const tokens = this._items;
     if (tokens.length < 3) {
       return -1;
     }
@@ -135,5 +142,9 @@ export class JournalDate implements IJournalDate {
 
   public afterThanOrEqualsTo(date: IJournalDate) {
     return !this.beforeThan(date);
+  }
+
+  public toString(): string {
+    return this._date;
   }
 }

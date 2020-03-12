@@ -1,7 +1,7 @@
 import { singleton, container } from "tsyringe";
 import StabRepositoryBase from "./StabRepositoryBase";
 import { DBadget } from "../../model/interface/DBadget";
-import BadgetConverter from "../converter/BadgetConverter";
+import BadgetTransformer from "../transformer/BadgetTransformer";
 import { IBadget } from "../../model/interface/IBadget";
 import IBadgetRepository from "../interface/IBadgetRepository";
 
@@ -14,7 +14,11 @@ export default class StabBadgetRepository
     this.jsonKey = "badget";
   }
 
-  public async convert(journal: DBadget): Promise<IBadget> {
-    return container.resolve(BadgetConverter).convert(journal);
+  public async aggregate(journal: DBadget): Promise<IBadget> {
+    return container.resolve(BadgetTransformer).aggregate(journal);
+  }
+
+  public simplify(badget: IBadget): DBadget {
+    return container.resolve(BadgetTransformer).simplify(badget);
   }
 }

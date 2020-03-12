@@ -1,6 +1,6 @@
 import { singleton, container } from "tsyringe";
 import StabRepositoryBase from "./StabRepositoryBase";
-import UserConverter from "../converter/UserConverter";
+import UserTransformer from "../transformer/UserTransformer";
 import IUserRepository from "../interface/IUserRepository";
 import IUser from "../../model/interface/IUser";
 import DUser from "../../model/interface/DUser";
@@ -13,7 +13,11 @@ export default class StabUserRepository extends StabRepositoryBase<DUser, IUser>
     this.jsonKey = "user";
   }
 
-  public async convert(journal: DUser): Promise<IUser> {
-    return container.resolve(UserConverter).convert(journal);
+  public async aggregate(journal: DUser): Promise<IUser> {
+    return container.resolve(UserTransformer).aggregate(journal);
+  }
+
+  public simplify(user: IUser): DUser {
+    return container.resolve(UserTransformer).simplify(user);
   }
 }

@@ -2,7 +2,7 @@ import StabRepositoryBase from "./StabRepositoryBase";
 import { DJournalDetail } from "../../model/interface/DJournal";
 import { IJournalDetail } from "../../model/interface/IJournal";
 import { container } from "tsyringe";
-import JournalDetailConverter from "../converter/JournalDetailConverter";
+import JournalDetailTransformer from "../transformer/JournalDetailTransformer";
 
 export default class StabJournalDetailRepository extends StabRepositoryBase<
   DJournalDetail,
@@ -13,7 +13,11 @@ export default class StabJournalDetailRepository extends StabRepositoryBase<
     this.jsonKey = "journal_detail";
   }
 
-  public async convert(detail: DJournalDetail): Promise<IJournalDetail> {
-    return container.resolve(JournalDetailConverter).convert(detail);
+  public async aggregate(detail: DJournalDetail): Promise<IJournalDetail> {
+    return container.resolve(JournalDetailTransformer).aggregate(detail);
+  }
+
+  public simplify(detail: IJournalDetail): DJournalDetail {
+    return container.resolve(JournalDetailTransformer).simplify(detail);
   }
 }

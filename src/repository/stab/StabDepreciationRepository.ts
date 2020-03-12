@@ -1,6 +1,6 @@
 import { singleton, container } from "tsyringe";
 import StabRepositoryBase from "./StabRepositoryBase";
-import DepreciationConverter from "../converter/DepreciationConverter";
+import DepreciationTransformer from "../transformer/DepreciationTransformer";
 import { IDepreciation } from "../../model/interface/IProperty";
 import IDepreciationRepository from "../interface/IDepreciationRepository";
 import { DDepreciation } from "../../model/interface/DProperty";
@@ -14,7 +14,11 @@ export default class StabDepreciationRepository
     this.jsonKey = "depreciation";
   }
 
-  public async convert(journal: DDepreciation): Promise<IDepreciation> {
-    return container.resolve(DepreciationConverter).convert(journal);
+  public async aggregate(journal: DDepreciation): Promise<IDepreciation> {
+    return container.resolve(DepreciationTransformer).aggregate(journal);
+  }
+
+  public simplify(depreciation: IDepreciation): DDepreciation {
+    return container.resolve(DepreciationTransformer).simplify(depreciation);
   }
 }

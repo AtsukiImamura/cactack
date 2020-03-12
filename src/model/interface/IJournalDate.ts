@@ -14,4 +14,6 @@ export default interface IJournalDate {
   afterThan: (date: IJournalDate) => boolean;
 
   equalsTo: (date: IJournalDate) => boolean;
+
+  toString: () => string;
 }

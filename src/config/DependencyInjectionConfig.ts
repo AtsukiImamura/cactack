@@ -6,12 +6,22 @@ import StabPropertyRepository from "../repository/stab/StabPropertyRepository";
 import StabBadgetRepository from "../repository/stab/StabBadgetRepository";
 import StabDepreciationRepository from "../repository/stab/StabDepreciationRepository";
 import StabUserRepository from "../repository/stab/StabUserRepository";
+import StabBadgetGroupRepository from "../repository/stab/StabBadgetGroupRepository";
 
+/**
+ * DI管理用クラス
+ */
 export default class DependencyInjectionConfig {
+  /**
+   * 本番用DIを登録する
+   */
   public static runProduction(): void {
     // container.register("JournalRepository", { useClass: JournalRepository });
   }
 
+  /**
+   * テスト用のDIを登録する
+   */
   public static runTest(): void {
     container.register("JournalRepository", {
       useClass: StabJournalRepository
@@ -21,6 +31,9 @@ export default class DependencyInjectionConfig {
     });
     container.register("BadgetRepository", {
       useClass: StabBadgetRepository
+    });
+    container.register("BadgetGroupRepository", {
+      useClass: StabBadgetGroupRepository
     });
     container.register("DepreciationRepository", {
       useClass: StabDepreciationRepository
