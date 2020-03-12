@@ -1,7 +1,7 @@
 import { IDepreciatable, IDepreciation } from "./interface/IProperty";
-import ConsumerProperty from "./ConsumerProperty";
+import Property from "./Property";
 
-export default class DurableProperty extends ConsumerProperty
+export default class DurableProperty extends Property
   implements IDepreciatable {
   /** 減価償却 */
   private _depreciation: IDepreciation;

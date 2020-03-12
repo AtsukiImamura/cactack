@@ -1,8 +1,9 @@
 // import IJournalDate from "./IJournalDate";
 
-export interface IBadgetGroup {
-  /** ID */
-  id: string;
+import Identifiable from "./Identifiable";
+import Treatable from "./common/Treatable";
+
+export interface IBadgetGroup extends Identifiable, Treatable {
   /** 予算名称 */
   name: string;
   // /** 予算リスト */
@@ -11,9 +12,7 @@ export interface IBadgetGroup {
   currentBadget: IBadget | undefined;
 }
 
-export interface IBadget {
-  id: string;
-
+export interface IBadget extends Identifiable, Treatable {
   // startAt: IJournalDate;
 
   // finishAt: IJournalDate;

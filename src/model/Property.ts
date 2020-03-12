@@ -2,7 +2,7 @@ import { IProperty } from "./interface/IProperty";
 import IJournalDate from "./interface/IJournalDate";
 import { JournalDate } from "./common/JournalDate";
 
-export default class ConsumerProperty implements IProperty {
+export default class Property implements IProperty {
   private _id: string;
 
   private _name: string;

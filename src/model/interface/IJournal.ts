@@ -1,9 +1,9 @@
 import IJournalDate from "./IJournalDate";
 import { IBadget } from "./IBadget";
+import Identifiable from "./Identifiable";
+import Treatable from "./common/Treatable";
 
-export default interface IJournal {
-  id: string;
-
+export default interface IJournal extends Identifiable, Treatable {
   transactionId: string;
 
   accountedAt: IJournalDate;
@@ -19,15 +19,13 @@ export default interface IJournal {
   execute: () => void;
 }
 
-export interface IJournalDetail {
-  id: string;
-
+export interface IJournalDetail extends Identifiable, Treatable {
   amount: number;
 
   category: IAccountCategory;
 }
 
-export interface IAccountCategory {
+export interface IAccountCategory extends Treatable {
   name: string;
 
   isCredit: boolean;
