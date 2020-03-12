@@ -8,6 +8,7 @@
     "start": "node dist/server.js",
     "watch": "webpack --watch",
     "test": "jest",
+    "test:coverage": "jest --coverage",
     "server:watch": "webpack --watch --config webpack.server.config.js",
     "sass:build": "node-sass ./src/resources/sass/ -r -o ./dist/public/css/ --output-style compressed"
   },
