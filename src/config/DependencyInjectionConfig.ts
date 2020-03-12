@@ -5,6 +5,7 @@ import StabJournalDetailRepository from "../repository/stab/StabJournalDetailRep
 import StabPropertyRepository from "../repository/stab/StabPropertyRepository";
 import StabBadgetRepository from "../repository/stab/StabBadgetRepository";
 import StabDepreciationRepository from "../repository/stab/StabDepreciationRepository";
+import StabUserRepository from "../repository/stab/StabUserRepository";
 
 export default class DependencyInjectionConfig {
   public static runProduction(): void {
@@ -26,6 +27,9 @@ export default class DependencyInjectionConfig {
     });
     container.register("JournalDetailRepository", {
       useClass: StabJournalDetailRepository
+    });
+    container.register("UserRepository", {
+      useClass: StabUserRepository
     });
   }
 }
