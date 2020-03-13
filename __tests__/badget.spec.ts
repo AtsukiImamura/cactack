@@ -5,7 +5,7 @@ import StabBadgetGroupRepository from "../src/repository/stab/StabBadgetGroupRep
 
 // テストの前のセッティング
 beforeAll(() => {
-  DependencyInjectionConfig.runTest();
+  DependencyInjectionConfig.runLocal();
   (container.resolve("BadgetRepository") as StabBadgetRepository).clearAll();
   (container.resolve(
     "BadgetGroupRepository"
@@ -18,11 +18,11 @@ import BadgetService from "../src/service/BadgetService";
 test("create new badget", done => {
   container
     .resolve(BadgetService)
-    .createNewBadgetGroup("家賃")
+    .createAndInsertNewBadgetGroup("家賃")
     .then(group => {
       return container
         .resolve(BadgetService)
-        .createThisMonthsBadget(group, 2500);
+        .createAndInsertThisMonthsBadget(group, 2500);
     })
     .then(badget => {
       expect(badget.id).toBe("1");

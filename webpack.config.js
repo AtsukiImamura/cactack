@@ -1,19 +1,23 @@
 const VueLoaderplugin = require("vue-loader/lib/plugin"); //vue-loader/lib/plugin
 const path = require("path");
 
-// console.log("PATH: " + path.resolve(__dirname, "./src/resources/sass"));
+const env =
+  process.env.NODE_ENV === "production" ? "production" : "development";
+const target = process.env.NODE_ENV === "development" ? "node" : "web";
+const fileName = target === "web" ? "index" : "test";
+console.log(`env=${env} target=${target} fileName=${fileName}`);
+
 const scssPath = path.resolve(__dirname, "./src/resources/common.scss");
 console.log("scssPath: " + scssPath + "\n");
 
 module.exports = {
-  target: "node", // web
-  //   watch: true,
-  mode: "development",
+  target: target,
+  mode: env,
   devtool: "inline-source-map",
-  entry: "./src/test.ts",
+  entry: `./src/${fileName}.ts`,
   output: {
     path: path.join(__dirname, "./dist"),
-    filename: "test.js"
+    filename: `${fileName}.js`
   },
   module: {
     rules: [
@@ -84,7 +88,8 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".js", ".vue", ".scss"],
     alias: {
-      vue$: "vue/dist/vue.esm.js"
+      vue$: "vue/dist/vue.esm.js",
+      config$: path.resolve(`src/env/${target}.ts`)
     }
   },
 

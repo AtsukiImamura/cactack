@@ -4,12 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack ",
+    "build": "cross-env NODE_ENV=production webpack",
+    "build:test": "cross-env NODE_ENV=test webpack",
+    "build:dev": "cross-env NODE_ENV=development webpack ",
     "start": "node dist/server.js",
-    "watch": "webpack --watch",
+    "watch": "cross-env NODE_ENV=production webpack --watch",
+    "watch:web": "cross-env NODE_ENV=test webpack --watch",
+    "watch:dev": "cross-env NODE_ENV=development webpack --watch",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "server:watch": "webpack --watch --config webpack.server.config.js",
+    "test:local": "node ./dist/test.js",
     "sass:build": "node-sass ./src/resources/sass/ -r -o ./dist/public/css/ --output-style compressed"
   },
   "jest": {
@@ -44,10 +48,12 @@
   "dependencies": {
     "@types/node": "^13.9.0",
     "@types/uuid": "^7.0.0",
+    "cross-env": "^7.0.2",
     "express": "^4.17.1",
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.1.0",
-    "uuid": "^3.4.0"
+    "uuid": "^3.4.0",
+    "vue": "^2.6.11"
   },
   "devDependencies": {
     "@types/jest": "^25.1.4",
