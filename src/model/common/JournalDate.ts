@@ -1,10 +1,13 @@
 import IJournalDate from "../interface/IJournalDate";
 
 export class JournalDate implements IJournalDate {
+  public static cast(value: string | IJournalDate): IJournalDate {
+    return typeof value === "string" ? JournalDate.fromToken(value) : value;
+  }
   /**
    * 今日の値を持つ日付クラスを作成する
    */
-  public static today(): JournalDate {
+  public static today(): IJournalDate {
     const today = new Date();
     return JournalDate.byDay(
       today.getFullYear(),
@@ -23,18 +26,18 @@ export class JournalDate implements IJournalDate {
     year: number | string,
     month: number | string,
     day: number | string
-  ) {
+  ): IJournalDate {
     return new JournalDate(JournalDate.tokenize(year, month, day));
   }
 
   public static byMonth(
     year: number | string,
     month: number | string
-  ): JournalDate {
+  ): IJournalDate {
     return new JournalDate(`${year}/${month}`);
   }
 
-  public static fromToken(token: string) {
+  public static fromToken(token: string): IJournalDate {
     return new JournalDate(token);
   }
 
@@ -146,5 +149,12 @@ export class JournalDate implements IJournalDate {
 
   public toString(): string {
     return this._date;
+  }
+
+  public getNextMonth(): IJournalDate {
+    return JournalDate.byMonth(
+      this.year + Math.floor(this.month / 12),
+      (this.month % 12) + 1
+    );
   }
 }

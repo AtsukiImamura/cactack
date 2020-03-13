@@ -16,8 +16,4 @@ export default class StabJournalDetailRepository extends StabRepositoryBase<
   public async aggregate(detail: DJournalDetail): Promise<IJournalDetail> {
     return container.resolve(JournalDetailTransformer).aggregate(detail);
   }
-
-  public simplify(detail: IJournalDetail): DJournalDetail {
-    return container.resolve(JournalDetailTransformer).simplify(detail);
-  }
 }

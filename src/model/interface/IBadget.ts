@@ -2,9 +2,9 @@
 
 import Identifiable from "./Identifiable";
 import Treatable from "./common/Treatable";
-import { DBadget } from "./DBadget";
+import { DBadget, DBadgetGroup } from "./DBadget";
 
-export interface IBadgetGroup extends Identifiable, Treatable {
+export interface IBadgetGroup extends Identifiable, Treatable<DBadgetGroup> {
   /** 予算名称 */
   name: string;
   // /** 予算リスト */
@@ -13,7 +13,7 @@ export interface IBadgetGroup extends Identifiable, Treatable {
   currentBadget: IBadget | undefined;
 }
 
-export interface IBadget extends Identifiable, Treatable {
+export interface IBadget extends Identifiable, Treatable<DBadget> {
   // startAt: IJournalDate;
 
   // finishAt: IJournalDate;

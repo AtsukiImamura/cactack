@@ -11,8 +11,4 @@ export default class DepreciationTransformer extends Transformer<
       return {} as IDepreciation;
     });
   }
-
-  public simplify(detail: IDepreciation): DDepreciation {
-    return {} as DDepreciation;
-  }
 }

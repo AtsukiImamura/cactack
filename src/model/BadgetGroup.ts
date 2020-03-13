@@ -1,4 +1,5 @@
 import { IBadgetGroup, IBadget } from "./interface/IBadget";
+import { DBadgetGroup } from "./interface/DBadget";
 
 export default class BadgetGroup implements IBadgetGroup {
   /** ID */
@@ -40,5 +41,12 @@ export default class BadgetGroup implements IBadgetGroup {
       throw new Error("Period duplication is detected.");
     }
     return badgets[0];
+  }
+
+  public simplify(): DBadgetGroup {
+    return {
+      id: this.id,
+      name: this.name
+    };
   }
 }

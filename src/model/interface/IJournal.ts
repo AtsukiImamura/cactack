@@ -2,13 +2,17 @@ import IJournalDate from "./IJournalDate";
 import { IBadget } from "./IBadget";
 import Identifiable from "./Identifiable";
 import Treatable from "./common/Treatable";
+import { DJournalDetail, DJournal } from "./DJournal";
 
-export default interface IJournal extends Identifiable, Treatable {
+export default interface IJournal
+  extends Identifiable,
+    Treatable<DJournal>,
+    IExecutable {
   transactionId: string;
 
-  accountedAt: IJournalDate;
+  accountAt: IJournalDate;
 
-  executedAt: IJournalDate;
+  // executeAt: IJournalDate;
 
   credit: IJournalDetail;
 
@@ -16,24 +20,34 @@ export default interface IJournal extends Identifiable, Treatable {
 
   badget: IBadget | undefined;
 
-  execute: () => void;
+  // execute: () => void;
 }
 
-export interface IJournalDetail extends Identifiable, Treatable {
+export interface IJournalDetail
+  extends Identifiable,
+    Treatable<DJournalDetail> {
   amount: number;
 
   category: IAccountCategory;
-}
-
-export interface IAccountCategory extends Treatable {
-  name: string;
 
   isCredit: boolean;
 
   isDebit: boolean;
 }
 
-export interface IAccountSide {
+export interface IExecutable {
+  executeAt: IJournalDate;
+
+  execute: () => void;
+}
+
+export interface ICreditDebt extends IJournalDetail, IExecutable {}
+
+export interface IAccountCategory {
+  code: number;
+
+  name: string;
+
   isCredit: boolean;
 
   isDebit: boolean;

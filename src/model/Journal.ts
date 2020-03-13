@@ -2,25 +2,54 @@ import IJournal, { IJournalDetail } from "./interface/IJournal";
 import { JournalDate } from "./common/JournalDate";
 import { IBadget } from "./interface/IBadget";
 import IJournalDate from "./interface/IJournalDate";
+import JournalDetail from "./JournalDetail";
+import AccountCategory from "./AccountCategory";
+import { DJournal } from "./interface/DJournal";
 
 export default class Journal implements IJournal {
   public static simple(
-    accountedAt: IJournalDate,
-    executedAt: IJournalDate,
+    accountAt: IJournalDate,
+    executeAt: IJournalDate,
     credit: IJournalDetail,
     debit: IJournalDetail,
     badget?: IBadget
   ): IJournal {
-    return new Journal("", "", accountedAt, executedAt, credit, debit, badget);
+    return new Journal("", "", accountAt, executeAt, credit, debit, badget);
+  }
+
+  /**
+   * 作成: 負債を貸方、現金を借方とする仕訳
+   * @param debt
+   */
+  public static debt(debt: IJournalDetail, executeAt?: IJournalDate | string) {
+    return Journal.simple(
+      JournalDate.today(),
+      executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
+      debt,
+      JournalDetail.cash(debt.amount)
+    );
+  }
+
+  /**
+   * キャッシュアウトの仕訳を作成
+   * @param amount
+   */
+  public static cashOut(amount: number) {
+    return Journal.simple(
+      JournalDate.today(),
+      JournalDate.today(),
+      JournalDetail.createNew(AccountCategory.netAssets(), -Math.abs(amount)),
+      JournalDetail.createNew(AccountCategory.cash(), -Math.abs(amount))
+    );
   }
   /** 取引ID */
   private _transactionId: string;
   /** 仕訳ID */
   private _id: string;
   /** 発生日 */
-  private _accountedAt: IJournalDate;
+  private _accountAt: IJournalDate;
   /** 執行日 */
-  private _executedAt: IJournalDate;
+  private _executeAt: IJournalDate;
   /** 貸方 */
   private _credit: IJournalDetail;
   /** 借方 */
@@ -32,8 +61,8 @@ export default class Journal implements IJournal {
    * 仕訳
    * @param transactionId
    * @param id
-   * @param accountedAt
-   * @param executedAt
+   * @param accountAt
+   * @param executeAt
    * @param credit
    * @param debit
    * @param badget
@@ -41,22 +70,22 @@ export default class Journal implements IJournal {
   constructor(
     transactionId: string,
     id: string,
-    accountedAt: string | IJournalDate,
-    executedAt: string | IJournalDate,
+    accountAt: string | IJournalDate,
+    executeAt: string | IJournalDate,
     credit: IJournalDetail,
     debit: IJournalDetail,
     badget?: IBadget
   ) {
     this._transactionId = transactionId;
     this._id = id;
-    this._accountedAt =
-      typeof accountedAt === "string"
-        ? JournalDate.fromToken(accountedAt)
-        : accountedAt;
-    this._executedAt =
-      typeof executedAt === "string"
-        ? JournalDate.fromToken(executedAt)
-        : executedAt;
+    this._accountAt =
+      typeof accountAt === "string"
+        ? JournalDate.fromToken(accountAt)
+        : accountAt;
+    this._executeAt =
+      typeof executeAt === "string"
+        ? JournalDate.fromToken(executeAt)
+        : executeAt;
     this._credit = credit;
     this._debit = debit;
     if (badget) {
@@ -81,19 +110,19 @@ export default class Journal implements IJournal {
   }
 
   /**
-   * Getter accountedAt
+   * Getter accountAt
    * @return {IJournalDate}
    */
-  public get accountedAt(): IJournalDate {
-    return this._accountedAt;
+  public get accountAt(): IJournalDate {
+    return this._accountAt;
   }
 
   /**
-   * Getter executedAt
+   * Getter executeAt
    * @return {IJournalDate}
    */
-  public get executedAt(): IJournalDate {
-    return this._executedAt;
+  public get executeAt(): IJournalDate {
+    return this._executeAt;
   }
 
   /**
@@ -116,26 +145,30 @@ export default class Journal implements IJournal {
     return this._badget;
   }
 
+  public set credit(credit: IJournalDetail) {
+    this.credit = credit;
+  }
+
+  public set debit(debit: IJournalDetail) {
+    this.debit = debit;
+  }
+
   /**
    * この仕訳を実行済みにする
    */
   public execute(): void {
-    this._executedAt = JournalDate.today();
+    this._executeAt = JournalDate.today();
   }
 
-  //   /**
-  //    * Setter credit
-  //    * @param {IJournalDetail} value
-  //    */
-  //   public set credit(value: IJournalDetail) {
-  //     this._credit = value;
-  //   }
-
-  //   /**
-  //    * Setter debit
-  //    * @param {IJournalDetail} value
-  //    */
-  //   public set debit(value: IJournalDetail) {
-  //     this._debit = value;
-  //   }
+  public simplify(): DJournal {
+    return {
+      transactionId: this.transactionId,
+      id: this.id,
+      accountAt: this.accountAt.toString(),
+      executeAt: this.executeAt.toString(),
+      creditId: this.credit.id,
+      debitId: this.debit.id,
+      badgetId: this.badget?.id
+    };
+  }
 }

@@ -19,10 +19,6 @@ export default class StabJournalRepository
     return container.resolve(JournalTransformer).aggregate(journal);
   }
 
-  public simplify(journal: IJournal): DJournal {
-    return container.resolve(JournalTransformer).simplify(journal);
-  }
-
   public getByAccountedAt(
     from: IJournalDate,
     to: IJournalDate
@@ -30,7 +26,7 @@ export default class StabJournalRepository
     return this.getAll().then(journals => {
       const targets = [];
       for (const jor of journals) {
-        if (jor.accountedAt.beforeThan(from) || jor.accountedAt.afterThan(to)) {
+        if (jor.accountAt.beforeThan(from) || jor.accountAt.afterThan(to)) {
           continue;
         }
         targets.push(jor);

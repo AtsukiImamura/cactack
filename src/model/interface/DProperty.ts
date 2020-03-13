@@ -14,7 +14,7 @@ export interface DProperty extends DPropertyBase {
 
   price: number;
 
-  accountedAt: string;
+  accountAt: string;
 }
 
 export interface DDepreciation extends Identifiable, Strable {

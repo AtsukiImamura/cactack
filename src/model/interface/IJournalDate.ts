@@ -16,4 +16,6 @@ export default interface IJournalDate {
   equalsTo: (date: IJournalDate) => boolean;
 
   toString: () => string;
+
+  getNextMonth: () => IJournalDate;
 }

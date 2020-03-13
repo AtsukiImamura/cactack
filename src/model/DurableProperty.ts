@@ -12,18 +12,19 @@ export default class DurableProperty extends Property
    * @param name
    * @param description
    * @param price
-   * @param accountedAt
+   * @param accountAt
    * @param depreciation
    */
   constructor(
     id: string,
+    groupId: string,
     name: string,
     description: string,
     price: number,
-    accountedAt: string,
+    accountAt: string,
     depreciation: IDepreciation
   ) {
-    super(id, name, description, price, accountedAt);
+    super(id, groupId, name, description, price, accountAt);
     this._depreciation = depreciation;
   }
 

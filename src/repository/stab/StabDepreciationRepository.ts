@@ -17,8 +17,4 @@ export default class StabDepreciationRepository
   public async aggregate(journal: DDepreciation): Promise<IDepreciation> {
     return container.resolve(DepreciationTransformer).aggregate(journal);
   }
-
-  public simplify(depreciation: IDepreciation): DDepreciation {
-    return container.resolve(DepreciationTransformer).simplify(depreciation);
-  }
 }

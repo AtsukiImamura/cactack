@@ -129,6 +129,10 @@ export default class AccountCategory implements IAccountCategory {
     return this._name;
   }
 
+  public get code(): number {
+    return this._category;
+  }
+
   // /**
   //  * Getter category
   //  * @return {number}

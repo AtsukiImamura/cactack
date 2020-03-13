@@ -11,8 +11,4 @@ export default class PropertyDetailTransformer extends Transformer<
       return {} as IProperty;
     });
   }
-
-  public simplify(detail: IProperty): DProperty {
-    return {} as DProperty;
-  }
 }

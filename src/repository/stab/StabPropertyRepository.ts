@@ -17,8 +17,4 @@ export default class StabPropertyRepository
   public async aggregate(journal: DProperty): Promise<IProperty> {
     return container.resolve(PropertyTransformer).aggregate(journal);
   }
-
-  public simplify(property: IProperty): DProperty {
-    return container.resolve(PropertyTransformer).simplify(property);
-  }
 }

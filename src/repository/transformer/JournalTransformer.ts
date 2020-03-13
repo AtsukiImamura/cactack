@@ -29,23 +29,11 @@ export default class JournalTransformer extends Transformer<
     return new Journal(
       journal.transactionId ? journal.transactionId : "",
       journal.id,
-      journal.accountedAt,
-      journal.executedAt,
+      journal.accountAt,
+      journal.executeAt,
       credit,
       debit
       // badget // TODO: 予算詰める
     );
-  }
-
-  public simplify(journal: IJournal): DJournal {
-    return {
-      transactionId: journal.transactionId,
-      id: journal.id,
-      accountedAt: journal.accountedAt.toString(),
-      executedAt: journal.executedAt.toString(),
-      creditId: journal.credit.id,
-      debitId: journal.debit.id,
-      badgetId: journal.badget?.id
-    };
   }
 }

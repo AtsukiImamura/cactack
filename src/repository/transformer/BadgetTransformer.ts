@@ -8,8 +8,4 @@ export default class BadgetTransformer extends Transformer<DBadget, IBadget> {
       return (badget as unknown) as IBadget;
     });
   }
-
-  public simplify(badget: IBadget): DBadget {
-    return badget.simplify();
-  }
 }

@@ -1,5 +1,7 @@
 import IUser from "./interface/IUser";
 import { JournalDate } from "./common/JournalDate";
+import IJournalDate from "./interface/IJournalDate";
+import DUser from "./interface/DUser";
 
 export default class User implements IUser {
   /**
@@ -14,9 +16,9 @@ export default class User implements IUser {
   /** ID */
   private _id: string;
   /** 登録日 */
-  private _registeredAt: JournalDate;
+  private _registeredAt: IJournalDate;
   /** 削除日 */
-  private _deletedAt?: JournalDate | undefined;
+  private _deletedAt?: IJournalDate | undefined;
 
   /**
    * ユーザー
@@ -24,7 +26,7 @@ export default class User implements IUser {
    * @param {string} id ID
    * @param {Date} registeredAt  登録日
    */
-  constructor(name: string, id: string, registeredAt: JournalDate) {
+  constructor(name: string, id: string, registeredAt: IJournalDate) {
     this._name = name;
     this._id = id;
     this._registeredAt = registeredAt;
@@ -50,7 +52,7 @@ export default class User implements IUser {
    * Getter registeredAt
    * @return {Date}
    */
-  public get registeredAt(): JournalDate {
+  public get registeredAt(): IJournalDate {
     return this._registeredAt;
   }
 
@@ -70,5 +72,14 @@ export default class User implements IUser {
   /** 削除扱いにする */
   public setDeleted(): void {
     this._deletedAt = JournalDate.today();
+  }
+
+  public simplify(): DUser {
+    return {
+      id: this.id,
+      name: this.name,
+      registeredAt: this.registeredAt.toString(),
+      deletedAt: this._deletedAt ? this._deletedAt.toString() : ""
+    };
   }
 }

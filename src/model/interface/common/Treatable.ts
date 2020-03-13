@@ -1,1 +1,3 @@
-export default interface Treatable {}
+export default interface Treatable<B> {
+  simplify: () => B;
+}

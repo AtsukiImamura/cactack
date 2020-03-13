@@ -1,10 +1,16 @@
 import { container } from "tsyringe";
 import IJournalRepostory from "../repository/interface/IJournalRepository";
-import IJournal from "../model/interface/IJournal";
+import IJournal, {
+  IJournalDetail,
+  ICreditDebt
+} from "../model/interface/IJournal";
 
 import { singleton } from "tsyringe";
 import IJournalDetailRepository from "../repository/interface/IJournalDetailRepository";
 import IBadgetRepository from "../repository/interface/IBadgetRepository";
+import Journal from "../model/Journal";
+import IJournalDate from "../model/interface/IJournalDate";
+import { IBadget } from "../model/interface/IBadget";
 
 @singleton()
 export default class JournalService {
@@ -20,11 +26,58 @@ export default class JournalService {
     return container.resolve("BadgetRepository");
   }
 
-  public insertJournal(journal: IJournal) {
-    this.journalRepository.insert(journal);
-    this.journalDetailRepository.batchInsert([journal.credit, journal.debit]);
+  /**
+   * for TEST?
+   * @param journal
+   */
+  public async insertJournal(journal: IJournal) {
+    await this.journalDetailRepository
+      .batchInsert([journal.credit, journal.debit])
+      .then((details: IJournalDetail[]) => {
+        journal.credit.id = details[0].id;
+        journal.debit.id = details[1].id;
+      });
     if (journal.badget) {
-      this.badgetRepository.insert(journal.badget);
+      this.badgetRepository.insert(journal.badget).then((badget: IBadget) => {
+        if (journal.badget) {
+          journal.badget.id = badget.id;
+        }
+      });
     }
+    this.journalRepository.insert(journal);
+  }
+
+  /**
+   * 負債を処理する一連の仕訳を生成
+   * @param debt 負債項目
+   * @param executeAt 執行日
+   */
+  public createJournalsOfDebt(
+    debt: IJournalDetail,
+    executeAt: string | IJournalDate
+  ): IJournal[] {
+    if (debt.isDebit) {
+      throw new Error("Debt must be on credit side.");
+    }
+    return [Journal.debt(debt, executeAt), Journal.cashOut(debt.amount)];
+  }
+
+  public createJournalsOfCreditDebt(creditDebt: ICreditDebt): IJournal[] {
+    return this.createJournalsOfDebt(
+      creditDebt as IJournalDetail,
+      creditDebt.executeAt
+    );
+  }
+
+  /**
+   * 一連の負債を処理する仕訳を生成
+   * @param debts
+   */
+  public createJournalsOfDebts(debts: ICreditDebt[]): IJournal[] {
+    const totalAmount = debts.reduce((acc, cur) => (acc += cur.amount), 0);
+    return [
+      Journal.cashOut(totalAmount),
+      ...debts.map(debt => Journal.debt(debt as IJournalDetail, debt.executeAt))
+    ];
   }
 }

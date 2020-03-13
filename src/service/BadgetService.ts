@@ -5,6 +5,7 @@ import IBadgetGroupRepository from "../repository/interface/IBadgetGroupReposito
 import { IBadgetGroup, IBadget } from "../model/interface/IBadget";
 import { JournalDate } from "../model/common/JournalDate";
 import Badget from "../model/Badget";
+import IJournalDate from "../model/interface/IJournalDate";
 
 @singleton()
 export default class BadgetService {
@@ -16,26 +17,26 @@ export default class BadgetService {
     return container.resolve("BadgetGroupRepository");
   }
 
-  public createNewBadgetGroup(name: string): Promise<IBadgetGroup> {
+  public createAndInsertNewBadgetGroup(name: string): Promise<IBadgetGroup> {
     const group = new BadgetGroup("", name, []);
     return this.badgetGroupRepository.insert(group);
   }
 
-  public createNewBadget(
+  public createAndInsertNewBadget(
     group: IBadgetGroup,
     amount: number,
-    startAt: string | JournalDate,
-    finishAt: string | JournalDate
+    startAt: string | IJournalDate,
+    finishAt: string | IJournalDate
   ): Promise<IBadget> {
-    const badget = new Badget("", amount, startAt, finishAt, group.id);
+    const badget = new Badget("", amount, startAt, finishAt, group);
     return this.badgetRepository.insert(badget);
   }
 
-  public createThisMonthsBadget(
+  public createAndInsertThisMonthsBadget(
     group: IBadgetGroup,
     amount: number
   ): Promise<IBadget> {
     const today = JournalDate.today();
-    return this.createNewBadget(group, amount, today, today);
+    return this.createAndInsertNewBadget(group, amount, today, today);
   }
 }

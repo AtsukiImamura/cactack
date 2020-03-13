@@ -11,11 +11,4 @@ export default class BadgetGroupTransformer extends Transformer<
       return detail as IBadgetGroup;
     });
   }
-
-  public simplify(detail: IBadgetGroup): DBadgetGroup {
-    return {
-      id: detail.id,
-      name: detail.name
-    };
-  }
 }

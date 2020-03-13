@@ -1,8 +1,8 @@
 import DependencyInjectionConfig from "./config/DependencyInjectionConfig";
 import { container } from "tsyringe";
 import JournalService from "./service/JournalService";
-import IJournal from "./model/interface/IJournal";
+import Journal from "./model/Journal";
 
-DependencyInjectionConfig.runTest();
+DependencyInjectionConfig.runLocal();
 const service = container.resolve(JournalService);
-service.insertJournal({} as IJournal);
+service.insertJournal(Journal.cashOut(2345));

@@ -1,9 +1,12 @@
 import { IProperty } from "./interface/IProperty";
 import IJournalDate from "./interface/IJournalDate";
 import { JournalDate } from "./common/JournalDate";
+import { DProperty } from "./interface/DProperty";
 
 export default class Property implements IProperty {
   private _id: string;
+
+  private _groupId: string;
 
   private _name: string;
 
@@ -11,7 +14,7 @@ export default class Property implements IProperty {
 
   private _price: number;
 
-  private _accountedAt: IJournalDate;
+  private _accountAt: IJournalDate;
 
   /**
    * 消費財: 減価償却を伴わないもの
@@ -19,20 +22,22 @@ export default class Property implements IProperty {
    * @param name
    * @param description
    * @param price
-   * @param accountedAt
+   * @param accountAt
    */
   constructor(
     id: string,
+    groupId: string,
     name: string,
     description: string,
     price: number,
-    accountedAt: string
+    accountAt: string
   ) {
     this._id = id;
+    this._groupId = groupId;
     this._name = name;
     this._description = description;
     this._price = price;
-    this._accountedAt = JournalDate.fromToken(accountedAt);
+    this._accountAt = JournalDate.fromToken(accountAt);
   }
 
   /**
@@ -41,6 +46,14 @@ export default class Property implements IProperty {
    */
   public get id(): string {
     return this._id;
+  }
+
+  /**
+   * Getter groupId
+   * @return {string}
+   */
+  public get groupId(): string {
+    return this._groupId;
   }
 
   /**
@@ -68,10 +81,21 @@ export default class Property implements IProperty {
   }
 
   /**
-   * Getter accountedAt
+   * Getter accountAt
    * @return {IJournalDate}
    */
-  public get accountedAt(): IJournalDate {
-    return this._accountedAt;
+  public get accountAt(): IJournalDate {
+    return this._accountAt;
+  }
+
+  public simplify(): DProperty {
+    return {
+      id: this.id,
+      groupId: this.groupId,
+      price: this.price,
+      accountAt: this.accountAt.toString(),
+      description: this.description,
+      name: this.name
+    };
   }
 }

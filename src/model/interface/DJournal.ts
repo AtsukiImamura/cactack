@@ -4,9 +4,9 @@ import Strable from "./common/Strable";
 export interface DJournal extends Identifiable, Strable {
   transactionId?: string;
 
-  accountedAt: string;
+  accountAt: string;
 
-  executedAt: string;
+  executeAt: string;
 
   creditId: string;
 

@@ -10,8 +10,4 @@ export default class UserDetailTransformer extends Transformer<DUser, IUser> {
       return {} as IUser;
     });
   }
-
-  public simplify(detail: IUser): DUser {
-    return {} as DUser;
-  }
 }

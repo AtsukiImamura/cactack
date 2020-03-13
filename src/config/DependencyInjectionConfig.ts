@@ -7,7 +7,7 @@ import StabBadgetRepository from "../repository/stab/StabBadgetRepository";
 import StabDepreciationRepository from "../repository/stab/StabDepreciationRepository";
 import StabUserRepository from "../repository/stab/StabUserRepository";
 import StabBadgetGroupRepository from "../repository/stab/StabBadgetGroupRepository";
-
+import config from "config";
 /**
  * DI管理用クラス
  */
@@ -15,14 +15,14 @@ export default class DependencyInjectionConfig {
   /**
    * 本番用DIを登録する
    */
-  public static runProduction(): void {
+  public static runWeb(): void {
     // container.register("JournalRepository", { useClass: JournalRepository });
   }
 
   /**
    * テスト用のDIを登録する
    */
-  public static runTest(): void {
+  public static runLocal(): void {
     container.register("JournalRepository", {
       useClass: StabJournalRepository
     });
@@ -44,5 +44,13 @@ export default class DependencyInjectionConfig {
     container.register("UserRepository", {
       useClass: StabUserRepository
     });
+  }
+
+  public static run() {
+    if (config.TARGET === "web") {
+      DependencyInjectionConfig.runWeb();
+      return;
+    }
+    DependencyInjectionConfig.runLocal();
   }
 }

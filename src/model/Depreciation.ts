@@ -1,4 +1,4 @@
-import { IDepreciation } from "./interface/IProperty";
+import { IDepreciation, IProperty } from "./interface/IProperty";
 import IJournalDate from "./interface/IJournalDate";
 import IJournal from "./interface/IJournal";
 import { JournalDate } from "./common/JournalDate";
@@ -6,6 +6,7 @@ import Journal from "./Journal";
 import { IBadget } from "./interface/IBadget";
 import JournalDetail from "./JournalDetail";
 import AccountCategory from "./AccountCategory";
+import { DDepreciation } from "./interface/DProperty";
 
 export default class Depreciation implements IDepreciation {
   /** 償却タイプ: 定率 */
@@ -17,6 +18,8 @@ export default class Depreciation implements IDepreciation {
 
   /** ID */
   private _id: string;
+
+  private _property: IProperty;
   /** 償却タイプ */
   private _type: number;
   /** 償却開始日 */
@@ -34,6 +37,7 @@ export default class Depreciation implements IDepreciation {
 
   constructor(
     id: string,
+    property: IProperty,
     type: number,
     startAt: string,
     cycle: number,
@@ -43,6 +47,7 @@ export default class Depreciation implements IDepreciation {
     minDepreciationPrice?: number
   ) {
     this._id = id;
+    this._property = property;
     this._type = type;
     this._startAt = JournalDate.fromToken(startAt);
     this._cycle = cycle;
@@ -138,6 +143,18 @@ export default class Depreciation implements IDepreciation {
       JournalDetail.createNew(AccountCategory.durableAsset(), amount),
       this._badget
     );
+  }
+
+  public simplify(): DDepreciation {
+    return {
+      id: this.id,
+      startAt: this.startAt.toString(),
+      propertyId: this._property.id,
+      cycle: this.cycle,
+      minDepreciationPrice: this.minDepreciationPrice,
+      purchasePrice: this.purchasePrice,
+      salvagePrice: this.salvagePrice
+    };
   }
 
   /**

@@ -1,24 +1,25 @@
-import { IBadget } from "./interface/IBadget";
+import { IBadget, IBadgetGroup } from "./interface/IBadget";
 import { JournalDate } from "./common/JournalDate";
 import { DBadget } from "./interface/DBadget";
+import IJournalDate from "./interface/IJournalDate";
 
 export default class Badget implements IBadget {
   private _id: string;
 
   private _amount: number;
 
-  private _startAt: JournalDate;
+  private _startAt: IJournalDate;
 
-  private _finishAt: JournalDate;
+  private _finishAt: IJournalDate;
 
-  private _badgetBaseId: string;
+  private _badgetGroup: IBadgetGroup;
 
   constructor(
     id: string,
     amount: number,
-    startAt: string | JournalDate,
-    finishAt: string | JournalDate,
-    badgetBaseId: string
+    startAt: string | IJournalDate,
+    finishAt: string | IJournalDate,
+    badgetGroup: IBadgetGroup
   ) {
     this._id = id;
     this._amount = amount;
@@ -26,7 +27,7 @@ export default class Badget implements IBadget {
       typeof startAt === "string" ? JournalDate.fromToken(startAt) : startAt;
     this._finishAt =
       typeof finishAt === "string" ? JournalDate.fromToken(finishAt) : finishAt;
-    this._badgetBaseId = badgetBaseId;
+    this._badgetGroup = badgetGroup;
   }
 
   /**
@@ -41,8 +42,8 @@ export default class Badget implements IBadget {
    * Getter badgetBaseId
    * @return {string}
    */
-  public get badgetBaseId(): string {
-    return this._badgetBaseId;
+  public get badgetGroup(): IBadgetGroup {
+    return this._badgetGroup;
   }
 
   /**
@@ -61,10 +62,17 @@ export default class Badget implements IBadget {
     );
   }
 
+  public set id(id: string) {
+    if (this.id) {
+      return;
+    }
+    this._id = id;
+  }
+
   public simplify(): DBadget {
     return {
       id: this.id,
-      baseId: this._badgetBaseId,
+      baseId: this._badgetGroup.id,
       startAt: this._startAt.toString(),
       finishAt: this._finishAt.toString(),
       amount: this._amount

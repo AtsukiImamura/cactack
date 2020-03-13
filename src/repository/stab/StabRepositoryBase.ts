@@ -2,18 +2,15 @@ import JsonUtil from "../util/JsonUtil";
 import Identifiable from "../../model/interface/Identifiable";
 import Strable from "../../model/interface/common/Strable";
 import IBaseRepository from "../interface/IBaseRepository";
+import Treatable from "../../model/interface/common/Treatable";
 
 export default abstract class StabRepositoryBase<
   S extends Strable & Identifiable,
-  T extends Identifiable
+  T extends Identifiable & Treatable<S>
 > implements IBaseRepository<T> {
   protected jsonKey: string = "";
 
   public abstract aggregate(value: S): Promise<T>;
-
-  public abstract simplify(value: T): S;
-
-  // public abstract
 
   public getById(id: string): Promise<T | undefined> {
     return this.getAllWithoutConvert().then(values => {
@@ -41,7 +38,7 @@ export default abstract class StabRepositoryBase<
   public insert(value: T): Promise<T> {
     return this.getAllWithoutConvert()
       .then(values => {
-        const simplified = this.simplify(value);
+        const simplified = value.simplify();
         if (!simplified.id) {
           simplified.id = String(values.length + 1);
         }
@@ -55,13 +52,15 @@ export default abstract class StabRepositoryBase<
 
   public async batchInsert(values: T[]): Promise<T[]> {
     const records = await this.getAllWithoutConvert();
-    const newIdBase = records.length;
+    const targets = [];
+    let newIdBase = records.length;
     for (const v of values) {
-      v.id = String(newIdBase + 1);
-      records.push(this.simplify(v));
+      const target = v.simplify();
+      target.id = String((newIdBase += 1));
+      targets.push(target);
     }
-    await JsonUtil.save(this.jsonKey, records);
-    return values;
+    await JsonUtil.save(this.jsonKey, [...records, ...targets]);
+    return Promise.all(targets.map(t => this.aggregate(t)));
   }
 
   public update(value: T): Promise<void> {
@@ -69,7 +68,7 @@ export default abstract class StabRepositoryBase<
       const newValues = [];
       for (const v of values) {
         if (v.id !== value.id) {
-          newValues.push(this.simplify(value));
+          newValues.push(value.simplify());
           continue;
         }
         newValues.push(value);
@@ -85,7 +84,7 @@ export default abstract class StabRepositoryBase<
       if (!ids.includes(v.id)) {
         continue;
       }
-      records[ids.indexOf(v.id)] = this.simplify(v);
+      records[ids.indexOf(v.id)] = v.simplify();
     }
     return JsonUtil.save(this.jsonKey, records);
   }

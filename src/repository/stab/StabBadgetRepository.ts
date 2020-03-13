@@ -17,8 +17,4 @@ export default class StabBadgetRepository
   public async aggregate(journal: DBadget): Promise<IBadget> {
     return container.resolve(BadgetTransformer).aggregate(journal);
   }
-
-  public simplify(badget: IBadget): DBadget {
-    return container.resolve(BadgetTransformer).simplify(badget);
-  }
 }
