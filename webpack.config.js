@@ -87,7 +87,8 @@ module.exports = {
     extensions: [".ts", ".js", ".vue", ".scss"],
     alias: {
       vue$: "vue/dist/vue.esm.js",
-      config$: path.resolve(`src/env/${target}.ts`)
+      config$: path.resolve(`src/env/${target}.ts`),
+      "@": path.resolve("src")
     }
     // root: [path.resolve("./src")]
   },
