@@ -1,8 +1,9 @@
 // import Vue from "vue";
 import Router from "vue-router";
 import { Vue } from "vue-property-decorator";
-import App from "./view/App.vue";
-import DependencyInjectionConfig from "./config/DependencyInjectionConfig";
+import App from "@/view/App.vue";
+import AppMenu from "@/view/common/AppMenu.vue";
+import DependencyInjectionConfig from "@/config/DependencyInjectionConfig";
 
 DependencyInjectionConfig.run();
 
@@ -13,6 +14,6 @@ const router = new Router({
 });
 
 new Vue({
-  components: { App },
+  components: { AppMenu },
   router: router
 }).$mount("#app");

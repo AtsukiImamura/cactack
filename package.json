@@ -14,7 +14,7 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:local": "node ./dist/test.js",
-    "sass:build": "node-sass ./src/resources/sass/ -r -o ./dist/public/css/ --output-style compressed"
+    "sass:build": "node-sass ./src/resources/sass/ -r -o ./dist/ --output-style compressed"
   },
   "jest": {
     "moduleFileExtensions": [
