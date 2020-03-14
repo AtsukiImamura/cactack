@@ -1,12 +1,12 @@
-import { IDepreciation, IProperty } from "./interface/IProperty";
-import IJournalDate from "./interface/IJournalDate";
-import IJournal from "./interface/IJournal";
-import { JournalDate } from "./common/JournalDate";
-import Journal from "./Journal";
-import { IBadget } from "./interface/IBadget";
-import JournalDetail from "./JournalDetail";
-import AccountCategory from "./AccountCategory";
-import { DDepreciation } from "./interface/DProperty";
+import { IDepreciation, IProperty } from "@model/interface/IProperty";
+import IJournalDate from "@model/interface/IJournalDate";
+import IJournal from "@model/interface/IJournal";
+import { JournalDate } from "@model/common/JournalDate";
+import Journal from "@model/Journal";
+import { IBadget } from "@model/interface/IBadget";
+import JournalDetail from "@model/JournalDetail";
+import AccountCategory from "@model/AccountCategory";
+import { DDepreciation } from "@model/interface/DProperty";
 
 export default class Depreciation implements IDepreciation {
   /** 償却タイプ: 定率 */

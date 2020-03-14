@@ -1,8 +1,12 @@
-import IJournalDate from "./IJournalDate";
-import IJournal from "./IJournal";
-import Identifiable from "./Identifiable";
-import Treatable from "./common/Treatable";
-import { DPropertyGroup, DProperty, DDepreciation } from "./DProperty";
+import IJournalDate from "@model/interface/IJournalDate";
+import IJournal from "@model/interface/IJournal";
+import Identifiable from "@model/interface/Identifiable";
+import Treatable from "@model/interface/common/Treatable";
+import {
+  DPropertyGroup,
+  DProperty,
+  DDepreciation
+} from "@model/interface/DProperty";
 
 export interface IPropertyBase extends Identifiable {
   name: string;

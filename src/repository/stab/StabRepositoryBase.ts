@@ -1,8 +1,8 @@
-import JsonUtil from "../util/JsonUtil";
-import Identifiable from "../../model/interface/Identifiable";
-import Strable from "../../model/interface/common/Strable";
-import IBaseRepository from "../interface/IBaseRepository";
-import Treatable from "../../model/interface/common/Treatable";
+import JsonUtil from "@repository/util/JsonUtil";
+import Identifiable from "@model/interface/Identifiable";
+import Strable from "@model/interface/common/Strable";
+import IBaseRepository from "@repository/interface/IBaseRepository";
+import Treatable from "@model/interface/common/Treatable";
 
 export default abstract class StabRepositoryBase<
   S extends Strable & Identifiable,

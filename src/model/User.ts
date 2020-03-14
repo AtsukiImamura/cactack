@@ -1,7 +1,7 @@
-import IUser from "./interface/IUser";
-import { JournalDate } from "./common/JournalDate";
-import IJournalDate from "./interface/IJournalDate";
-import DUser from "./interface/DUser";
+import IUser from "@model/interface/IUser";
+import { JournalDate } from "@model/common/JournalDate";
+import IJournalDate from "@model/interface/IJournalDate";
+import DUser from "@model/interface/DUser";
 
 export default class User implements IUser {
   /**

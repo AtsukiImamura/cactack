@@ -1,6 +1,6 @@
-import Transformer from "./Transformer";
-import { IBadgetGroup } from "../../model/interface/IBadget";
-import { DBadgetGroup } from "../../model/interface/DBadget";
+import Transformer from "@repository/transformer/Transformer";
+import { IBadgetGroup } from "@model/interface/IBadget";
+import { DBadgetGroup } from "@model/interface/DBadget";
 
 export default class BadgetGroupTransformer extends Transformer<
   DBadgetGroup,

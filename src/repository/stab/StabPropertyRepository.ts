@@ -1,9 +1,9 @@
 import { singleton, container } from "tsyringe";
-import StabRepositoryBase from "./StabRepositoryBase";
-import { DProperty } from "../../model/interface/DProperty";
-import PropertyTransformer from "../transformer/PropertyTransformer";
-import { IProperty } from "../../model/interface/IProperty";
-import IPropertyRepository from "../interface/IPropertyRepository";
+import StabRepositoryBase from "@repository/stab/StabRepositoryBase";
+import { DProperty } from "@model/interface/DProperty";
+import PropertyTransformer from "@repository/transformer/PropertyTransformer";
+import { IProperty } from "@model/interface/IProperty";
+import IPropertyRepository from "@repository/interface/IPropertyRepository";
 
 @singleton()
 export default class StabPropertyRepository

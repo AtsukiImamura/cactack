@@ -1,4 +1,4 @@
-import Identifiable from "./Identifiable";
+import Identifiable from "@model/interface/Identifiable";
 
 export default interface DUser extends Identifiable {
   /** ユーザー名 */

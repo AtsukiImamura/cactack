@@ -1,10 +1,10 @@
-import Transformer from "./Transformer";
-import { DJournal } from "../../model/interface/DJournal";
-import IJournal from "../../model/interface/IJournal";
+import Transformer from "@repository/transformer/Transformer";
+import { DJournal } from "@model/interface/DJournal";
+import IJournal from "@model/interface/IJournal";
 
 import { singleton, container } from "tsyringe";
-import Journal from "../../model/Journal";
-import IJournalDetailRepository from "../interface/IJournalDetailRepository";
+import Journal from "@model/Journal";
+import IJournalDetailRepository from "@repository/interface/IJournalDetailRepository";
 
 @singleton()
 export default class JournalTransformer extends Transformer<

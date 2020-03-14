@@ -1,8 +1,8 @@
-import AccountCategory from "./AccountCategory";
-import { ICreditDebt } from "./interface/IJournal";
-import { JournalDate } from "./common/JournalDate";
-import IJournalDate from "./interface/IJournalDate";
-import { DJournalDetail } from "./interface/DJournal";
+import AccountCategory from "@model/AccountCategory";
+import { ICreditDebt } from "@model/interface/IJournal";
+import { JournalDate } from "@model/common/JournalDate";
+import IJournalDate from "@model/interface/IJournalDate";
+import { DJournalDetail } from "@model/interface/DJournal";
 
 export default class JournalDetail {
   public static createNew(category: AccountCategory, amount: number) {

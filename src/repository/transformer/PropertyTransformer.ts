@@ -1,6 +1,6 @@
-import Transformer from "./Transformer";
-import { DProperty } from "../../model/interface/DProperty";
-import { IProperty } from "../../model/interface/IProperty";
+import Transformer from "@repository/transformer/Transformer";
+import { DProperty } from "@model/interface/DProperty";
+import { IProperty } from "@model/interface/IProperty";
 
 export default class PropertyDetailTransformer extends Transformer<
   DProperty,

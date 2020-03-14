@@ -1,4 +1,4 @@
-import Identifiable from "../../model/interface/Identifiable";
+import Identifiable from "@model/interface/Identifiable";
 
 export default interface IBaseRepository<T extends Identifiable> {
   getById: (id: string) => Promise<T | undefined>;

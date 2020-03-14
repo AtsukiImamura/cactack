@@ -1,8 +1,8 @@
-import IJournalDate from "./IJournalDate";
-import { IBadget } from "./IBadget";
-import Identifiable from "./Identifiable";
-import Treatable from "./common/Treatable";
-import { DJournalDetail, DJournal } from "./DJournal";
+import IJournalDate from "@model/interface/IJournalDate";
+import { IBadget } from "@model/interface/IBadget";
+import Identifiable from "@model/interface/Identifiable";
+import Treatable from "@model/interface/common/Treatable";
+import { DJournalDetail, DJournal } from "@model/interface/DJournal";
 
 export default interface IJournal
   extends Identifiable,

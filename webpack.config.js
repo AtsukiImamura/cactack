@@ -67,17 +67,15 @@ module.exports = {
             options: {
               sourceMap: true
             }
+          },
+          {
+            loader: "sass-resources-loader",
+            options: {
+              resources: [
+                path.resolve(__dirname, "./src/resources/sass/common.scss")
+              ]
+            }
           }
-          // "Make sure 'options.resources' is String or Array of Strings." というのが出るのでいったんコメントアウト。https://github.com/shakacode/sass-resources-loader/issues/35で議論されているがよくわからん。
-          //   {
-          //     loader: "sass-resources-loader",
-          //     options: {
-          //       resources: [
-          //         path.resolve(__dirname, "./src/resources/common.scss"),
-          //         path.resolve(__dirname, "./src/resources/_variables.scss")
-          //       ]
-          //     }
-          //   }
         ],
         exclude: /node_modules/
       }
@@ -91,6 +89,7 @@ module.exports = {
       vue$: "vue/dist/vue.esm.js",
       config$: path.resolve(`src/env/${target}.ts`)
     }
+    // root: [path.resolve("./src")]
   },
 
   plugins: [new VueLoaderplugin()],

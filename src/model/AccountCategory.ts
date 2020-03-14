@@ -1,4 +1,4 @@
-import { IAccountCategory } from "./interface/IJournal";
+import { IAccountCategory } from "@model/interface/IJournal";
 
 export default class AccountCategory implements IAccountCategory {
   /**

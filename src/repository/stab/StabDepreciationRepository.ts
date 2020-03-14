@@ -1,9 +1,9 @@
 import { singleton, container } from "tsyringe";
-import StabRepositoryBase from "./StabRepositoryBase";
-import DepreciationTransformer from "../transformer/DepreciationTransformer";
-import { IDepreciation } from "../../model/interface/IProperty";
-import IDepreciationRepository from "../interface/IDepreciationRepository";
-import { DDepreciation } from "../../model/interface/DProperty";
+import StabRepositoryBase from "@repository/stab/StabRepositoryBase";
+import DepreciationTransformer from "@repository/transformer/DepreciationTransformer";
+import { IDepreciation } from "@model/interface/IProperty";
+import IDepreciationRepository from "@repository/interface/IDepreciationRepository";
+import { DDepreciation } from "@model/interface/DProperty";
 
 @singleton()
 export default class StabDepreciationRepository

@@ -9,4 +9,8 @@ import { Component, Vue } from "vue-property-decorator";
 export default class App extends Vue {}
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.hoge {
+  @include test;
+}
+</style>

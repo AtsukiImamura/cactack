@@ -1,5 +1,5 @@
-import Identifiable from "./Identifiable";
-import Strable from "./common/Strable";
+import Identifiable from "@model/interface/Identifiable";
+import Strable from "@model/interface/common/Strable";
 
 export interface DJournal extends Identifiable, Strable {
   transactionId?: string;

@@ -1,5 +1,5 @@
-import { IBadgetGroup, IBadget } from "./interface/IBadget";
-import { DBadgetGroup } from "./interface/DBadget";
+import { IBadgetGroup, IBadget } from "@model/interface/IBadget";
+import { DBadgetGroup } from "@model/interface/DBadget";
 
 export default class BadgetGroup implements IBadgetGroup {
   /** ID */

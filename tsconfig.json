@@ -16,7 +16,20 @@
     "experimentalDecorators": true,
     "allowJs": true,
     "sourceMap": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "baseUrl": "./",
+    "paths": {
+      //   "config/*": ["src/model/*"],
+      //   "env/*": ["src/env/*"],
+      //   "model/*": ["src/model/*"],
+      //   "repository/*": ["src/repository/*"],
+      //   "resources/*": ["src/resources/*"],
+      //   "service/*": ["src/service/*"],
+      //   "util/*": ["src/util/*"],
+      //   "view/*": ["src/view/*"],
+      "@": ["src"],
+      "@*": ["src/*"]
+    }
   },
   "exclude": ["node_modules/*"],
   "include": ["src/**/*.ts", "src/**/*.vue"]

@@ -1,10 +1,10 @@
-import IJournal, { IJournalDetail } from "./interface/IJournal";
-import { JournalDate } from "./common/JournalDate";
-import { IBadget } from "./interface/IBadget";
-import IJournalDate from "./interface/IJournalDate";
-import JournalDetail from "./JournalDetail";
-import AccountCategory from "./AccountCategory";
-import { DJournal } from "./interface/DJournal";
+import IJournal, { IJournalDetail } from "@model/interface/IJournal";
+import { JournalDate } from "@model/common/JournalDate";
+import { IBadget } from "@model/interface/IBadget";
+import IJournalDate from "@model/interface/IJournalDate";
+import JournalDetail from "@model/JournalDetail";
+import AccountCategory from "@model/AccountCategory";
+import { DJournal } from "@model/interface/DJournal";
 
 export default class Journal implements IJournal {
   public static simple(
