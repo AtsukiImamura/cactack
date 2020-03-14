@@ -12,12 +12,14 @@ import { Component, Vue, Prop } from "vue-property-decorator";
 export default class MenuItem extends Vue {
   @Prop() title!: string;
 
-  @Prop() regex!: string;
+  @Prop() regex?: string;
 
   @Prop() imagePath!: string;
 
   public get needHighlight(): boolean {
-    const match = location.hash.substr(0, 1).match(this.regex);
+    const match = location.hash
+      .substr(0, 1)
+      .match(this.regex ? this.regex : "");
     if (!match) {
       return false;
     }
