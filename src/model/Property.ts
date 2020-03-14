@@ -1,7 +1,7 @@
-import { IProperty } from "@model/interface/IProperty";
-import IJournalDate from "@model/interface/IJournalDate";
-import { JournalDate } from "@model/common/JournalDate";
-import { DProperty } from "@model/interface/DProperty";
+import { IProperty } from "@/model/interface/IProperty";
+import IJournalDate from "@/model/interface/IJournalDate";
+import { JournalDate } from "@/model/common/JournalDate";
+import { DProperty } from "@/model/interface/DProperty";
 
 export default class Property implements IProperty {
   private _id: string;

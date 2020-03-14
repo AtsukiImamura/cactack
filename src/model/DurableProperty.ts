@@ -1,5 +1,5 @@
-import { IDepreciatable, IDepreciation } from "@model/interface/IProperty";
-import Property from "@model/Property";
+import { IDepreciatable, IDepreciation } from "@/model/interface/IProperty";
+import Property from "@/model/Property";
 
 export default class DurableProperty extends Property
   implements IDepreciatable {

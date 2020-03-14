@@ -1,6 +1,6 @@
-import Transformer from "@repository/transformer/Transformer";
-import { DDepreciation } from "@model/interface/DProperty";
-import { IDepreciation } from "@model/interface/IProperty";
+import Transformer from "@/repository/transformer/Transformer";
+import { DDepreciation } from "@/model/interface/DProperty";
+import { IDepreciation } from "@/model/interface/IProperty";
 
 export default class DepreciationTransformer extends Transformer<
   DDepreciation,

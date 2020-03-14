@@ -1,7 +1,7 @@
-import IJournalDate from "@model/interface/IJournalDate";
-import IJournal from "@model/interface/IJournal";
-import Identifiable from "@model/interface/Identifiable";
-import Treatable from "@model/interface/common/Treatable";
+import IJournalDate from "@/model/interface/IJournalDate";
+import IJournal from "@/model/interface/IJournal";
+import Identifiable from "@/model/interface/Identifiable";
+import Treatable from "@/model/interface/common/Treatable";
 import {
   DPropertyGroup,
   DProperty,

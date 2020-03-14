@@ -1,9 +1,9 @@
 import { singleton, container } from "tsyringe";
-import StabRepositoryBase from "@repository/stab/StabRepositoryBase";
-import UserTransformer from "@repository/transformer/UserTransformer";
-import IUserRepository from "@repository/interface/IUserRepository";
-import IUser from "@model/interface/IUser";
-import DUser from "@model/interface/DUser";
+import StabRepositoryBase from "@/repository/stab/StabRepositoryBase";
+import UserTransformer from "@/repository/transformer/UserTransformer";
+import IUserRepository from "@/repository/interface/IUserRepository";
+import IUser from "@/model/interface/IUser";
+import DUser from "@/model/interface/DUser";
 
 @singleton()
 export default class StabUserRepository extends StabRepositoryBase<DUser, IUser>

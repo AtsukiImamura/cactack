@@ -1,5 +1,5 @@
-import Identifiable from "@model/interface/Identifiable";
-import Strable from "@model/interface/common/Strable";
+import Identifiable from "@/model/interface/Identifiable";
+import Strable from "@/model/interface/common/Strable";
 
 export interface DPropertyBase extends Identifiable, Strable {
   name: string;

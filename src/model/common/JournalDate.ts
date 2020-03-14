@@ -1,4 +1,4 @@
-import IJournalDate from "@model/interface/IJournalDate";
+import IJournalDate from "@/model/interface/IJournalDate";
 
 export class JournalDate implements IJournalDate {
   public static cast(value: string | IJournalDate): IJournalDate {
