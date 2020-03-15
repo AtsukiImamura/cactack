@@ -1,8 +1,14 @@
 <template>
-  <div class="menu-item" :class="{highlight: needHighlight}" :image-path="imagePath">
+  <router-link
+    :to="url"
+    class="menu-item"
+    :class="{highlight: needHighlight}"
+    :image-path="imagePath"
+    tag="div"
+  >
     <span class="icon" :style="{'background-image': `url(${imagePath})`}"></span>
     {{ title }}
-  </div>
+  </router-link>
 </template>
 
 <script lang="ts">
@@ -15,6 +21,8 @@ export default class MenuItem extends Vue {
   @Prop() regex?: string;
 
   @Prop() imagePath!: string;
+
+  @Prop() url!: string;
 
   public get needHighlight(): boolean {
     const match = location.hash
