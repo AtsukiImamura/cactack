@@ -43,12 +43,32 @@
           </div>
         </div>
         <div class="t-body">
-          <div class="row">
-            <div class="cell name">Hoge</div>
-            <div class="cell date">2020/02/13</div>
-            <div class="cell badget">ユーティリティ</div>
-            <div class="cell amount">&yen;4,567</div>
-          </div>
+          <ScrollDownRow>
+            <template v-slot:display>
+              <div class="row">
+                <div class="cell name">Hoge</div>
+                <div class="cell date">2020/02/13</div>
+                <div class="cell badget">ユーティリティ</div>
+                <div class="cell amount">&yen;4,567</div>
+              </div>
+            </template>
+            <template v-slot:hidden>
+              <div class="hoge">Hoge</div>
+            </template>
+          </ScrollDownRow>
+          <ScrollDownRow>
+            <template v-slot:display>
+              <div class="row">
+                <div class="cell name">Hoge</div>
+                <div class="cell date">2020/02/20</div>
+                <div class="cell badget">家賃</div>
+                <div class="cell amount">&yen;78,000</div>
+              </div>
+            </template>
+            <template v-slot:hidden>
+              <div class="hoge">Hoge</div>
+            </template>
+          </ScrollDownRow>
         </div>
       </div>
     </div>
@@ -58,8 +78,9 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import SlideMenu from "@/view/common/SlideMenu.vue";
+import ScrollDownRow from "@/view/common/ScrollDownRow.vue";
 
-@Component({ components: { SlideMenu } })
+@Component({ components: { SlideMenu, ScrollDownRow } })
 export default class Flow extends Vue {
   public get contents(): string[] {
     return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(
@@ -95,6 +116,10 @@ export default class Flow extends Vue {
       .t-body {
         .row {
           padding: 4px 0px;
+        }
+        .hoge {
+          height: 200px;
+          border: 1px solid #ffa000;
         }
       }
       .row {
