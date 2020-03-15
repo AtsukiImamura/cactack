@@ -1,8 +1,55 @@
 <template>
   <div class="flow">
     <div class="top">
+      <div class="flow-type">
+        <div class="actions">
+          <span class="b" :class="{'selected': true}">現金フロー</span>
+          <span class="b" :class="{'selected': false}">総資産フロー</span>
+        </div>
+      </div>
       <div class="menu">
         <SlideMenu :contents="contents"></SlideMenu>
+      </div>
+      <div class="select-data-type">
+        <div class="title">
+          <span>絞り込み</span>
+        </div>
+        <div class="data-types">
+          <div class="type">
+            <!-- TODO: 自前のチェックボックスにする -->
+            <input type="checkbox" />
+            <label class="k">ユーティリティ</label>
+          </div>
+          <div class="type">
+            <input type="checkbox" />
+            <label class="k">食費</label>
+          </div>
+
+          <div class="type">
+            <input type="checkbox" />
+            <label class="k">被服費</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="main">
+      <div class="contents-table">
+        <div class="t-header">
+          <div class="row">
+            <div class="cell name">名称</div>
+            <div class="cell date">日付</div>
+            <div class="cell badget">予算</div>
+            <div class="cell amount">金額</div>
+          </div>
+        </div>
+        <div class="t-body">
+          <div class="row">
+            <div class="cell name">Hoge</div>
+            <div class="cell date">2020/02/13</div>
+            <div class="cell badget">ユーティリティ</div>
+            <div class="cell amount">&yen;4,567</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -39,8 +86,70 @@ export default class Flow extends Vue {
 <style lang="scss" scoped>
 .flow {
   width: 100%;
+  .main {
+    .contents-table {
+      width: 100%;
+      margin: 18px 0px;
+      .t-header {
+      }
+      .t-body {
+        .row {
+          padding: 4px 0px;
+        }
+      }
+      .row {
+        width: 100%;
+        display: flex;
+        border-bottom: 1px solid #c0c0c0;
+        // border-bottom: 1px solid $color-main-skeleton;
+        .cell {
+          padding: 5px 8px;
+          &.name {
+            width: 30%;
+          }
+          &.date {
+            width: 15%;
+          }
+          &.badget {
+            width: 15%;
+          }
+          &.amount {
+            width: 15%;
+          }
+        }
+      }
+    }
+  }
   .top {
     width: 100%;
+    .flow-type {
+      .actions {
+        margin: 5px 0px;
+        display: flex;
+        // width: 210px;
+        .b {
+          display: block;
+          max-width: 80px;
+          font-size: 0.9em;
+          width: calc(50% - 2px);
+          border: 1px solid $color-main;
+          color: $color-main;
+          padding: 5px 8px;
+          text-align: center;
+          cursor: pointer;
+          &:first-child {
+            border-radius: 3px 0px 0px 3px;
+          }
+          &:last-child {
+            border-radius: 0px 3px 3px 0px;
+          }
+          &.selected {
+            color: #ffffff;
+            background-color: $color-main;
+          }
+        }
+      }
+    }
     .menu {
       width: 100%;
       height: 55px;
@@ -89,6 +198,26 @@ export default class Flow extends Vue {
         .date,
         .amount {
           width: 50%;
+        }
+      }
+    }
+    .select-data-type {
+      margin: 5px 0px;
+      padding: 10px;
+      box-shadow: 2px 2px 2px 2px rgba(40, 40, 40, 0.15);
+      .title {
+        margin: 0px 0px 3px 0px;
+      }
+      .data-types {
+        display: flex;
+        .type {
+          min-width: 150px;
+          .k {
+            width: 80%;
+          }
+          .v {
+            width: 20%;
+          }
         }
       }
     }

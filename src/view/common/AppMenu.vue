@@ -11,7 +11,7 @@
         <MenuItem title="フロー" regex="/flow/?.*" image-path="image/flow.svg" url="/flow"></MenuItem>
       </div>
       <div class="item">
-        <MenuItem title="ストック" regex="a" image-path="image/store.svg" url="/inventory"></MenuItem>
+        <MenuItem title="ストック" regex="/inventory/?.*" image-path="image/store.svg" url="/inventory"></MenuItem>
       </div>
       <div class="item">
         <MenuItem title="予算" regex="a" image-path="image/badget.svg" url="/badget"></MenuItem>

@@ -272,6 +272,7 @@ class ScrollTimer {
     width: $ctrl-width;
     height: 100%;
     position: absolute;
+    background-color: $color-main;
     top: 0;
     &.prev-btn {
       left: 0;

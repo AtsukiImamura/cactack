@@ -25,9 +25,7 @@ export default class MenuItem extends Vue {
   @Prop() url!: string;
 
   public get needHighlight(): boolean {
-    const match = location.hash
-      .substr(0, 1)
-      .match(this.regex ? this.regex : "");
+    const match = location.hash.substr(1).match(this.regex ? this.regex : "");
     if (!match) {
       return false;
     }
