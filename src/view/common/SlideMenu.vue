@@ -1,12 +1,21 @@
 <template>
   <div class="slide-menu">
-    <div class="ctrl prev-btn" @mouseup="attemptToTransformToLeft"></div>
-    <div class="ctrl next-btn" @mouseup="attemptToTransformToRight"></div>
+    <div class="ctrl prev-btn" @mouseup="attemptToTransformToLeft" :disabled="!canScroll"></div>
+    <div class="ctrl next-btn" @mouseup="attemptToTransformToRight" :disabled="!canScroll"></div>
     <div class="menu-list-wrap">
-      <div class="menu-list" @scroll="onMenuScrolled" ref="menuList">
+      <div class="menu-list" ref="menuList">
         <div class="dummy" style="display:none"></div>
         <div class="dummy" style="display:none"></div>
-        <slot></slot>
+        <slot>
+          <div
+            v-html="content"
+            v-for="(content, index) in contents"
+            :key="index"
+            @click="transformTo(index)"
+            :class="{'main': index===currentMainIndex,
+            'sub': Math.abs(index - currentMainIndex) === 1}"
+          ></div>
+        </slot>
         <div class="dummy" style="display:none"></div>
         <div class="dummy" style="display:none"></div>
       </div>
@@ -15,24 +24,30 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Prop } from "vue-property-decorator";
 
 @Component({})
 export default class SlideMenu extends Vue {
+  /** ハイライトされていないコンテンツの幅 */
   public static readonly NOMAL_ITEM_WIDTH = 100;
+  /** メインコンテンツ両隣の幅 */
   public static readonly SUB_ITEM_WIDTH = 170;
+  /** メインコンテンツの幅 */
   public static readonly MAIN_ITEM_WIDTH = 260;
-
+  /** スクロールに要する時間 */
   public static readonly SCROLL_DURATION = 400;
+
+  /** コンテンツに表示する要素（slotを用いない場合は必須） */
+  @Prop() contents?: string[];
+
+  @Prop() defaultIndex?: number;
 
   private timer: ScrollTimer = new ScrollTimer(0);
 
   private currentMainIndex: number = 0;
 
-  // private scrollStartPos: number = 0;
-
   public mounted(): void {
-    this.transform();
+    this.transformTo(this.defaultIndex ? this.defaultIndex : 0);
   }
 
   private calcCenterScrollPos(index: number): number {
@@ -69,59 +84,15 @@ export default class SlideMenu extends Vue {
     );
   }
 
-  // private getIndexByScrollLeft(left: number): number {
-  //   console.log("[getIndexByScrollLeft] left=" + left);
-  //   let prev = 0;
-  //   for (let i = 0; i < this.menuContentsNum; i++) {
-  //     if (prev <= left && left <= (prev = this.calcScrollLeft(i))) {
-  //       return i;
-  //     }
-  //     console.log(`  ${i}: ${prev}`);
-  //   }
-  //   return this.menuContentsNum - 1;
-  // }
-
-  // TODO: スクロールが複数回呼び出されることに対して脆弱
-  public onMenuScrolled(e: Event): void {
-    e.stopPropagation();
-    e.preventDefault();
-
-    const menuList = this.menuListElement;
-    if (!menuList) {
-      return;
-    }
-
-    if (!this.timer.isFinished) {
-      // console.log("@1");
-      return;
-    }
-    this.timer = ScrollTimer.start(SlideMenu.SCROLL_DURATION);
-
-    // スクロール方向判定
-    // const scrollDirection = menuList.scrollLeft - this.scrollStartPos;
-
-    // const guessedCurrentIndex = this.getIndexByScrollLeft(menuList.scrollLeft);
-    // console.log(
-    //   `guessedCurrentIndex=${guessedCurrentIndex} currentIndex=${this.currentMainIndex}`
-    // );
-    // if (this.currentMainIndex === guessedCurrentIndex) {
-    //   console.log("@2");
-    //   return;
-    // }
-
-    // console.log(`scrollDirection = ${scrollDirection}`);
-    // if (scrollDirection > 0) {
-    //   this.attemptToTransformToRight();
-    // } else if (scrollDirection < 0) {
-    //   this.attemptToTransformToLeft();
-    // }
-  }
-
-  // private canScroll = true;
+  private canScroll = true;
   public attemptToTransformToLeft(): void {
     if (this.currentMainIndex <= 0) {
       return;
     }
+    if (!this.canScroll) {
+      return;
+    }
+    this.canScroll = false;
     this.currentMainIndex--;
     this.transform();
   }
@@ -130,7 +101,16 @@ export default class SlideMenu extends Vue {
     if (this.currentMainIndex >= this.menuContentsNum - 1) {
       return;
     }
+    if (!this.canScroll) {
+      return;
+    }
+    this.canScroll = false;
     this.currentMainIndex++;
+    this.transform();
+  }
+
+  public transformTo(index: number) {
+    this.currentMainIndex = index;
     this.transform();
   }
 
@@ -156,44 +136,37 @@ export default class SlideMenu extends Vue {
       from: number;
       to: number;
     }[] = [];
-    const mainContent = this.menuContents[this.currentMainIndex];
-    widthTransformControlls.push({
-      elem: mainContent,
-      from: mainContent.clientWidth,
-      to: SlideMenu.MAIN_ITEM_WIDTH
-    });
-    if (this.currentMainIndex > 0) {
-      const leftSubContent = this.menuContents[this.currentMainIndex - 1];
-      widthTransformControlls.push({
-        elem: leftSubContent,
-        from: leftSubContent.clientWidth,
-        to: SlideMenu.SUB_ITEM_WIDTH
-      });
+
+    // 各コンテンツの幅を定義
+    for (const [index, elem] of this.menuContents.entries()) {
+      if (index === this.currentMainIndex) {
+        widthTransformControlls.push({
+          elem: elem,
+          from: elem.clientWidth,
+          to: SlideMenu.MAIN_ITEM_WIDTH
+        });
+        continue;
+      }
+      if (
+        index === this.currentMainIndex - 1 ||
+        index === this.currentMainIndex + 1
+      ) {
+        widthTransformControlls.push({
+          elem: elem,
+          from: elem.clientWidth,
+          to: SlideMenu.SUB_ITEM_WIDTH
+        });
+        continue;
+      }
+      if (elem.clientWidth !== SlideMenu.NOMAL_ITEM_WIDTH) {
+        widthTransformControlls.push({
+          elem: elem,
+          from: elem.clientWidth,
+          to: SlideMenu.NOMAL_ITEM_WIDTH
+        });
+      }
     }
-    if (this.currentMainIndex > 1) {
-      const leftNormalContent = this.menuContents[this.currentMainIndex - 2];
-      widthTransformControlls.push({
-        elem: leftNormalContent,
-        from: leftNormalContent.clientWidth,
-        to: SlideMenu.NOMAL_ITEM_WIDTH
-      });
-    }
-    if (this.currentMainIndex < this.menuContentsNum - 1) {
-      const rightSubContent = this.menuContents[this.currentMainIndex + 1];
-      widthTransformControlls.push({
-        elem: rightSubContent,
-        from: rightSubContent.clientWidth,
-        to: SlideMenu.SUB_ITEM_WIDTH
-      });
-    }
-    if (this.currentMainIndex < this.menuContentsNum - 2) {
-      const rightNormalContent = this.menuContents[this.currentMainIndex + 2];
-      widthTransformControlls.push({
-        elem: rightNormalContent,
-        from: rightNormalContent.clientWidth,
-        to: SlideMenu.NOMAL_ITEM_WIDTH
-      });
-    }
+    // すこしずつ値を変化させる
     const currentScrollPos = menuList.scrollLeft;
     for (let t = 0; t < SlideMenu.SCROLL_DURATION; t += 10) {
       setTimeout(() => {
@@ -206,6 +179,7 @@ export default class SlideMenu extends Vue {
         }
       }, t);
     }
+    setTimeout(() => (this.canScroll = true), SlideMenu.SCROLL_DURATION);
   }
   public get menuContents(): HTMLElement[] {
     const menuList = this.menuListElement;
@@ -250,6 +224,9 @@ export default class SlideMenu extends Vue {
   }
 }
 
+/**
+ * スクロール中の時間経過を管理するタイマー
+ */
 class ScrollTimer {
   public static start(durationMilli: number): ScrollTimer {
     return new ScrollTimer(durationMilli).start();
@@ -273,13 +250,7 @@ class ScrollTimer {
   }
 
   public get isFinished(): boolean {
-    // console.log(
-    //   `now:${String(Date.now()).substr(-5)} compared: ${String(
-    //     this.startAt + this.duration
-    //   ).substr(-5)}`
-    // );
     const res = Date.now() > this.startAt + this.duration;
-    // console.log(res);
     return res;
   }
 
@@ -287,11 +258,6 @@ class ScrollTimer {
    * 現在の時間に基づいて進捗のレートを返す
    */
   public calcRate(): number {
-    // console.log(
-    //   `[calcRate] startAt:${String(this.startAt).substr(-4)} now:${String(
-    //     Date.now()
-    //   ).substr(-4)}`
-    // );
     return Math.min((Date.now() - this.startAt) / this.duration, 1);
   }
 }
@@ -332,6 +298,7 @@ class ScrollTimer {
       > * {
         min-width: 100px;
         scroll-snap-align: start;
+        border: 1px solid $color-main-skeleton;
       }
       .dummy {
       }
