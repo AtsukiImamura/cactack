@@ -4,7 +4,7 @@
       <h1>Cactack</h1>
     </div>
     <div class="register-area">
-      <div class="register-mark">登録</div>
+      <router-link class="register-mark" tag="div" to="/register">登録</router-link>
     </div>
     <div class="items">
       <div class="item">

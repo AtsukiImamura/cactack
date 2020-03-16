@@ -53,7 +53,8 @@
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.1.0",
     "uuid": "^3.4.0",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "vuejs-datepicker": "^1.6.2"
   },
   "devDependencies": {
     "@types/jest": "^25.1.4",

@@ -29,7 +29,8 @@
       //   "view/*": ["src/view/*"],
       "@": ["src"],
       "@*": ["src/*"]
-    }
+    },
+    "typeRoots": ["src/declaration"]
   },
   "exclude": ["node_modules/*"],
   "include": ["src/**/*.ts", "src/**/*.vue"]

@@ -3,8 +3,8 @@
     <div class="top">
       <div class="flow-type">
         <div class="actions">
-          <span class="b" :class="{'selected': true}">現金フロー</span>
-          <span class="b" :class="{'selected': false}">総資産フロー</span>
+          <span class="b" :class="{ selected: true }">現金フロー</span>
+          <span class="b" :class="{ selected: false }">総資産フロー</span>
         </div>
       </div>
       <div class="menu">
@@ -14,18 +14,17 @@
         <div class="title">
           <span>絞り込み</span>
         </div>
-        <div class="data-types">
-          <div class="type">
-            <!-- TODO: 自前のチェックボックスにする -->
+        <div class="data-types picks">
+          <div class="type c">
             <input type="checkbox" />
             <label class="k">ユーティリティ</label>
           </div>
-          <div class="type">
+          <div class="type c">
             <input type="checkbox" />
             <label class="k">食費</label>
           </div>
 
-          <div class="type">
+          <div class="type c">
             <input type="checkbox" />
             <label class="k">被服費</label>
           </div>

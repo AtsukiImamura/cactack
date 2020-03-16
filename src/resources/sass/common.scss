@@ -30,4 +30,71 @@ body {
       height: auto;
     }
   }
+
+  // フォームコントロール系
+  .picks {
+    display: flex;
+    .c {
+      width: 120px;
+      input[type="checkbox"] {
+        position: relative;
+        $box-size: 18px;
+        &:after {
+          position: absolute;
+          content: "";
+          width: $box-size;
+          height: $box-size;
+          background-color: #ffffff;
+          z-index: 9;
+          border-radius: 3px;
+          border: 1px solid #c0c0c0;
+          top: -2px;
+          left: -5px;
+        }
+        &:checked {
+          &:before {
+            position: absolute;
+            content: "";
+            width: $box-size;
+            height: $box-size;
+            top: -1px;
+            left: -4px;
+            background-image: url("image/check.svg");
+            z-index: 10;
+          }
+        }
+      }
+      input[type="radio"] {
+        position: relative;
+        $circle-radius: 9px;
+        $inner-circle-radius: 7px;
+        &:after {
+          position: absolute;
+          content: "";
+          top: -$circle-radius / 4;
+          left: -$circle-radius / 2;
+          background-color: #ffffff;
+          width: $circle-radius * 2;
+          height: $circle-radius * 2;
+          border-radius: $circle-radius + 2px;
+          border: 1px solid #c0c0c0;
+          z-index: 9;
+        }
+        &:checked {
+          &:before {
+            position: absolute;
+            content: "";
+            top: -1.5px + ($circle-radius - $inner-circle-radius);
+            left: -2.5px + ($circle-radius - $inner-circle-radius)/2;
+            background-color: #ffffff;
+            width: $inner-circle-radius * 2;
+            height: $inner-circle-radius * 2;
+            border-radius: $inner-circle-radius + 2px;
+            background-color: $color-main;
+            z-index: 10;
+          }
+        }
+      }
+    }
+  }
 }
