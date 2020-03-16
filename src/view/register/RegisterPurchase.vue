@@ -12,6 +12,14 @@
               <DatePicker format="yyyy/MM/dd" @selected="onSelectAccountAt" value="2020/2/13"></DatePicker>
             </div>
           </div>
+          <div class="form-item">
+            <div class="k">
+              <label>金額</label>
+            </div>
+            <div class="v">
+              <NumberInput></NumberInput>
+            </div>
+          </div>
         </div>
         <div class="debt">
           <div class="form-item">
@@ -20,16 +28,17 @@
             </div>
             <div class="v picks">
               <div class="c">
-                <input name="payment-timing" type="radio" />
+                <input name="payment-timing" type="radio" v-model="paymentTiming" :value="1" />
                 <label>当月</label>
               </div>
 
               <div class="c">
-                <input name="payment-timing" type="radio" />
+                <input name="payment-timing" type="radio" v-model="paymentTiming" :value="2" />
                 <label>来月以降</label>
               </div>
             </div>
           </div>
+          <RegisterDebt v-if="isDebt"></RegisterDebt>
         </div>
         <div class="receivable">
           <div class="form-item">
@@ -90,9 +99,22 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import DatePicker from "vuejs-datepicker";
+import RegisterDebt from "@/view/register/RegisterDebt.vue";
+import NumberInput from "@/view/common/NumberInput.vue";
 
-@Component({ components: { DatePicker } })
+enum PaymentTiming {
+  Immediately = 1,
+  Debt = 2
+}
+
+@Component({ components: { DatePicker, RegisterDebt, NumberInput } })
 export default class RegisterPurchase extends Vue {
+  public paymentTiming: PaymentTiming = PaymentTiming.Immediately;
+
+  public get isDebt(): boolean {
+    return this.paymentTiming === PaymentTiming.Debt;
+  }
+
   public onSelectAccountAt(date: Date) {
     console.log(date);
     console.log(date.getMonth());
@@ -115,31 +137,6 @@ export default class RegisterPurchase extends Vue {
     }
     .main {
       .purchase {
-      }
-      .form-item {
-        width: 100%;
-        display: flex;
-        margin: 20px 0px;
-        .k {
-          width: 20%;
-          height: 100%;
-          padding: 1px 8px;
-        }
-        .v {
-          width: 80%;
-          /deep/input[type="text"] {
-            min-width: 200px;
-            padding: 5px 8px;
-            border: 1px solid #c0c0c0;
-            outline: none;
-            border-radius: 3px;
-            &:focus {
-              padding: 4px 7px;
-              border-width: 2px;
-              transition-duration: 0.25s;
-            }
-          }
-        }
       }
     }
   }
