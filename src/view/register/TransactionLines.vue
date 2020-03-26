@@ -29,6 +29,7 @@ import { Component, Vue, Prop } from "vue-property-decorator";
 import { ITransaction } from "../../model/interface/dto/Transaction";
 import NumberInput from "@/view/common/NumberInput.vue";
 import DatePicker from "vuejs-datepicker";
+import JournalDate from "../../model/common/JournalDate";
 
 @Component({ components: { DatePicker, NumberInput } })
 export default class TransactionLines extends Vue {
@@ -38,13 +39,62 @@ export default class TransactionLines extends Vue {
     console.log(this.transactions);
   }
 
-  public onDateSelected(tr: ITransaction, date: Date): void {}
+  public onDateSelected(tSaction: ITransaction, date: Date): void {
+    const transactionsByDate = this.transactions.reduce((acc, cur) => {
+      acc[cur.date.toString()] = cur;
+      return acc;
+    }, {} as { [date: string]: ITransaction });
 
-  public onInputAmount(tr: ITransaction, val: string): void {}
+    const dateKey = date.toString();
+    if (dateKey in transactionsByDate) {
+      if (transactionsByDate[dateKey].seq === tSaction.seq) {
+        return;
+      }
+      this.commit(
+        this.transactions
+          .map(tr => {
+            if (tr.date.toString() === dateKey && tr.seq !== tSaction.seq) {
+              tr.amount += tSaction.amount;
+            }
+            return tr;
+          })
+          .filter(tr => tr.seq !== tSaction.seq)
+      );
+    } else {
+      this.commit(
+        this.transactions.map(tr => {
+          if (tr.seq === tSaction.seq) {
+            tr.date = JournalDate.byDate(date);
+          }
+          return tr;
+        })
+      );
+    }
+  }
 
-  public deleteTransaction(tr: ITransaction) {}
+  public onInputAmount(debt: ITransaction, val: string): void {
+    const amount = Number(val);
+    if (isNaN(amount)) {
+      return;
+    }
+    this.commit(
+      this.transactions.map(tr => {
+        if (tr.seq !== debt.seq) {
+          return tr;
+        }
+        tr.amount = amount;
+        return tr;
+      })
+    );
+  }
+
+  public deleteTransaction(debt: ITransaction) {
+    this.commit(this.transactions.filter(tr => tr.seq !== debt.seq));
+  }
 
   public addTransaction(): void {}
+
+  public commit(transactions: ITransaction[]) {}
 }
 </script>
 

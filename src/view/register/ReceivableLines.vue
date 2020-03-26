@@ -6,13 +6,13 @@ import TransactionModule from "@/store/TransactionStore";
 // import JournalDate from "../../model/common/JournalDate";
 
 @Component({})
-export default class DebtLines extends Mixins(TransactionLines) {
+export default class ReceivableLines extends Mixins(TransactionLines) {
   public addTransaction(): void {
-    TransactionModule.addDebtTransaction();
+    TransactionModule.addReceivableTransaction();
   }
 
-  public commit(debts: ITransaction[]) {
-    TransactionModule.commitDebts(debts);
+  public commit(receivables: ITransaction[]) {
+    TransactionModule.commitReceivables(receivables);
   }
 }
 </script>

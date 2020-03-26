@@ -40,9 +40,18 @@ class TransactionStore extends VuexModule {
   }
 
   private get debtJournals(): IJournal[] {
-    return this._journals.filter(
-      jnl => jnl.credit.category.code === AccountCategory.DEBT
-    );
+    // return this._journals.filter(
+    //   jnl => jnl.credit.category.code === AccountCategory.DEBT
+    // );
+    return container
+      .resolve(TransactionHelper)
+      .findJournals(this._journals, AccountCategory.debt());
+  }
+
+  public get receivableJournals(): IJournal[] {
+    return container
+      .resolve(TransactionHelper)
+      .findJournals(this._journals, AccountCategory.receivable());
   }
 
   /**
@@ -54,9 +63,10 @@ class TransactionStore extends VuexModule {
     });
   }
 
-  /** 負債があるか */
-  public get isDebt(): boolean {
-    return this.debtJournals.length > 0;
+  public get receivables(): ITransaction[] {
+    return container
+      .resolve(TransactionHelper)
+      .createTransactions(this._journals, AccountCategory.receivable());
   }
 
   @Action
@@ -69,12 +79,38 @@ class TransactionStore extends VuexModule {
   }
 
   @Action
+  public commitReceivables(receivables: ITransaction[]) {
+    this.clearReceivableJournals();
+    const journals = container
+      .resolve(TransactionHelper)
+      .transactionToReceivables(receivables, this.accountAt);
+    this._journals.push(...journals);
+  }
+
+  @Action
   public addDebtTransaction(): void {
-    const date =
-      this._journals.length > 0
-        ? this._journals[this._journals.length - 1].executeAt
-        : JournalDate.today();
-    this._journals.push(Journal.debt(0, date.getNextMonth()));
+    this._journals.push(
+      Journal.debt(
+        0,
+        container
+          .resolve(TransactionHelper)
+          .findLatestMonthOf(this.debtJournals)
+          .getNextMonth()
+      )
+    );
+  }
+
+  @Action
+  public addReceivableTransaction(): void {
+    this._journals.push(
+      Journal.receivable(
+        0,
+        container
+          .resolve(TransactionHelper)
+          .findLatestMonthOf(this.receivableJournals)
+          .getNextMonth()
+      )
+    );
   }
 
   @Action
@@ -104,6 +140,18 @@ class TransactionStore extends VuexModule {
   @Action
   public cashPayment(): void {
     this.clearDebtJournals();
+  }
+
+  @Action
+  public receivable(): void {
+    this._journals.push(
+      Journal.receivable(0, JournalDate.today().getNextMonth())
+    );
+  }
+
+  @Action
+  public noReceivable(): void {
+    this.clearReceivableJournals();
   }
 
   /** 分割数を変更する */
@@ -156,6 +204,11 @@ class TransactionStore extends VuexModule {
   @Action
   private clearDebtJournals(): void {
     this.clearJournalsByCategory(AccountCategory.debt());
+  }
+
+  @Action
+  private clearReceivableJournals(): void {
+    this.clearJournalsByCategory(AccountCategory.receivable());
   }
 
   /** remove all journals which have specific category in argument from journals. */

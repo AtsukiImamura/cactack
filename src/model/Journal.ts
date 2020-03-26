@@ -40,6 +40,15 @@ export default class Journal implements IJournal {
     );
   }
 
+  public static receivable(amount: number, executeAt?: IJournalDate | string) {
+    return Journal.simple(
+      JournalDate.today(),
+      executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
+      amount,
+      AccountCategory.receivable(),
+      AccountCategory.cash()
+    );
+  }
   /**
    * キャッシュアウトの仕訳を作成
    * @param amount

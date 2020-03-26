@@ -57,6 +57,7 @@
               </div>
             </div>
           </div>
+          <RegisterReceivable v-if="isReceivable"></RegisterReceivable>
         </div>
         <div class="depreciation">
           <div class="form-item">
@@ -75,6 +76,8 @@
               </div>
             </div>
           </div>
+
+          <PropertySelector class="property-selections" v-if="hasStockRelation"></PropertySelector>
           <div class="form-item">
             <div class="k">
               <label>減価償却</label>
@@ -104,12 +107,34 @@
 import { Component, Vue } from "vue-property-decorator";
 import DatePicker from "vuejs-datepicker";
 import RegisterDebt from "@/view/register/RegisterDebt.vue";
+import RegisterReceivable from "@/view/register/RegisterReceivable.vue";
 import NumberInput from "@/view/common/NumberInput.vue";
 import TransactionModule from "../../store/TransactionStore";
+import PropertySelector from "@/view/register/PropertySelector.vue";
 
-@Component({ components: { DatePicker, RegisterDebt, NumberInput } })
+@Component({
+  components: {
+    DatePicker,
+    RegisterDebt,
+    RegisterReceivable,
+    NumberInput,
+    PropertySelector
+  }
+})
 export default class RegisterPurchase extends Vue {
-  public isReceivable: boolean = false;
+  public get isReceivable(): boolean {
+    return TransactionModule.receivables.length > 0;
+  }
+
+  public set isReceivable(val: boolean) {
+    // TODO
+    if (val) {
+      console.log("check");
+      TransactionModule.receivable();
+    } else {
+      TransactionModule.noReceivable();
+    }
+  }
 
   public hasStockRelation: boolean = false;
 
@@ -123,7 +148,7 @@ export default class RegisterPurchase extends Vue {
   }
 
   public get isDebt(): boolean {
-    return TransactionModule.isDebt;
+    return TransactionModule.debts.length > 0;
   }
 
   public set isDebt(val: boolean) {
@@ -162,6 +187,10 @@ export default class RegisterPurchase extends Vue {
     .main {
       padding: 10px;
       .purchase {
+      }
+      .property-selections {
+        width: calc(80% - 14px);
+        padding-left: calc(20% + 14px);
       }
     }
     .footer {
