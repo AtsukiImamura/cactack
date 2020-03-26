@@ -1,5 +1,5 @@
 import { IBadget, IBadgetGroup } from "@/model/interface/IBadget";
-import { JournalDate } from "@/model/common/JournalDate";
+import JournalDate from "@/model/common/JournalDate";
 import { DBadget } from "@/model/interface/DBadget";
 import IJournalDate from "@/model/interface/IJournalDate";
 

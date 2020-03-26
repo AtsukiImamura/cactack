@@ -9,7 +9,7 @@
               <label>発生日</label>
             </div>
             <div class="v">
-              <DatePicker format="yyyy/MM/dd" @selected="onSelectAccountAt" value="2020/2/13"></DatePicker>
+              <DatePicker format="yyyy/MM/dd" @selected="onSelectAccountAt" :value="accountAt"></DatePicker>
             </div>
           </div>
           <div class="form-item">
@@ -17,7 +17,7 @@
               <label>金額</label>
             </div>
             <div class="v">
-              <NumberInput></NumberInput>
+              <NumberInput @commit="onInputAmount"></NumberInput>
             </div>
           </div>
         </div>
@@ -28,12 +28,12 @@
             </div>
             <div class="v picks">
               <div class="c">
-                <input name="payment-timing" type="radio" v-model="paymentTiming" :value="1" />
+                <input name="payment-timing" type="radio" v-model="isDebt" :value="false" />
                 <label>当月</label>
               </div>
 
               <div class="c">
-                <input name="payment-timing" type="radio" v-model="paymentTiming" :value="2" />
+                <input name="payment-timing" type="radio" v-model="isDebt" :value="true" />
                 <label>来月以降</label>
               </div>
             </div>
@@ -47,12 +47,12 @@
             </div>
             <div class="v picks">
               <div class="c">
-                <input name="receivable" type="radio" />
+                <input name="receivable" type="radio" :value="false" v-model="isReceivable" />
                 <label>なし</label>
               </div>
 
               <div class="c">
-                <input name="receivable" type="radio" />
+                <input name="receivable" type="radio" :value="true" v-model="isReceivable" />
                 <label>あり</label>
               </div>
             </div>
@@ -65,12 +65,12 @@
             </div>
             <div class="v picks">
               <div class="c">
-                <input name="stock" type="radio" />
+                <input name="stock" type="radio" :value="false" v-model="hasStockRelation" />
                 <label>なし</label>
               </div>
 
               <div class="c">
-                <input name="stock" type="radio" />
+                <input name="stock" type="radio" :value="true" v-model="hasStockRelation" />
                 <label>あり</label>
               </div>
             </div>
@@ -81,16 +81,20 @@
             </div>
             <div class="v picks">
               <div class="c">
-                <input name="depreciation" type="radio" />
+                <input name="depreciation" type="radio" :value="false" v-model="hasDepreciation" />
                 <label>なし</label>
               </div>
               <div class="c">
-                <input name="depreciation" type="radio" />
+                <input name="depreciation" type="radio" :value="true" v-model="hasDepreciation" />
                 <label>あり</label>
               </div>
             </div>
           </div>
         </div>
+      </div>
+      <div class="footer">
+        <input type="button" value="キャンセル" class="btn cancel-btn" />
+        <input type="button" value="登録" class="btn ok-btn" />
       </div>
     </div>
   </div>
@@ -101,23 +105,41 @@ import { Component, Vue } from "vue-property-decorator";
 import DatePicker from "vuejs-datepicker";
 import RegisterDebt from "@/view/register/RegisterDebt.vue";
 import NumberInput from "@/view/common/NumberInput.vue";
-
-enum PaymentTiming {
-  Immediately = 1,
-  Debt = 2
-}
+import TransactionModule from "../../store/TransactionStore";
 
 @Component({ components: { DatePicker, RegisterDebt, NumberInput } })
 export default class RegisterPurchase extends Vue {
-  public paymentTiming: PaymentTiming = PaymentTiming.Immediately;
+  public isReceivable: boolean = false;
+
+  public hasStockRelation: boolean = false;
+
+  public hasDepreciation: boolean = false;
+
+  public get accountAt(): string {
+    const accountAt = TransactionModule.accountAt;
+    return `${accountAt.year}/${accountAt.month}/${
+      accountAt.day > 0 ? accountAt.day : 1
+    }`;
+  }
 
   public get isDebt(): boolean {
-    return this.paymentTiming === PaymentTiming.Debt;
+    return TransactionModule.isDebt;
+  }
+
+  public set isDebt(val: boolean) {
+    if (val) {
+      TransactionModule.debt();
+    } else {
+      TransactionModule.cashPayment();
+    }
   }
 
   public onSelectAccountAt(date: Date) {
-    console.log(date);
-    console.log(date.getMonth());
+    TransactionModule.setAccountAt(date);
+  }
+
+  public onInputAmount(amount: number) {
+    TransactionModule.setAmount(amount);
   }
 }
 </script>
@@ -128,15 +150,43 @@ export default class RegisterPurchase extends Vue {
   .contents {
     width: 70%;
     margin: 10px 15%;
-    padding: 10px;
     box-shadow: 2px 2px 2px 2px rgba(40, 40, 40, 0.15);
     * {
       font-size: 1.06rem;
     }
     .title {
+      padding: 12px 20px;
+      background-color: $color-main;
+      color: #ffffff;
     }
     .main {
+      padding: 10px;
       .purchase {
+      }
+    }
+    .footer {
+      display: flex;
+      justify-content: flex-end;
+      padding: 10px;
+      margin: 20px 0px;
+      .btn {
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.28);
+        border-radius: 3px;
+        border: transparent;
+        padding: 6px 10px;
+        margin-left: 10px;
+        min-width: 90px;
+        outline: none;
+        cursor: pointer;
+        font-size: 1rem;
+        &.ok-btn {
+          text-align: center;
+          overflow: hidden;
+          background: linear-gradient(#ffda75 0%, #ffb702 100%);
+          color: #ffffff;
+        }
+        &.cancel-btn {
+        }
       }
     }
   }

@@ -6,34 +6,17 @@
       </div>
       <div class="v picks">
         <div class="c">
-          <input name="depreciation" type="radio" :value="1" v-model="paymentType" />
+          <input name="payment-type" type="radio" :value="1" v-model="paymentType" />
           <label>一括</label>
         </div>
         <div class="c">
-          <input name="depreciation" type="radio" :value="2" v-model="paymentType" />
+          <input name="payment-type" type="radio" :value="2" v-model="paymentType" />
           <label>分割</label>
         </div>
       </div>
     </div>
-    <div class="form-item" v-show="isInstallment">
-      <div class="k">
-        <label>分割回数</label>
-      </div>
-      <div class="v">
-        <NumberInput @commit="onCommitDevideNum"></NumberInput>
-      </div>
-    </div>
     <div class="depts">
-      <div class="d" v-for="(debt, index) in debts" :key="index">
-        <div class="attr date">
-          <label>日付</label>
-          <DatePicker format="yyyy/MM/dd" :value="debt.date.toString()"></DatePicker>
-        </div>
-        <div class="attr amount">
-          <label>金額</label>
-          <NumberInput :default="debt.amount"></NumberInput>
-        </div>
-      </div>
+      <DebtLines :transactions="transactions"></DebtLines>
     </div>
   </div>
 </template>
@@ -41,62 +24,54 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import NumberInput from "@/view/common/NumberInput.vue";
-import IJournalDate from "../../model/interface/IJournalDate";
-import { JournalDate } from "../../model/common/JournalDate";
-import DatePicker from "vuejs-datepicker";
+import { ITransaction } from "../../model/interface/dto/Transaction";
+import TransactionModule from "../../store/TransactionStore";
+import { PaymentType } from "@/model/interface/dto/Payment";
+import DebtLines from "./DebtLines.vue";
 
-enum PaymentType {
-  LumpSum = 1,
-  Installment = 2
-}
-
-@Component({ components: { NumberInput, DatePicker } })
+@Component({ components: { NumberInput, DebtLines } })
 export default class RegisterDebt extends Vue {
-  public paymentType: PaymentType = PaymentType.LumpSum;
+  public get paymentType(): PaymentType {
+    return this.transactions.length === 1
+      ? PaymentType.LumpSum
+      : PaymentType.Installment;
+  }
 
-  public devideNum: number = 1;
-
-  public get debts(): { date: IJournalDate; amount: number }[] {
-    const debts = [];
-    let date = JournalDate.today();
-    switch (this.paymentType) {
+  public set paymentType(type: PaymentType) {
+    switch (type) {
       case PaymentType.LumpSum:
-        debts.push({ date: date.getNextMonth(), amount: 0 });
+        TransactionModule.alterDebtDevideNum(1);
         break;
       case PaymentType.Installment:
-        for (let i = 0; i < this.devideNum; i++) {
-          debts.push({ date: date = date.getNextMonth(), amount: 0 });
-        }
+        TransactionModule.alterDebtDevideNum(2);
         break;
     }
-    return debts;
   }
+
+  // private get totalAmount(): number {
+  //   return TransactionModule.amount;
+  // }
+
+  // public get amountDiff(): number {
+  //   return (
+  //     container.resolve(TransactionHelper).calcSum(this.transactions) -
+  //     this.totalAmount
+  //   );
+  // }
 
   public get isInstallment(): boolean {
-    return this.paymentType === PaymentType.Installment;
+    return this.transactions.length > 1;
   }
 
-  public onCommitDevideNum(num: number): void {
-    this.devideNum = num;
+  public get transactions(): ITransaction[] {
+    return TransactionModule.debts;
   }
 }
 </script>
 
 <style lang="scss" scoped>
 .depts {
-  width: 100%;
-  .d {
-    width: calc(80% - 14px);
-    margin-left: calc(20% + 14px);
-    display: flex;
-    .attr {
-      //   width: 50%;
-      width: 240px;
-      //     &.date {
-      // }
-      // &.amount {
-      // }
-    }
-  }
+  width: calc(80% - 14px);
+  padding-left: calc(20% + 14px);
 }
 </style>

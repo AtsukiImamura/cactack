@@ -49,6 +49,7 @@
     "@types/uuid": "^7.0.0",
     "cross-env": "^7.0.2",
     "express": "^4.17.1",
+    "pretty-checkbox-vue": "^1.1.9",
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.1.0",
     "uuid": "^3.4.0",

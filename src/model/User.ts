@@ -1,5 +1,5 @@
 import IUser from "@/model/interface/IUser";
-import { JournalDate } from "@/model/common/JournalDate";
+import JournalDate from "@/model/common/JournalDate";
 import IJournalDate from "@/model/interface/IJournalDate";
 import DUser from "@/model/interface/DUser";
 

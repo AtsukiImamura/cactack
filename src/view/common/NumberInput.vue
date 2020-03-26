@@ -13,20 +13,18 @@ import { Component, Vue, Prop, Emit } from "vue-property-decorator";
 
 @Component({})
 export default class NumberInput extends Vue {
-  @Prop() default?: number;
+  @Prop({ default: () => 0 }) default!: number;
 
-  public value: number = 0;
+  public value: string = "0";
 
   public message: string = "";
 
   public mounted(): void {
-    if (this.default) {
-      this.value = this.default;
-    }
+    this.value = String(this.default);
   }
 
   public onInput(): void {
-    if (isNaN(this.value)) {
+    if (isNaN(Number(this.value))) {
       this.message = "数値を入力してください";
       return;
     }
@@ -40,12 +38,12 @@ export default class NumberInput extends Vue {
 
   @Emit("input")
   private noticeInput(): number {
-    return this.value;
+    return Number(this.value);
   }
 
   @Emit("commit")
   private noticeCommit(): number {
-    return this.value;
+    return Number(this.value);
   }
 }
 </script>

@@ -1,4 +1,5 @@
 // import Vue from "vue";
+import "reflect-metadata";
 import Router from "vue-router";
 import { Vue } from "vue-property-decorator";
 import App from "@/view/top/App.vue";

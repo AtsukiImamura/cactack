@@ -59,7 +59,7 @@ export default class JournalService {
     if (debt.isDebit) {
       throw new Error("Debt must be on credit side.");
     }
-    return [Journal.debt(debt, executeAt), Journal.cashOut(debt.amount)];
+    return [Journal.debt(debt.amount, executeAt), Journal.cashOut(debt.amount)];
   }
 
   public createJournalsOfCreditDebt(creditDebt: ICreditDebt): IJournal[] {
@@ -77,7 +77,7 @@ export default class JournalService {
     const totalAmount = debts.reduce((acc, cur) => (acc += cur.amount), 0);
     return [
       Journal.cashOut(totalAmount),
-      ...debts.map(debt => Journal.debt(debt as IJournalDetail, debt.executeAt))
+      ...debts.map(debt => Journal.debt(debt.amount, debt.executeAt))
     ];
   }
 }

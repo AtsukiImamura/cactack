@@ -1,10 +1,9 @@
 import { IDepreciation, IProperty } from "@/model/interface/IProperty";
 import IJournalDate from "@/model/interface/IJournalDate";
 import IJournal from "@/model/interface/IJournal";
-import { JournalDate } from "@/model/common/JournalDate";
+import JournalDate from "@/model/common/JournalDate";
 import Journal from "@/model/Journal";
 import { IBadget } from "@/model/interface/IBadget";
-import JournalDetail from "@/model/JournalDetail";
 import AccountCategory from "@/model/AccountCategory";
 import { DDepreciation } from "@/model/interface/DProperty";
 
@@ -139,8 +138,9 @@ export default class Depreciation implements IDepreciation {
     return Journal.simple(
       JournalDate.today(),
       JournalDate.today(),
-      JournalDetail.createNew(AccountCategory.netAssets(), amount),
-      JournalDetail.createNew(AccountCategory.durableAsset(), amount),
+      amount,
+      AccountCategory.netAssets(),
+      AccountCategory.durableAsset(),
       this._badget
     );
   }

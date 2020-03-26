@@ -20,7 +20,9 @@ export default interface IJournal
 
   badget: IBadget | undefined;
 
-  // execute: () => void;
+  amount: number;
+
+  setAmount: (amount: number) => void;
 }
 
 export interface IJournalDetail

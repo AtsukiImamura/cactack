@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import DependencyInjectionConfig from "../src/config/DependencyInjectionConfig";
-import { JournalDate } from "../src/model/common/JournalDate";
+import JournalDate from "../src/model/common/JournalDate";
 import { CreditDebt } from "../src/model/JournalDetail";
 import { container } from "tsyringe";
 import JournalService from "../src/service/JournalService";

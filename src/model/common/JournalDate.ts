@@ -1,6 +1,6 @@
 import IJournalDate from "@/model/interface/IJournalDate";
 
-export class JournalDate implements IJournalDate {
+export default class JournalDate implements IJournalDate {
   public static cast(value: string | IJournalDate): IJournalDate {
     return typeof value === "string" ? JournalDate.fromToken(value) : value;
   }
@@ -8,11 +8,18 @@ export class JournalDate implements IJournalDate {
    * 今日の値を持つ日付クラスを作成する
    */
   public static today(): IJournalDate {
-    const today = new Date();
+    return JournalDate.byDate(new Date());
+  }
+
+  /**
+   * Dateクラスから作成する
+   * @param {Date} date
+   */
+  public static byDate(date: Date) {
     return JournalDate.byDay(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDay()
+      date.getFullYear(),
+      date.getMonth() + 1,
+      date.getDate()
     );
   }
 
@@ -97,6 +104,10 @@ export class JournalDate implements IJournalDate {
     return tokens[1];
   }
 
+  /**
+   * Returns the day part of the date if it is defined, else returns negative value.
+   * Note that day begins with 1.
+   */
   public get day(): number {
     if (!this._date) {
       return -1;
@@ -152,9 +163,10 @@ export class JournalDate implements IJournalDate {
   }
 
   public getNextMonth(): IJournalDate {
-    return JournalDate.byMonth(
+    return JournalDate.byDay(
       this.year + Math.floor(this.month / 12),
-      (this.month % 12) + 1
+      (this.month % 12) + 1,
+      this.day
     );
   }
 }

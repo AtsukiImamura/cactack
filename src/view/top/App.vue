@@ -14,7 +14,8 @@
         </div>
       </div>
       <div class="gragh">
-        <DiffGragh :option="diffGraghOption"></DiffGragh>
+        <!-- <DiffGragh :option="diffGraghOption"></DiffGragh> -->
+        <CactackBalance :option="diffGraghOption"></CactackBalance>
       </div>
     </div>
     <div class="details">
@@ -30,11 +31,12 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import DiffGragh from "@/view/top/DiffGragh.vue";
+// import DiffGragh from "@/view/top/DiffGragh.vue";
 import { IDiffGraghOption } from "@/view/interface/IDiffGragh";
 import TopDetails from "@/view/top/TopDetails.vue";
+import CactackBalance from "vue-balance";
 
-@Component({ components: { DiffGragh, TopDetails } })
+@Component({ components: { CactackBalance, /*DiffGragh*/ TopDetails } })
 export default class App extends Vue {
   public get diffGraghOption(): IDiffGraghOption {
     return {

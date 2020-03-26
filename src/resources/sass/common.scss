@@ -18,10 +18,11 @@ body {
     $menu-width: 200px;
     #menu {
       position: fixed;
-      top: 0;
+      top: -30px;
       left: 0;
       height: 100vh;
       width: $menu-width;
+      padding-top: 5px;
     }
     #main {
       margin-left: $menu-width + 10px;
@@ -123,5 +124,36 @@ body {
         }
       }
     }
+  }
+}
+
+@mixin add-mark($width, $height) {
+  border: 1px solid #c0c0c0;
+  background-color: #ffffff;
+  position: relative;
+  $mark-size: 18px;
+  display: block;
+  width: $width;
+  height: $height;
+  outline: none;
+  cursor: pointer;
+  &:hover {
+    background-color: #f8f8f8;
+    transition-delay: 0.12s;
+    transition-duration: 0.3s;
+  }
+  &:after,
+  &:before {
+    content: "";
+    width: $mark-size;
+    height: 1px;
+    background-color: #c0c0c0;
+    position: absolute;
+    top: calc(#{$height} / 2 - 1px);
+    left: calc((#{$width} - #{$mark-size}) / 2);
+    z-index: 2;
+  }
+  &:before {
+    transform: rotate(90deg);
   }
 }

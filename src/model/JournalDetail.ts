@@ -1,11 +1,11 @@
 import AccountCategory from "@/model/AccountCategory";
-import { ICreditDebt } from "@/model/interface/IJournal";
-import { JournalDate } from "@/model/common/JournalDate";
+import { ICreditDebt, IAccountCategory } from "@/model/interface/IJournal";
+import JournalDate from "@/model/common/JournalDate";
 import IJournalDate from "@/model/interface/IJournalDate";
 import { DJournalDetail } from "@/model/interface/DJournal";
 
 export default class JournalDetail {
-  public static createNew(category: AccountCategory, amount: number) {
+  public static createNew(category: IAccountCategory, amount: number) {
     return new JournalDetail("", category, amount);
   }
 
@@ -13,10 +13,14 @@ export default class JournalDetail {
     return JournalDetail.createNew(AccountCategory.cash(), amount);
   }
 
+  public static debt(amount: number) {
+    return JournalDetail.createNew(AccountCategory.debt(), amount);
+  }
+
   /** ID */
   private _id: string;
   /** 仕訳種別 */
-  private _category: AccountCategory;
+  private _category: IAccountCategory;
   /** 価額 */
   private _amount: number;
 
@@ -26,7 +30,7 @@ export default class JournalDetail {
    * @param category
    * @param amount
    */
-  constructor(id: string, category: AccountCategory, amount: number) {
+  constructor(id: string, category: IAccountCategory, amount: number) {
     this._id = id;
     this._category = category;
     this._amount = amount;
@@ -44,7 +48,7 @@ export default class JournalDetail {
    * Getter category
    * @return {AccountCategory}
    */
-  public get category(): AccountCategory {
+  public get category(): IAccountCategory {
     return this._category;
   }
 

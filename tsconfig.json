@@ -27,8 +27,7 @@
       //   "service/*": ["src/service/*"],
       //   "util/*": ["src/util/*"],
       //   "view/*": ["src/view/*"],
-      "@": ["src"],
-      "@*": ["src/*"]
+      "@": ["src"]
     },
     "typeRoots": ["src/declaration", "node_modules/@types"]
   },

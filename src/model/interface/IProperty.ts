@@ -6,7 +6,7 @@ import {
   DPropertyGroup,
   DProperty,
   DDepreciation
-} from "@model/interface/DProperty";
+} from "@/model/interface/DProperty";
 
 export interface IPropertyBase extends Identifiable {
   name: string;

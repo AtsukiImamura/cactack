@@ -85,25 +85,25 @@ export default class AccountCategory implements IAccountCategory {
   }
 
   /** 債務 */
-  private static readonly DEBT = 1;
+  public static readonly DEBT = 1;
   /** 債権 */
-  private static readonly RECEIVABLE = 2;
+  public static readonly RECEIVABLE = 2;
   /** 純資産 */
-  private static readonly NET_ASSETS = 3;
+  public static readonly NET_ASSETS = 3;
   /** 現金 */
-  private static readonly CASH = 101;
+  public static readonly CASH = 101;
   /** 現金同等物 */
-  private static readonly CASH_EQUIVALENT = 102;
+  public static readonly CASH_EQUIVALENT = 102;
   /** 在庫 */
-  private static readonly STOCK = 103;
+  public static readonly STOCK = 103;
   /** 積立金 */
-  private static readonly DEPOSIT = 104;
+  public static readonly DEPOSIT = 104;
   /** 耐久資産 */
-  private static readonly DURABLE_ASSET = 105;
+  public static readonly DURABLE_ASSET = 105;
   /** 不明（貸方） */
-  private static readonly UNKNOWN_CREDIT = 900;
+  public static readonly UNKNOWN_CREDIT = 900;
   /** 不明（借方） */
-  private static readonly UNKNOWN_DEBIT = -1;
+  public static readonly UNKNOWN_DEBIT = -1;
 
   /** カテゴリ */
   private _category: number;

@@ -3,7 +3,7 @@ import { container, singleton } from "tsyringe";
 import BadgetGroup from "../model/BadgetGroup";
 import IBadgetGroupRepository from "../repository/interface/IBadgetGroupRepository";
 import { IBadgetGroup, IBadget } from "../model/interface/IBadget";
-import { JournalDate } from "../model/common/JournalDate";
+import JournalDate from "../model/common/JournalDate";
 import Badget from "../model/Badget";
 import IJournalDate from "../model/interface/IJournalDate";
 

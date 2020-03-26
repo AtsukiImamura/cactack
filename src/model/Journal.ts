@@ -1,5 +1,5 @@
 import IJournal, { IJournalDetail } from "@/model/interface/IJournal";
-import { JournalDate } from "@/model/common/JournalDate";
+import JournalDate from "@/model/common/JournalDate";
 import { IBadget } from "@/model/interface/IBadget";
 import IJournalDate from "@/model/interface/IJournalDate";
 import JournalDetail from "@/model/JournalDetail";
@@ -10,23 +10,33 @@ export default class Journal implements IJournal {
   public static simple(
     accountAt: IJournalDate,
     executeAt: IJournalDate,
-    credit: IJournalDetail,
-    debit: IJournalDetail,
+    amount: number,
+    creditType: AccountCategory,
+    debitType: AccountCategory,
     badget?: IBadget
   ): IJournal {
-    return new Journal("", "", accountAt, executeAt, credit, debit, badget);
+    return new Journal(
+      "",
+      "",
+      accountAt,
+      executeAt,
+      JournalDetail.createNew(creditType, amount),
+      JournalDetail.createNew(debitType, amount),
+      badget
+    );
   }
 
   /**
    * 作成: 負債を貸方、現金を借方とする仕訳
    * @param debt
    */
-  public static debt(debt: IJournalDetail, executeAt?: IJournalDate | string) {
+  public static debt(amount: number, executeAt?: IJournalDate | string) {
     return Journal.simple(
       JournalDate.today(),
       executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
-      debt,
-      JournalDetail.cash(debt.amount)
+      amount,
+      AccountCategory.debt(),
+      AccountCategory.cash()
     );
   }
 
@@ -38,8 +48,9 @@ export default class Journal implements IJournal {
     return Journal.simple(
       JournalDate.today(),
       JournalDate.today(),
-      JournalDetail.createNew(AccountCategory.netAssets(), -Math.abs(amount)),
-      JournalDetail.createNew(AccountCategory.cash(), -Math.abs(amount))
+      -Math.abs(amount),
+      AccountCategory.netAssets(),
+      AccountCategory.cash()
     );
   }
   /** 取引ID */
@@ -50,9 +61,11 @@ export default class Journal implements IJournal {
   private _accountAt: IJournalDate;
   /** 執行日 */
   private _executeAt: IJournalDate;
-  /** 貸方 */
+
+  private _amount: number;
+  /** 貸方（右） */
   private _credit: IJournalDetail;
-  /** 借方 */
+  /** 借方（左） */
   private _debit: IJournalDetail;
   /** 予算 */
   private _badget?: IBadget;
@@ -86,6 +99,7 @@ export default class Journal implements IJournal {
       typeof executeAt === "string"
         ? JournalDate.fromToken(executeAt)
         : executeAt;
+    this._amount = 0;
     this._credit = credit;
     this._debit = debit;
     if (badget) {
@@ -125,6 +139,20 @@ export default class Journal implements IJournal {
     return this._executeAt;
   }
 
+  public get amount(): number {
+    return this._amount;
+  }
+
+  /**
+   * set amount.
+   * the amount values of credit and debit in this journal will be changed as well.
+   * @param amount
+   */
+  public setAmount(amount: number) {
+    this._amount = amount;
+    this.credit = JournalDetail.createNew(this.credit.category, amount);
+    this.debit = JournalDetail.createNew(this.debit.category, amount);
+  }
   /**
    * Getter credit
    * @return {IJournalDetail}
