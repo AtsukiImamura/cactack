@@ -1,11 +1,6 @@
 <template>
-  <div class="transaction-lines">
-    <div
-      class="line"
-      :class="{'effect': index > 0}"
-      v-for="(tr, index) in transactions"
-      :key="index"
-    >
+  <div class="control-lines">
+    <div class="line" :class="{'effect': index > 0}" v-for="(tr, index) in controls" :key="index">
       <div class="attr date">
         <label v-if="index === 0">日付</label>
         <DatePicker
@@ -25,33 +20,31 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
-import { ITransaction } from "../../model/interface/dto/Transaction";
+import { Component, Vue } from "vue-property-decorator";
+import { IJournalControl } from "../../model/interface/dto/JournalControl";
 import NumberInput from "@/view/common/NumberInput.vue";
 import DatePicker from "vuejs-datepicker";
 import JournalDate from "../../model/common/JournalDate";
 
 @Component({ components: { DatePicker, NumberInput } })
 export default class TransactionLines extends Vue {
-  @Prop({ default: () => [] }) transactions!: ITransaction[];
-
-  public mounted(): void {
-    console.log(this.transactions);
+  public get controls(): IJournalControl[] {
+    return [];
   }
 
-  public onDateSelected(tSaction: ITransaction, date: Date): void {
-    const transactionsByDate = this.transactions.reduce((acc, cur) => {
+  public onDateSelected(tSaction: IJournalControl, date: Date): void {
+    const controlsByDate = this.controls.reduce((acc, cur) => {
       acc[cur.date.toString()] = cur;
       return acc;
-    }, {} as { [date: string]: ITransaction });
+    }, {} as { [date: string]: IJournalControl });
 
     const dateKey = date.toString();
-    if (dateKey in transactionsByDate) {
-      if (transactionsByDate[dateKey].seq === tSaction.seq) {
+    if (dateKey in controlsByDate) {
+      if (controlsByDate[dateKey].seq === tSaction.seq) {
         return;
       }
       this.commit(
-        this.transactions
+        this.controls
           .map(tr => {
             if (tr.date.toString() === dateKey && tr.seq !== tSaction.seq) {
               tr.amount += tSaction.amount;
@@ -62,7 +55,7 @@ export default class TransactionLines extends Vue {
       );
     } else {
       this.commit(
-        this.transactions.map(tr => {
+        this.controls.map(tr => {
           if (tr.seq === tSaction.seq) {
             tr.date = JournalDate.byDate(date);
           }
@@ -72,13 +65,13 @@ export default class TransactionLines extends Vue {
     }
   }
 
-  public onInputAmount(debt: ITransaction, val: string): void {
+  public onInputAmount(debt: IJournalControl, val: string): void {
     const amount = Number(val);
     if (isNaN(amount)) {
       return;
     }
     this.commit(
-      this.transactions.map(tr => {
+      this.controls.map(tr => {
         if (tr.seq !== debt.seq) {
           return tr;
         }
@@ -88,18 +81,18 @@ export default class TransactionLines extends Vue {
     );
   }
 
-  public deleteTransaction(debt: ITransaction) {
-    this.commit(this.transactions.filter(tr => tr.seq !== debt.seq));
+  public deleteTransaction(debt: IJournalControl) {
+    this.commit(this.controls.filter(tr => tr.seq !== debt.seq));
   }
 
   public addTransaction(): void {}
 
-  public commit(transactions: ITransaction[]) {}
+  public commit(controls: IJournalControl[]) {}
 }
 </script>
 
 <style lang="scss" scoped>
-.transaction-lines {
+.control-lines {
   width: 100%;
   .line {
     $attr-width: 250px;
@@ -160,45 +153,6 @@ export default class TransactionLines extends Vue {
         }
         &:before {
           transform: rotate(-45deg);
-        }
-      }
-    }
-    &.check-sum {
-      // justify-content: flex-end;
-      margin-top: 10px;
-      .mark {
-        display: inline-block;
-        margin: 0px 3px -4px 0px;
-        background-image: url("image/complete.svg");
-        width: 20px;
-        height: 20px;
-        transition-duration: 0.3s;
-      }
-      .value {
-        font-size: 1.1rem;
-        display: inline-block;
-        color: rgb(0, 160, 84);
-        transition-duration: 0.35s;
-        // margin-top: -2px;
-      }
-      .attr {
-        &.positive {
-          .mark {
-            background-image: url("image/puls.svg");
-          }
-          .value {
-            // transition-duration: 0.s;
-            color: rgb(255, 78, 78);
-          }
-        }
-        &.negative {
-          .mark {
-            background-image: url("image/minus.svg");
-          }
-          .value {
-            transition-duration: 0.3s;
-            color: rgb(99, 126, 255);
-          }
         }
       }
     }

@@ -11,4 +11,6 @@ export default interface IJournalRepository extends IBaseRepository<IJournal> {
     from: IJournalDate,
     to: IJournalDate
   ) => Promise<IJournal[]>;
+
+  getByTransactionId: (transactionId: string) => Promise<IJournal[]>;
 }

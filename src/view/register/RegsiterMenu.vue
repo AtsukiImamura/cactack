@@ -12,7 +12,7 @@
           <router-link class="item" to="/register/debt">
             <span>負債</span>
           </router-link>
-          <router-link class="item" to="/register/receivables">
+          <router-link class="item" to="/register/receivable">
             <span>債権</span>
           </router-link>
           <router-link class="item" to="/register/reserve">

@@ -1,28 +1,30 @@
-import IJournal, { IJournalDetail } from "@/model/interface/IJournal";
+import IJournal, {
+  IJournalDetail,
+  IAccountCategory
+} from "@/model/interface/IJournal";
 import JournalDate from "@/model/common/JournalDate";
-import { IBadget } from "@/model/interface/IBadget";
 import IJournalDate from "@/model/interface/IJournalDate";
 import JournalDetail from "@/model/JournalDetail";
 import AccountCategory from "@/model/AccountCategory";
 import { DJournal } from "@/model/interface/DJournal";
+import IdBase from "./IdBase";
 
-export default class Journal implements IJournal {
+export default class Journal extends IdBase implements IJournal {
   public static simple(
     accountAt: IJournalDate,
     executeAt: IJournalDate,
     amount: number,
-    creditType: AccountCategory,
-    debitType: AccountCategory,
-    badget?: IBadget
+    creditType: IAccountCategory,
+    debitType: IAccountCategory
   ): IJournal {
     return new Journal(
       "",
       "",
+      amount,
       accountAt,
       executeAt,
       JournalDetail.createNew(creditType, amount),
-      JournalDetail.createNew(debitType, amount),
-      badget
+      JournalDetail.createNew(debitType, amount)
     );
   }
 
@@ -34,9 +36,19 @@ export default class Journal implements IJournal {
     return Journal.simple(
       JournalDate.today(),
       executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
-      amount,
+      Math.abs(amount),
       AccountCategory.debt(),
       AccountCategory.cash()
+    );
+  }
+
+  public static debtCounter(amount: number, executeAt?: IJournalDate | string) {
+    return Journal.simple(
+      JournalDate.today(),
+      executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
+      Math.abs(amount),
+      AccountCategory.cash(),
+      AccountCategory.debt()
     );
   }
 
@@ -45,8 +57,34 @@ export default class Journal implements IJournal {
       JournalDate.today(),
       executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
       amount,
+      AccountCategory.netAssets(),
+      AccountCategory.receivable()
+    );
+  }
+
+  public static receivableCounter(
+    amount: number,
+    executeAt?: IJournalDate | string
+  ) {
+    return Journal.simple(
+      JournalDate.today(),
+      executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
+      amount,
       AccountCategory.receivable(),
       AccountCategory.cash()
+    );
+  }
+
+  public static depreciation(
+    amount: number,
+    executeAt?: IJournalDate | string
+  ) {
+    return Journal.simple(
+      JournalDate.today(),
+      executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
+      amount,
+      AccountCategory.netAssets(),
+      AccountCategory.durableAsset()
     );
   }
   /**
@@ -64,8 +102,6 @@ export default class Journal implements IJournal {
   }
   /** 取引ID */
   private _transactionId: string;
-  /** 仕訳ID */
-  private _id: string;
   /** 発生日 */
   private _accountAt: IJournalDate;
   /** 執行日 */
@@ -76,8 +112,6 @@ export default class Journal implements IJournal {
   private _credit: IJournalDetail;
   /** 借方（左） */
   private _debit: IJournalDetail;
-  /** 予算 */
-  private _badget?: IBadget;
 
   /**
    * 仕訳
@@ -87,19 +121,20 @@ export default class Journal implements IJournal {
    * @param executeAt
    * @param credit
    * @param debit
-   * @param badget
    */
   constructor(
     transactionId: string,
     id: string,
+    amount: number,
     accountAt: string | IJournalDate,
     executeAt: string | IJournalDate,
     credit: IJournalDetail,
-    debit: IJournalDetail,
-    badget?: IBadget
+    debit: IJournalDetail
   ) {
+    super();
     this._transactionId = transactionId;
     this._id = id;
+    this._amount = Math.abs(Number(amount));
     this._accountAt =
       typeof accountAt === "string"
         ? JournalDate.fromToken(accountAt)
@@ -108,20 +143,8 @@ export default class Journal implements IJournal {
       typeof executeAt === "string"
         ? JournalDate.fromToken(executeAt)
         : executeAt;
-    this._amount = 0;
-    this._credit = credit;
-    this._debit = debit;
-    if (badget) {
-      this._badget = badget;
-    }
-  }
-
-  /**
-   * Getter id
-   * @return {string}
-   */
-  public get id(): string {
-    return this._id;
+    this._credit = amount >= 0 ? credit : debit;
+    this._debit = amount >= 0 ? debit : credit;
   }
 
   /**
@@ -162,6 +185,20 @@ export default class Journal implements IJournal {
     this.credit = JournalDetail.createNew(this.credit.category, amount);
     this.debit = JournalDetail.createNew(this.debit.category, amount);
   }
+
+  public setTransactionId(id: string): void {
+    this._transactionId = id;
+  }
+
+  public counter(executeAt?: IJournalDate | string): IJournal {
+    return Journal.simple(
+      this.accountAt,
+      executeAt ? JournalDate.cast(executeAt) : this.executeAt,
+      this.amount,
+      this.debit.category,
+      this.credit.category
+    );
+  }
   /**
    * Getter credit
    * @return {IJournalDetail}
@@ -176,10 +213,6 @@ export default class Journal implements IJournal {
    */
   public get debit(): IJournalDetail {
     return this._debit;
-  }
-
-  public get badget(): IBadget | undefined {
-    return this._badget;
   }
 
   public set credit(credit: IJournalDetail) {
@@ -201,11 +234,11 @@ export default class Journal implements IJournal {
     return {
       transactionId: this.transactionId,
       id: this.id,
+      amount: this._amount,
       accountAt: this.accountAt.toString(),
       executeAt: this.executeAt.toString(),
       creditId: this.credit.id,
-      debitId: this.debit.id,
-      badgetId: this.badget?.id
+      debitId: this.debit.id
     };
   }
 }

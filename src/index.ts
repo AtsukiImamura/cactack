@@ -5,9 +5,15 @@ import { Vue } from "vue-property-decorator";
 import App from "@/view/top/App.vue";
 import Flow from "@/view/flow/Flow.vue";
 import RegsiterMenu from "@/view/register/RegsiterMenu.vue";
-import RegisterPurchase from "@/view/register/RegisterPurchase.vue";
+import Purchase from "@/view/register/Purchase.vue";
 import AppMenu from "@/view/common/AppMenu.vue";
 import DependencyInjectionConfig from "@/config/DependencyInjectionConfig";
+import RegisterResults from "@/view/register/RegisterResults.vue";
+import Debt from "@/view/register/Debt.vue";
+import Receivable from "@/view/register/Receivable.vue";
+import UserRegistration from "@/view/auth/UserRegistration.vue";
+import UserLogin from "@/view/auth/UserLogin.vue";
+import RegisterManually from "@/view/register/RegisterManually.vue";
 
 DependencyInjectionConfig.run();
 
@@ -20,7 +26,13 @@ const router = new Router({
     { path: "/inventory", component: App },
     { path: "/badget", component: App },
     { path: "/register", component: RegsiterMenu },
-    { path: "/register/purchase", component: RegisterPurchase }
+    { path: "/register/purchase", component: Purchase },
+    { path: "/register/debt", component: Debt },
+    { path: "/register/receivable", component: Receivable },
+    { path: "/register/ok", component: RegisterResults },
+    { path: "/register/manually", component: RegisterManually },
+    { path: "/auth/create", component: UserRegistration },
+    { path: "/auth/login", component: UserLogin }
   ]
 });
 

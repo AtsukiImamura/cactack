@@ -22,11 +22,9 @@ export interface DDepreciation extends Identifiable, Strable {
 
   startAt: string;
 
+  // period: number;
+
   cycle: number;
 
-  purchasePrice: number;
-
   salvagePrice: number;
-
-  minDepreciationPrice: number;
 }

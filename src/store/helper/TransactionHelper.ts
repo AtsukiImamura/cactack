@@ -1,61 +1,78 @@
 import { singleton } from "tsyringe";
-import { ITransaction } from "@/model/interface/dto/Transaction";
+import { IJournalControl } from "@/model/interface/dto/JournalControl";
 import AccountCategory from "@/model/AccountCategory";
 import Journal from "@/model/Journal";
 import IJournalDate from "@/model/interface/IJournalDate";
-import IJournal, { IAccountCategory } from "@/model/interface/IJournal";
+import IJournal from "@/model/interface/IJournal";
 import JournalDate from "@/model/common/JournalDate";
 
 @singleton()
 export default class TransactionHelper {
-  public transactionToDebt(
-    transactions: ITransaction[],
+  public controlToDebtCounter(
+    controls: IJournalControl[],
     accountAt: IJournalDate
   ) {
-    return this.transactionToJournal(
-      transactions,
-      accountAt,
-      AccountCategory.debt()
-    );
-  }
-
-  public transactionToReceivables(
-    transactions: ITransaction[],
-    accountAt: IJournalDate
-  ) {
-    return this.transactionToJournal(
-      transactions,
-      accountAt,
-      AccountCategory.receivable()
-    );
-  }
-
-  public transactionToJournal(
-    transactions: ITransaction[],
-    accountAt: IJournalDate,
-    category: AccountCategory
-  ) {
-    return transactions.map(tr =>
+    return controls.map(tr =>
       Journal.simple(
         accountAt,
         tr.date,
         tr.amount,
-        category,
+        AccountCategory.cash(),
+        AccountCategory.debt()
+      )
+    );
+  }
+
+  public controlToReceivableCounters(
+    controls: IJournalControl[],
+    accountAt: IJournalDate
+  ) {
+    return controls.map(tr =>
+      Journal.simple(
+        accountAt,
+        tr.date,
+        tr.amount,
+        AccountCategory.receivable(),
         AccountCategory.cash()
       )
     );
   }
 
-  public calcSum(transactions: ITransaction[]) {
-    return transactions.reduce((acc, cur) => (acc += cur.amount), 0);
+  public controlToDepreciations(
+    controls: IJournalControl[],
+    accountAt: IJournalDate
+  ) {
+    return controls.map(tr =>
+      Journal.simple(
+        accountAt,
+        tr.date,
+        tr.amount,
+        AccountCategory.durableAsset(),
+        AccountCategory.netAssets()
+      )
+    );
   }
 
-  public createTransactions(journals: IJournal[], category: AccountCategory) {
-    return this.getJournalsByAccountCategory(journals, category).map(
-      (jnl, i) => {
-        return { date: jnl.executeAt, amount: jnl.credit.amount, seq: i };
-      }
-    );
+  public calcSum(controls: IJournalControl[]) {
+    return controls.reduce((acc, cur) => (acc += cur.amount), 0);
+  }
+
+  public createDebtCounterTransactions(journals: IJournal[]) {
+    return this.createTransactions(this.findDebtCounters(journals));
+  }
+
+  public createReceivableCounterTransactions(journals: IJournal[]) {
+    return this.createTransactions(this.findReceivableCounters(journals));
+  }
+
+  public createDepreciationTransactions(journals: IJournal[]) {
+    return this.createTransactions(this.findDepreciations(journals));
+  }
+
+  private createTransactions(journals: IJournal[]) {
+    return journals.map((jnl, i) => {
+      return { date: jnl.executeAt, amount: jnl.amount, seq: i };
+    });
   }
 
   public findLatestMonthOf(journals: IJournal[]) {
@@ -66,14 +83,21 @@ export default class TransactionHelper {
       : JournalDate.today();
   }
 
-  public findJournals(journals: IJournal[], category: IAccountCategory) {
-    return journals.filter(jnl => jnl.credit.category.code === category.code);
+  public findDebtCounters(journals: IJournal[]) {
+    return journals.filter(
+      jnl => jnl.debit.category.code === AccountCategory.DEBT
+    );
   }
 
-  private getJournalsByAccountCategory(
-    journals: IJournal[],
-    category: AccountCategory
-  ) {
-    return journals.filter(jnl => jnl.credit.category.code === category.code);
+  public findReceivableCounters(journals: IJournal[]) {
+    return journals.filter(
+      jnl => jnl.credit.category.code === AccountCategory.RECEIVABLE
+    );
+  }
+
+  public findDepreciations(journals: IJournal[]) {
+    return journals.filter(
+      jnl => jnl.debit.category.code === AccountCategory.NET_ASSETS
+    );
   }
 }

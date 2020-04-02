@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
+import { Component, Vue, Prop, Emit } from "vue-property-decorator";
 
 @Component({})
 export default class SlideMenu extends Vue {
@@ -109,9 +109,11 @@ export default class SlideMenu extends Vue {
     this.transform();
   }
 
+  @Emit("select")
   public transformTo(index: number) {
     this.currentMainIndex = index;
     this.transform();
+    return index;
   }
 
   private transform(): void {

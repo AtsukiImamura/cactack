@@ -16,23 +16,21 @@ class PropertyStore extends VuexModule {
     //     return acc;
     //   }, {} as { [key: string]: PropertyHeader })
     // );
-    return [
+    const headers = [
       { name: "aaa", amount: 1 },
       { name: "aaaa", amount: 1 },
       { name: "aaaaa", amount: 1 },
       { name: "aaab", amount: 1 },
       { name: "aaac", amount: 1 },
       { name: "aaacc", amount: 1 }
-    ];
+    ].map((h, index) => {
+      return { ...h, seq: index };
+    });
+    return headers;
   }
 
-  @Action
+  @Action({ rawError: true })
   public init(): void {}
-
-  @Action
-  public addNew(property: PropertyHeader): void {
-    // this._properties.push(Property.)
-  }
 }
 
 const PropertyModule = getModule(PropertyStore);

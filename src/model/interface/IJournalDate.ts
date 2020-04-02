@@ -18,4 +18,8 @@ export default interface IJournalDate {
   toString: () => string;
 
   getNextMonth: () => IJournalDate;
+
+  getAfterMonthOf: (val: number) => IJournalDate;
+
+  isInMonthOf: (date: IJournalDate) => boolean;
 }

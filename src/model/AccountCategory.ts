@@ -86,8 +86,6 @@ export default class AccountCategory implements IAccountCategory {
 
   /** 債務 */
   public static readonly DEBT = 1;
-  /** 債権 */
-  public static readonly RECEIVABLE = 2;
   /** 純資産 */
   public static readonly NET_ASSETS = 3;
   /** 現金 */
@@ -100,10 +98,12 @@ export default class AccountCategory implements IAccountCategory {
   public static readonly DEPOSIT = 104;
   /** 耐久資産 */
   public static readonly DURABLE_ASSET = 105;
+  /** 債権 */
+  public static readonly RECEIVABLE = 106;
   /** 不明（貸方） */
   public static readonly UNKNOWN_CREDIT = 900;
   /** 不明（借方） */
-  public static readonly UNKNOWN_DEBIT = -1;
+  public static readonly UNKNOWN_DEBIT = 0;
 
   /** カテゴリ */
   private _category: number;

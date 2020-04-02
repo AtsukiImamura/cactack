@@ -8,7 +8,7 @@ export default abstract class StabRepositoryBase<
   S extends Strable & Identifiable,
   T extends Identifiable & Treatable<S>
 > implements IBaseRepository<T> {
-  protected jsonKey: string = "";
+  protected dbKey: string = "";
 
   public abstract aggregate(value: S): Promise<T>;
 
@@ -43,7 +43,7 @@ export default abstract class StabRepositoryBase<
           simplified.id = String(values.length + 1);
         }
         values.push(simplified);
-        return JsonUtil.save(this.jsonKey, values).then(() => simplified);
+        return JsonUtil.save(this.dbKey, values).then(() => simplified);
       })
       .then(simplified => {
         return this.aggregate(simplified);
@@ -59,7 +59,7 @@ export default abstract class StabRepositoryBase<
       target.id = String((newIdBase += 1));
       targets.push(target);
     }
-    await JsonUtil.save(this.jsonKey, [...records, ...targets]);
+    await JsonUtil.save(this.dbKey, [...records, ...targets]);
     return Promise.all(targets.map(t => this.aggregate(t)));
   }
 
@@ -73,7 +73,7 @@ export default abstract class StabRepositoryBase<
         }
         newValues.push(value);
       }
-      return JsonUtil.save(this.jsonKey, newValues);
+      return JsonUtil.save(this.dbKey, newValues);
     });
   }
 
@@ -86,7 +86,7 @@ export default abstract class StabRepositoryBase<
       }
       records[ids.indexOf(v.id)] = v.simplify();
     }
-    return JsonUtil.save(this.jsonKey, records);
+    return JsonUtil.save(this.dbKey, records);
   }
 
   public delete(value: T): Promise<void> {
@@ -98,21 +98,21 @@ export default abstract class StabRepositoryBase<
         }
         newValues.push(v);
       }
-      return JsonUtil.save(this.jsonKey, newValues);
+      return JsonUtil.save(this.dbKey, newValues);
     });
   }
 
   public async getAll(): Promise<T[]> {
-    return JsonUtil.read<S[]>(this.jsonKey).then((values: S[]) =>
+    return JsonUtil.read<S[]>(this.dbKey).then((values: S[]) =>
       Promise.all(values.map(v => this.aggregate(v)))
     );
   }
 
   protected async getAllWithoutConvert(): Promise<S[]> {
-    return JsonUtil.read<S[]>(this.jsonKey);
+    return JsonUtil.read<S[]>(this.dbKey);
   }
 
   public clearAll(): Promise<void> {
-    return JsonUtil.save(this.jsonKey, []);
+    return JsonUtil.save(this.dbKey, []);
   }
 }

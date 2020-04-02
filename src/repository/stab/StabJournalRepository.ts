@@ -12,7 +12,7 @@ export default class StabJournalRepository
   implements IJournalRepository {
   constructor() {
     super();
-    this.jsonKey = "journal";
+    this.dbKey = "journal";
   }
 
   public async aggregate(journal: DJournal): Promise<IJournal> {
@@ -40,5 +40,9 @@ export default class StabJournalRepository
     to: IJournalDate
   ): Promise<IJournal[]> {
     return this.getByAccountedAt(from, to); // TODO: 実装
+  }
+
+  public async getByTransactionId(trId: string): Promise<IJournal[]> {
+    return [];
   }
 }

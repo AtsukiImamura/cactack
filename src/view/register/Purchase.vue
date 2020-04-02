@@ -3,24 +3,7 @@
     <div class="contents">
       <div class="title">購入</div>
       <div class="main">
-        <div class="purchase">
-          <div class="form-item">
-            <div class="k">
-              <label>発生日</label>
-            </div>
-            <div class="v">
-              <DatePicker format="yyyy/MM/dd" @selected="onSelectAccountAt" :value="accountAt"></DatePicker>
-            </div>
-          </div>
-          <div class="form-item">
-            <div class="k">
-              <label>金額</label>
-            </div>
-            <div class="v">
-              <NumberInput @commit="onInputAmount"></NumberInput>
-            </div>
-          </div>
-        </div>
+        <RegisterBasic></RegisterBasic>
         <div class="debt">
           <div class="form-item">
             <div class="k">
@@ -57,7 +40,9 @@
               </div>
             </div>
           </div>
-          <RegisterReceivable v-if="isReceivable"></RegisterReceivable>
+          <div class="receivable-lines" v-if="isReceivable">
+            <ReceivableLines></ReceivableLines>
+          </div>
         </div>
         <div class="depreciation">
           <div class="form-item">
@@ -69,16 +54,18 @@
                 <input name="stock" type="radio" :value="false" v-model="hasStockRelation" />
                 <label>なし</label>
               </div>
-
               <div class="c">
                 <input name="stock" type="radio" :value="true" v-model="hasStockRelation" />
                 <label>あり</label>
               </div>
             </div>
           </div>
-
-          <PropertySelector class="property-selections" v-if="hasStockRelation"></PropertySelector>
-          <div class="form-item">
+          <PropertySelector
+            @select="onPropertySelected"
+            class="property-selections"
+            v-if="hasStockRelation"
+          ></PropertySelector>
+          <div class="form-item" v-if="canSetDepreciations">
             <div class="k">
               <label>減価償却</label>
             </div>
@@ -93,11 +80,27 @@
               </div>
             </div>
           </div>
+          <div class="depreciation-area">
+            <RegisterDepreciation v-if="hasDepreciation" :amount="amount"></RegisterDepreciation>
+          </div>
         </div>
       </div>
       <div class="footer">
-        <input type="button" value="キャンセル" class="btn cancel-btn" />
-        <input type="button" value="登録" class="btn ok-btn" />
+        <div class="check-sum">
+          <div class="attr" :class="{'negative': diff < 0, 'positive': diff > 0}">
+            <span class="mark"></span>
+            <span class="value">{{ Math.abs(diff) }}</span>
+          </div>
+        </div>
+        <input type="button" value="キャンセル" class="btn cancel-btn" @click="cancel" />
+        <input
+          type="button"
+          value="登録"
+          class="btn ok-btn"
+          :class="{'disabled': diff!==0}"
+          @click="register"
+          :disabled="diff !== 0"
+        />
       </div>
     </div>
   </div>
@@ -107,46 +110,29 @@
 import { Component, Vue } from "vue-property-decorator";
 import DatePicker from "vuejs-datepicker";
 import RegisterDebt from "@/view/register/RegisterDebt.vue";
-import RegisterReceivable from "@/view/register/RegisterReceivable.vue";
+import ReceivableLines from "@/view/register/ReceivableLines.vue";
 import NumberInput from "@/view/common/NumberInput.vue";
-import TransactionModule from "../../store/TransactionStore";
+import TransactionModule from "@/store/TransactionStore";
 import PropertySelector from "@/view/register/PropertySelector.vue";
+import { PropertyHeader } from "../../model/interface/dto/PropertyDto";
+import RegisterDepreciation from "@/view/register/RegisterDepreciation.vue";
+import RegisterBasic from "@/view/register/RegisterBasic.vue";
 
 @Component({
   components: {
     DatePicker,
     RegisterDebt,
-    RegisterReceivable,
+    ReceivableLines,
     NumberInput,
-    PropertySelector
+    PropertySelector,
+    RegisterDepreciation,
+    RegisterBasic
   }
 })
-export default class RegisterPurchase extends Vue {
-  public get isReceivable(): boolean {
-    return TransactionModule.receivables.length > 0;
+export default class Purchase extends Vue {
+  public get amount(): number {
+    return TransactionModule.amount;
   }
-
-  public set isReceivable(val: boolean) {
-    // TODO
-    if (val) {
-      console.log("check");
-      TransactionModule.receivable();
-    } else {
-      TransactionModule.noReceivable();
-    }
-  }
-
-  public hasStockRelation: boolean = false;
-
-  public hasDepreciation: boolean = false;
-
-  public get accountAt(): string {
-    const accountAt = TransactionModule.accountAt;
-    return `${accountAt.year}/${accountAt.month}/${
-      accountAt.day > 0 ? accountAt.day : 1
-    }`;
-  }
-
   public get isDebt(): boolean {
     return TransactionModule.debts.length > 0;
   }
@@ -159,65 +145,61 @@ export default class RegisterPurchase extends Vue {
     }
   }
 
-  public onSelectAccountAt(date: Date) {
-    TransactionModule.setAccountAt(date);
+  public get isReceivable(): boolean {
+    return TransactionModule.receivables.length > 0;
   }
 
-  public onInputAmount(amount: number) {
-    TransactionModule.setAmount(amount);
+  public set isReceivable(val: boolean) {
+    if (val) {
+      TransactionModule.receivable();
+    } else {
+      TransactionModule.noReceivable();
+    }
+  }
+
+  public hasStockRelation: boolean = false;
+
+  public canSetDepreciations: boolean = false;
+
+  public hasDepreciation: boolean = false;
+
+  public mounted(): void {
+    TransactionModule.init();
+  }
+
+  public onPropertySelected(header: PropertyHeader) {
+    TransactionModule.propertySelected(header);
+    this.canSetDepreciations = true;
+  }
+
+  public register(): void {
+    TransactionModule.saveAll().then(() => this.$router.push("/register/ok"));
+  }
+
+  public cancel(): void {
+    this.$router.push("/register");
+  }
+
+  public get diff(): number {
+    return TransactionModule.diff;
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.register-area {
-  width: 100%;
-  .contents {
-    width: 70%;
-    margin: 10px 15%;
-    box-shadow: 2px 2px 2px 2px rgba(40, 40, 40, 0.15);
-    * {
-      font-size: 1.06rem;
-    }
-    .title {
-      padding: 12px 20px;
-      background-color: $color-main;
-      color: #ffffff;
-    }
-    .main {
-      padding: 10px;
-      .purchase {
-      }
-      .property-selections {
-        width: calc(80% - 14px);
-        padding-left: calc(20% + 14px);
-      }
-    }
-    .footer {
-      display: flex;
-      justify-content: flex-end;
-      padding: 10px;
-      margin: 20px 0px;
-      .btn {
-        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.28);
-        border-radius: 3px;
-        border: transparent;
-        padding: 6px 10px;
-        margin-left: 10px;
-        min-width: 90px;
-        outline: none;
-        cursor: pointer;
-        font-size: 1rem;
-        &.ok-btn {
-          text-align: center;
-          overflow: hidden;
-          background: linear-gradient(#ffda75 0%, #ffb702 100%);
-          color: #ffffff;
-        }
-        &.cancel-btn {
-        }
-      }
-    }
-  }
+@include register;
+
+.property-selections {
+  width: calc(80% - 14px);
+  padding-left: calc(20% + 14px);
 }
+.receivable-lines {
+  width: calc(80% - 14px);
+  padding-left: calc(20% + 14px);
+}
+.depreciation-area {
+  width: calc(98% - 14px);
+  padding-left: calc(2% + 14px);
+}
+@include check-sum;
 </style>

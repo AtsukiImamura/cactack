@@ -10,7 +10,7 @@ export default class StabUserRepository extends StabRepositoryBase<DUser, IUser>
   implements IUserRepository {
   constructor() {
     super();
-    this.jsonKey = "user";
+    this.dbKey = "user";
   }
 
   public async aggregate(journal: DUser): Promise<IUser> {

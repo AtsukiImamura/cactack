@@ -11,7 +11,7 @@ export default class StabBadgetRepository
   implements IBadgetRepository {
   constructor() {
     super();
-    this.jsonKey = "badget";
+    this.dbKey = "badget";
   }
 
   public async aggregate(journal: DBadget): Promise<IBadget> {

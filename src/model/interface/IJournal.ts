@@ -1,5 +1,4 @@
 import IJournalDate from "@/model/interface/IJournalDate";
-import { IBadget } from "@/model/interface/IBadget";
 import Identifiable from "@/model/interface/Identifiable";
 import Treatable from "@/model/interface/common/Treatable";
 import { DJournalDetail, DJournal } from "@/model/interface/DJournal";
@@ -18,11 +17,15 @@ export default interface IJournal
 
   debit: IJournalDetail;
 
-  badget: IBadget | undefined;
+  // badget: IBadget | undefined;
 
   amount: number;
 
   setAmount: (amount: number) => void;
+
+  setTransactionId: (id: string) => void;
+
+  counter: (executeAt?: IJournalDate | string) => IJournal;
 }
 
 export interface IJournalDetail

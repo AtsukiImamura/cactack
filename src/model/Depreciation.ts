@@ -25,12 +25,8 @@ export default class Depreciation implements IDepreciation {
   private _startAt: IJournalDate;
   /** 償却サイクル（月） */
   private _cycle: number;
-  /** 仕入価額 */
-  private _purchasePrice: number;
   /** 残存価額 */
   private _salvagePrice: number;
-  /** 最低償却価額（定率の場合） */
-  private _minDepreciationPrice: number;
   /** 対応する予算 */
   private _badget: IBadget;
 
@@ -40,27 +36,18 @@ export default class Depreciation implements IDepreciation {
     type: number,
     startAt: string,
     cycle: number,
-    purchasePrice: number,
     salvagePrice: number,
-    badget: IBadget,
-    minDepreciationPrice?: number
+    badget: IBadget
   ) {
     this._id = id;
     this._property = property;
     this._type = type;
     this._startAt = JournalDate.fromToken(startAt);
     this._cycle = cycle;
-    this._purchasePrice = purchasePrice;
     this._salvagePrice = salvagePrice;
     this._badget = badget;
-    this._minDepreciationPrice = minDepreciationPrice
-      ? minDepreciationPrice
-      : 0;
     // 定率の場合は最低償却額必須
-    if (
-      this.type === Depreciation.TYPE_FIEXED_RATE &&
-      this.minDepreciationPrice === 0
-    ) {
+    if (this.type === Depreciation.TYPE_FIEXED_RATE) {
       throw new Error(
         "Minimum depreciation price can not be zero as its type is FIX RATE."
       );
@@ -100,14 +87,6 @@ export default class Depreciation implements IDepreciation {
   }
 
   /**
-   * Getter purchasePrice
-   * @return {number}
-   */
-  public get purchasePrice(): number {
-    return this._purchasePrice;
-  }
-
-  /**
    * Getter salvagePrice
    * @return {number}
    */
@@ -116,11 +95,11 @@ export default class Depreciation implements IDepreciation {
   }
 
   /**
-   * Getter minDepreciationPrice
-   * @return {number}
+   * Getter badget
+   * @return {IBadget}
    */
-  public get minDepreciationPrice(): number {
-    return this._minDepreciationPrice;
+  public get badget(): IBadget {
+    return this._badget;
   }
 
   /**
@@ -140,8 +119,7 @@ export default class Depreciation implements IDepreciation {
       JournalDate.today(),
       amount,
       AccountCategory.netAssets(),
-      AccountCategory.durableAsset(),
-      this._badget
+      AccountCategory.durableAsset()
     );
   }
 
@@ -151,8 +129,6 @@ export default class Depreciation implements IDepreciation {
       startAt: this.startAt.toString(),
       propertyId: this._property.id,
       cycle: this.cycle,
-      minDepreciationPrice: this.minDepreciationPrice,
-      purchasePrice: this.purchasePrice,
       salvagePrice: this.salvagePrice
     };
   }

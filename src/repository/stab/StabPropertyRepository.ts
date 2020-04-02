@@ -11,7 +11,7 @@ export default class StabPropertyRepository
   implements IPropertyRepository {
   constructor() {
     super();
-    this.jsonKey = "property";
+    this.dbKey = "property";
   }
 
   public async aggregate(journal: DProperty): Promise<IProperty> {

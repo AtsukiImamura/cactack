@@ -18,11 +18,11 @@
         </div>
       </div>
       <div class="table-b">
-        <div class="row">
-          <span class="cell name">ユーティリティ</span>
-          <span class="cell date">2020/2/21</span>
-          <span class="cell badget">ユーティリティ</span>
-          <span class="cell amount">&yen;7,890</span>
+        <div class="row" v-for="(tr, index) in transactions" :key="index">
+          <span class="cell name">{{ tr.name }}</span>
+          <span class="cell date">{{ tr.createdAt.toString() }}</span>
+          <span class="cell badget">{{ tr.badget? tr.badget.name : ""}}</span>
+          <span class="cell amount">&yen; {{ Math.abs(tr.getMonthlyAmountOf(TODAY)) }}</span>
         </div>
       </div>
     </div>
@@ -31,22 +31,31 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
+import ITransaction from "../../model/interface/ITransaction";
+import JournalDate from "@/model/common/JournalDate";
 
 @Component({})
 export default class TopDetails extends Vue {
+  @Prop({ default: () => [] }) transactions!: ITransaction[];
+
   @Prop() imagePath!: string;
 
   @Prop() title!: string;
 
-  // @Prop() transactions?: ITransaction[];
+  public TODAY = JournalDate.today();
+
+  // @Prop() controls?: IJournalControl[];
 }
 </script>
 
 <style lang="scss" scoped>
 .top-details {
-  width: 100%;
-  box-shadow: 2px 2px 2px 2px rgba(40, 40, 40, 0.25);
-  padding: 5px 0px 10px 0px;
+  width: calc(100% - 12px);
+  // box-shadow: 2px 2px 2px 2px rgba(40, 40, 40, 0.25);
+  padding: 5px 5px 10px 5px;
+  // border: 1px solid $color-main;
+  min-height: calc(100vh - 350px);
+  margin: 5px;
   .h {
     width: 100%;
     display: flex;

@@ -37,11 +37,7 @@ export interface IDepreciation extends Identifiable, Treatable<DDepreciation> {
 
   cycle: number;
 
-  purchasePrice: number;
-
   salvagePrice: number;
-
-  minDepreciationPrice: number;
 
   createLatestJournal: () => IJournal;
 }

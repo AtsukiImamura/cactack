@@ -11,7 +11,7 @@ export default class StabDepreciationRepository
   implements IDepreciationRepository {
   constructor() {
     super();
-    this.jsonKey = "depreciation";
+    this.dbKey = "depreciation";
   }
 
   public async aggregate(journal: DDepreciation): Promise<IDepreciation> {

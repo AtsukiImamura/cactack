@@ -1,7 +1,162 @@
 @import "variables";
 
-@mixin test {
-  background-color: #ffff00;
+@mixin check-sum {
+  .check-sum {
+    margin-top: 8px;
+    margin-right: 10px;
+    .mark {
+      display: inline-block;
+      margin: 0px 3px -4px 0px;
+      background-image: url("image/complete.svg");
+      width: 20px;
+      height: 20px;
+      transition-duration: 0.3s;
+    }
+    .value {
+      font-size: 1.1rem;
+      display: inline-block;
+      color: rgb(0, 160, 84);
+      transition-duration: 0.35s;
+      // margin-top: -2px;
+    }
+    .attr {
+      &.positive {
+        .mark {
+          background-image: url("image/puls.svg");
+        }
+        .value {
+          // transition-duration: 0.s;
+          color: rgb(255, 78, 78);
+        }
+      }
+      &.negative {
+        .mark {
+          background-image: url("image/minus.svg");
+        }
+        .value {
+          transition-duration: 0.3s;
+          color: rgb(99, 126, 255);
+        }
+      }
+    }
+  }
+}
+@mixin register {
+  .register-area {
+    width: 100%;
+    .contents {
+      width: 70%;
+      margin: 10px 15%;
+      box-shadow: 2px 2px 2px 2px rgba(40, 40, 40, 0.15);
+      * {
+        font-size: 1.06rem;
+      }
+      .title {
+        padding: 12px 20px;
+        background-color: $color-main;
+        color: #ffffff;
+      }
+      .main {
+        padding: 10px;
+      }
+      .footer {
+        display: flex;
+        justify-content: flex-end;
+        padding: 10px;
+        margin: 20px 0px;
+        .btn {
+          box-shadow: 0 1px 1px rgba(0, 0, 0, 0.28);
+          border-radius: 3px;
+          border: transparent;
+          padding: 6px 10px;
+          margin-left: 10px;
+          min-width: 90px;
+          outline: none;
+          cursor: pointer;
+          font-size: 1rem;
+          &.ok-btn {
+            text-align: center;
+            overflow: hidden;
+            background: linear-gradient(#ffda75 0%, #ffb702 100%);
+            color: #ffffff;
+            &.disabled {
+              background: linear-gradient(#fff6dd 0%, #ffe7aa 100%);
+            }
+          }
+          &.cancel-btn {
+          }
+        }
+      }
+    }
+  }
+}
+
+@mixin picks {
+  .picks {
+    display: flex;
+    .c {
+      width: 120px;
+      input[type="checkbox"] {
+        position: relative;
+        $box-size: 18px;
+        &:after {
+          position: absolute;
+          content: "";
+          width: $box-size;
+          height: $box-size;
+          background-color: #ffffff;
+          z-index: 9;
+          border-radius: 3px;
+          border: 1px solid #c0c0c0;
+          top: -2px;
+          left: -5px;
+        }
+        &:checked {
+          &:before {
+            position: absolute;
+            content: "";
+            width: $box-size;
+            height: $box-size;
+            top: -1px;
+            left: -4px;
+            background-image: url("image/check.svg");
+            z-index: 10;
+          }
+        }
+      }
+      input[type="radio"] {
+        position: relative;
+        $circle-radius: 9px;
+        $inner-circle-radius: 7px;
+        &:after {
+          position: absolute;
+          content: "";
+          top: -$circle-radius / 4;
+          left: -$circle-radius / 2;
+          background-color: #ffffff;
+          width: $circle-radius * 2;
+          height: $circle-radius * 2;
+          border-radius: $circle-radius + 2px;
+          border: 1px solid #c0c0c0;
+          z-index: 9;
+        }
+        &:checked {
+          &:before {
+            position: absolute;
+            content: "";
+            top: -1.5px + ($circle-radius - $inner-circle-radius);
+            left: -2.5px + ($circle-radius - $inner-circle-radius)/2;
+            background-color: #ffffff;
+            width: $inner-circle-radius * 2;
+            height: $inner-circle-radius * 2;
+            border-radius: $inner-circle-radius + 2px;
+            background-color: $color-main;
+            z-index: 10;
+          }
+        }
+      }
+    }
+  }
 }
 
 body {
@@ -25,9 +180,9 @@ body {
       padding-top: 5px;
     }
     #main {
-      margin-left: $menu-width + 10px;
+      margin-left: $menu-width + 1px;
       margin-right: 10px;
-      width: calc(100vw - #{$menu-width} - 10px - 10px);
+      width: calc(100vw - #{$menu-width} - 2px);
       height: auto;
     }
   }
@@ -59,72 +214,10 @@ body {
     .v {
       width: 80%;
     }
-    .picks {
-      display: flex;
-      .c {
-        width: 120px;
-        input[type="checkbox"] {
-          position: relative;
-          $box-size: 18px;
-          &:after {
-            position: absolute;
-            content: "";
-            width: $box-size;
-            height: $box-size;
-            background-color: #ffffff;
-            z-index: 9;
-            border-radius: 3px;
-            border: 1px solid #c0c0c0;
-            top: -2px;
-            left: -5px;
-          }
-          &:checked {
-            &:before {
-              position: absolute;
-              content: "";
-              width: $box-size;
-              height: $box-size;
-              top: -1px;
-              left: -4px;
-              background-image: url("image/check.svg");
-              z-index: 10;
-            }
-          }
-        }
-        input[type="radio"] {
-          position: relative;
-          $circle-radius: 9px;
-          $inner-circle-radius: 7px;
-          &:after {
-            position: absolute;
-            content: "";
-            top: -$circle-radius / 4;
-            left: -$circle-radius / 2;
-            background-color: #ffffff;
-            width: $circle-radius * 2;
-            height: $circle-radius * 2;
-            border-radius: $circle-radius + 2px;
-            border: 1px solid #c0c0c0;
-            z-index: 9;
-          }
-          &:checked {
-            &:before {
-              position: absolute;
-              content: "";
-              top: -1.5px + ($circle-radius - $inner-circle-radius);
-              left: -2.5px + ($circle-radius - $inner-circle-radius)/2;
-              background-color: #ffffff;
-              width: $inner-circle-radius * 2;
-              height: $inner-circle-radius * 2;
-              border-radius: $inner-circle-radius + 2px;
-              background-color: $color-main;
-              z-index: 10;
-            }
-          }
-        }
-      }
-    }
+    @include picks;
   }
+
+  @include picks;
 }
 
 @mixin add-mark($width, $height) {
@@ -155,5 +248,69 @@ body {
   }
   &:before {
     transform: rotate(90deg);
+  }
+}
+
+.category-color {
+  display: inline-block;
+  &.c-1 {
+    color: $color-debt;
+    &.border {
+      border: 1px solid $color-debt;
+    }
+  }
+  &.c-106 {
+    color: $color-receivable;
+    &.border {
+      border: 1px solid $color-receivable;
+    }
+  }
+  &.c-3 {
+    color: $color-net-asset;
+    &.border {
+      border: 1px solid $color-net-asset;
+    }
+  }
+  &.c-101 {
+    color: $color-cash;
+    &.border {
+      border: 1px solid $color-cash;
+    }
+  }
+  &.c-102 {
+    color: $color-cash-equivalent;
+    &.border {
+      border: 1px solid $color-cash-equivalent;
+    }
+  }
+  &.c-103 {
+    color: $color-stock;
+    &.border {
+      border: 1px solid $color-stock;
+    }
+  }
+  &.c-104 {
+    color: $color-deposit;
+    &.border {
+      border: 1px solid $color-deposit;
+    }
+  }
+  &.c-105 {
+    color: $color-durable-asset;
+    &.border {
+      border: 1px solid $color-durable-asset;
+    }
+  }
+  &.c-900 {
+    color: $color-unknown;
+    &.border {
+      border: 1px solid $color-unknown;
+    }
+  }
+  &.c-0 {
+    color: $color-unknown;
+    &.border {
+      border: 1px solid $color-unknown;
+    }
   }
 }

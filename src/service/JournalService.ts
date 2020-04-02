@@ -7,10 +7,9 @@ import IJournal, {
 
 import { singleton } from "tsyringe";
 import IJournalDetailRepository from "../repository/interface/IJournalDetailRepository";
-import IBadgetRepository from "../repository/interface/IBadgetRepository";
+// import IBadgetRepository from "../repository/interface/IBadgetRepository";
 import Journal from "../model/Journal";
 import IJournalDate from "../model/interface/IJournalDate";
-import { IBadget } from "../model/interface/IBadget";
 
 @singleton()
 export default class JournalService {
@@ -22,9 +21,9 @@ export default class JournalService {
     return container.resolve("JournalDetailRepository");
   }
 
-  private get badgetRepository(): IBadgetRepository {
-    return container.resolve("BadgetRepository");
-  }
+  // private get badgetRepository(): IBadgetRepository {
+  //   return container.resolve("BadgetRepository");
+  // }
 
   /**
    * for TEST?
@@ -36,15 +35,11 @@ export default class JournalService {
       .then((details: IJournalDetail[]) => {
         journal.credit.id = details[0].id;
         journal.debit.id = details[1].id;
-      });
-    if (journal.badget) {
-      this.badgetRepository.insert(journal.badget).then((badget: IBadget) => {
-        if (journal.badget) {
-          journal.badget.id = badget.id;
-        }
-      });
-    }
-    this.journalRepository.insert(journal);
+      })
+      .catch(err => console.warn(err));
+    await this.journalRepository
+      .insert(journal)
+      .catch(err => console.warn(err));
   }
 
   /**

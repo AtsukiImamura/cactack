@@ -6,7 +6,7 @@ import {
   Action
 } from "vuex-module-decorators";
 import store from ".";
-import { ITransaction } from "@/model/interface/dto/Transaction";
+import { IJournalControl } from "@/model/interface/dto/JournalControl";
 import JournalDate from "@/model/common/JournalDate";
 import IJournalDate from "@/model/interface/IJournalDate";
 import IJournal from "@/model/interface/IJournal";
@@ -14,14 +14,75 @@ import AccountCategory from "@/model/AccountCategory";
 import Journal from "@/model/Journal";
 import { container } from "tsyringe";
 import TransactionHelper from "./helper/TransactionHelper";
+import { PropertyHeader } from "@/model/interface/dto/PropertyDto";
+import DepreciationModule from "./DepreciationStore";
+import AppModule from "./ApplicationStore";
+import { IBadget } from "@/model/interface/IBadget";
+import TransactionService from "@/service/TransactionService";
+import Transaction from "@/model/Transaction";
 
-@Module({ dynamic: true, store, name: "transaction", namespaced: true })
+@Module({ dynamic: true, store, name: "control", namespaced: true })
 class TransactionStore extends VuexModule {
+  private _name: string = "";
+
   private _accountAt: IJournalDate = JournalDate.today();
 
   private _amount: number = 0;
 
   private _journals: IJournal[] = [];
+
+  private _property?: PropertyHeader;
+
+  private _badget?: IBadget;
+
+  /**
+   * Getter name
+   * @return {string }
+   */
+  public get name(): string {
+    return this._name;
+  }
+
+  public get journals(): IJournal[] {
+    const journals: IJournal[] = [];
+    journals.push(
+      Journal.simple(
+        this.accountAt,
+        this.accountAt,
+        this.amount,
+        AccountCategory.cash(),
+        AccountCategory.netAssets()
+      )
+    );
+    if (this._property) {
+      journals.push(
+        Journal.simple(
+          this.accountAt,
+          this.accountAt,
+          this.amount,
+          AccountCategory.netAssets(),
+          AccountCategory.durableAsset()
+        )
+      );
+    }
+    journals.push(...this._journals);
+    journals.push(
+      ...this.debtJournals.map(debt => debt.counter(this.accountAt))
+    );
+    journals.push(
+      ...this.receivableJournals.map(rec => rec.counter(this.accountAt))
+    );
+    journals.push(...DepreciationModule.journals);
+    return journals;
+  }
+
+  public get diff(): number {
+    return this.debtJournals.length > 0
+      ? this.amount -
+          this.debtJournals.reduce((acc, cur) => (acc += cur.amount), 0)
+      : // + this.receivableJournals.reduce((acc, cur) => (acc += cur.amount), 0)
+        0;
+  }
 
   /**
    * Getter accountAt
@@ -40,57 +101,68 @@ class TransactionStore extends VuexModule {
   }
 
   private get debtJournals(): IJournal[] {
-    // return this._journals.filter(
-    //   jnl => jnl.credit.category.code === AccountCategory.DEBT
-    // );
     return container
       .resolve(TransactionHelper)
-      .findJournals(this._journals, AccountCategory.debt());
+      .findDebtCounters(this._journals);
   }
 
   public get receivableJournals(): IJournal[] {
     return container
       .resolve(TransactionHelper)
-      .findJournals(this._journals, AccountCategory.receivable());
+      .findReceivableCounters(this._journals);
   }
 
   /**
    * 負債の情報リスト
    */
-  public get debts(): ITransaction[] {
-    return this.debtJournals.map((jnl, i) => {
-      return { date: jnl.executeAt, amount: jnl.credit.amount, seq: i };
-    });
-  }
-
-  public get receivables(): ITransaction[] {
+  public get debts(): IJournalControl[] {
     return container
       .resolve(TransactionHelper)
-      .createTransactions(this._journals, AccountCategory.receivable());
+      .createDebtCounterTransactions(this._journals);
   }
 
-  @Action
-  public commitDebts(debts: ITransaction[]) {
-    this.clearDebtJournals();
+  public get receivables(): IJournalControl[] {
+    return container
+      .resolve(TransactionHelper)
+      .createReceivableCounterTransactions(this._journals);
+  }
+
+  @Action({ rawError: true })
+  public init(): void {
+    this.INIT();
+  }
+
+  @Mutation
+  private INIT(): void {
+    this._name = "";
+    this._accountAt = JournalDate.today();
+    this._amount = 0;
+    this._journals = [];
+    this._property = undefined;
+    this._badget = undefined;
+  }
+  @Action({ rawError: true })
+  public commitDebts(debts: IJournalControl[]) {
+    this.clearDebtCounters();
     const journals = container
       .resolve(TransactionHelper)
-      .transactionToDebt(debts, this.accountAt);
+      .controlToDebtCounter(debts, this.accountAt);
     this._journals.push(...journals);
   }
 
-  @Action
-  public commitReceivables(receivables: ITransaction[]) {
-    this.clearReceivableJournals();
+  @Action({ rawError: true })
+  public commitReceivables(receivables: IJournalControl[]) {
+    this.clearReceivableCounters();
     const journals = container
       .resolve(TransactionHelper)
-      .transactionToReceivables(receivables, this.accountAt);
+      .controlToReceivableCounters(receivables, this.accountAt);
     this._journals.push(...journals);
   }
 
-  @Action
+  @Action({ rawError: true })
   public addDebtTransaction(): void {
     this._journals.push(
-      Journal.debt(
+      Journal.debtCounter(
         0,
         container
           .resolve(TransactionHelper)
@@ -100,10 +172,10 @@ class TransactionStore extends VuexModule {
     );
   }
 
-  @Action
+  @Action({ rawError: true })
   public addReceivableTransaction(): void {
     this._journals.push(
-      Journal.receivable(
+      Journal.receivableCounter(
         0,
         container
           .resolve(TransactionHelper)
@@ -113,7 +185,12 @@ class TransactionStore extends VuexModule {
     );
   }
 
-  @Action
+  @Action({ rawError: true })
+  public setName(name: string) {
+    this.NAME(name);
+  }
+
+  @Action({ rawError: true })
   public setAccountAt(date: Date | JournalDate) {
     if (typeof date === typeof JournalDate) {
       this.ACCOUNT_AT(date as JournalDate);
@@ -122,40 +199,40 @@ class TransactionStore extends VuexModule {
     }
   }
 
-  @Action
+  @Action({ rawError: true })
   public setAmount(amount: number) {
     this.AMOUNT(amount);
   }
 
   /** Create a debt journal and insert into journals. Note that the number of debt journals will be one after execute this method. */
-  @Action
+  @Action({ rawError: true })
   public debt(): void {
-    this.clearDebtJournals();
+    this.clearDebtCounters();
     this._journals.push(
-      Journal.debt(this.amount, JournalDate.today().getNextMonth())
+      Journal.debtCounter(this.amount, JournalDate.today().getNextMonth())
     );
   }
 
   /** Set the payment as non-debt */
-  @Action
+  @Action({ rawError: true })
   public cashPayment(): void {
-    this.clearDebtJournals();
+    this.clearDebtCounters();
   }
 
-  @Action
+  @Action({ rawError: true })
   public receivable(): void {
     this._journals.push(
-      Journal.receivable(0, JournalDate.today().getNextMonth())
+      Journal.receivableCounter(0, JournalDate.today().getNextMonth())
     );
   }
 
-  @Action
+  @Action({ rawError: true })
   public noReceivable(): void {
-    this.clearReceivableJournals();
+    this.clearReceivableCounters();
   }
 
   /** 分割数を変更する */
-  @Action
+  @Action({ rawError: true })
   public alterDebtDevideNum(num: number) {
     if (this.debtJournals.length === num) {
       return;
@@ -171,7 +248,7 @@ class TransactionStore extends VuexModule {
       let date = this.debtJournals[this.debtJournals.length - 1].executeAt;
       for (let i = this.debtJournals.length; i < num; i++) {
         date = date.getNextMonth();
-        newDebtJouranals.push(Journal.debt(0, date));
+        newDebtJouranals.push(Journal.debtCounter(0, date));
       }
       // in case of decrement
     } else {
@@ -179,15 +256,34 @@ class TransactionStore extends VuexModule {
         .slice(num)
         .reduce((acc, cur) => (acc += cur.amount), 0);
       newDebtJouranals.push(
-        Journal.debt(
+        Journal.debtCounter(
           this.debtJournals[0].amount + firstAmount,
           this.debtJournals[0].executeAt
         )
       );
       newDebtJouranals.push(...this.debtJournals.slice(1, num));
     }
-    this.clearDebtJournals();
+    this.clearDebtCounters();
     this._journals.push(...newDebtJouranals);
+  }
+
+  @Action({ rawError: true })
+  public propertySelected(header: PropertyHeader) {
+    this.PROPERTY(header);
+  }
+
+  @Action({ rawError: true })
+  public async saveAll(): Promise<void> {
+    return container
+      .resolve(TransactionService)
+      .insertTransaction(Transaction.createNew(this.name, this.journals))
+      .then(() => {
+        AppModule.appendNew({
+          name: this.name,
+          journals: this.journals,
+          badget: this._badget
+        });
+      });
   }
 
   @Mutation
@@ -196,27 +292,42 @@ class TransactionStore extends VuexModule {
   }
 
   @Mutation
+  private NAME(name: string) {
+    this._name = name;
+  }
+
+  @Mutation
   private AMOUNT(amount: number) {
     this._amount = amount;
   }
 
   /** remove all debt from journals. */
-  @Action
-  private clearDebtJournals(): void {
-    this.clearJournalsByCategory(AccountCategory.debt());
-  }
-
-  @Action
-  private clearReceivableJournals(): void {
-    this.clearJournalsByCategory(AccountCategory.receivable());
-  }
-
-  /** remove all journals which have specific category in argument from journals. */
-  @Mutation
-  private clearJournalsByCategory(category: AccountCategory) {
-    this._journals = this._journals.filter(
-      jnl => jnl.credit.category.code !== category.code
+  @Action({ rawError: true })
+  private clearDebtCounters(): void {
+    const after = this._journals.filter(
+      jnl => jnl.debit.category.code !== AccountCategory.DEBT
     );
+    this.clearJournalAll();
+    this._journals.push(...after);
+  }
+
+  @Action({ rawError: true })
+  private clearReceivableCounters(): void {
+    const after = this._journals.filter(
+      jnl => jnl.credit.category.code !== AccountCategory.RECEIVABLE
+    );
+    this.clearJournalAll();
+    this._journals.push(...after);
+  }
+
+  @Action({ rawError: true })
+  private clearJournalAll(): void {
+    while (this._journals.pop()) {}
+  }
+
+  @Mutation
+  private PROPERTY(header: PropertyHeader) {
+    this._property = header;
   }
 }
 

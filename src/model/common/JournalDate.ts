@@ -72,36 +72,51 @@ export default class JournalDate implements IJournalDate {
     return token.split("/").map(t => Number(t));
   }
 
-  private _date: string = "";
+  private _year: number;
 
-  private _items: number[] = [];
+  private _month: number;
 
-  private set date(date: string) {
-    this._date = date;
-    this._items = JournalDate.parse(date);
-  }
+  private _day: number = -1;
+  /** for calculating next month since day might be ajusted due to overflowing. */
+  private _givenDay: number;
 
-  public constructor(date: string) {
-    this.date = date;
+  public constructor(date: string | Date) {
+    if (typeof date !== "string") {
+      this._year = date.getFullYear();
+      this._month = date.getMonth() + 1;
+      this._day = date.getDate();
+      this._givenDay = this._day;
+      return;
+    }
+    const tokens = JournalDate.parse(date);
+    if (tokens.length < 2) {
+      throw new Error(
+        "Something has gone wrong with given date string. " + date
+      );
+    }
+    this._year = tokens[0];
+    this._month = tokens[1];
+    this._day = tokens.length > 2 ? tokens[2] : -1;
+    this._givenDay = this._day;
+
+    if (this._day < 0) {
+      return;
+    }
+    // 月終わり調整
+    while (
+      new Date(this.year, this.month - 1, this.day).getMonth() + 1 !==
+      this.month
+    ) {
+      this._day -= 1;
+    }
   }
 
   public get year(): number {
-    if (!this._date) {
-      return -1;
-    }
-    const tokens = this._items;
-    return tokens[0];
+    return this._year;
   }
 
   public get month(): number {
-    if (!this._date) {
-      return -1;
-    }
-    const tokens = this._items;
-    if (tokens.length < 2) {
-      return -1;
-    }
-    return tokens[1];
+    return this._month;
   }
 
   /**
@@ -109,14 +124,7 @@ export default class JournalDate implements IJournalDate {
    * Note that day begins with 1.
    */
   public get day(): number {
-    if (!this._date) {
-      return -1;
-    }
-    const tokens = this._items;
-    if (tokens.length < 3) {
-      return -1;
-    }
-    return tokens[2];
+    return this._day;
   }
 
   public beforeThan(date: IJournalDate): boolean {
@@ -159,14 +167,23 @@ export default class JournalDate implements IJournalDate {
   }
 
   public toString(): string {
-    return this._date;
+    return `${this.year}/${this.month}${this.day > 0 ? `/${this.day}` : ""}`;
   }
 
   public getNextMonth(): IJournalDate {
+    return this.getAfterMonthOf(1);
+  }
+
+  public getAfterMonthOf(val: number) {
     return JournalDate.byDay(
-      this.year + Math.floor(this.month / 12),
-      (this.month % 12) + 1,
-      this.day
+      this.year + Math.floor((this.month + val) / 12),
+      ((this.month + val) % 12) +
+        Math.floor((12 - ((this.month + val) % 12)) / 12) * 12,
+      this._givenDay
     );
+  }
+
+  public isInMonthOf(date: IJournalDate) {
+    return date.year === this.year && date.month === this.month;
   }
 }

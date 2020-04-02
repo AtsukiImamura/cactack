@@ -1,10 +1,15 @@
 import AccountCategory from "@/model/AccountCategory";
-import { ICreditDebt, IAccountCategory } from "@/model/interface/IJournal";
+import {
+  ICreditDebt,
+  IAccountCategory,
+  IJournalDetail
+} from "@/model/interface/IJournal";
 import JournalDate from "@/model/common/JournalDate";
 import IJournalDate from "@/model/interface/IJournalDate";
 import { DJournalDetail } from "@/model/interface/DJournal";
+import IdBase from "./IdBase";
 
-export default class JournalDetail {
+export default class JournalDetail extends IdBase implements IJournalDetail {
   public static createNew(category: IAccountCategory, amount: number) {
     return new JournalDetail("", category, amount);
   }
@@ -17,8 +22,6 @@ export default class JournalDetail {
     return JournalDetail.createNew(AccountCategory.debt(), amount);
   }
 
-  /** ID */
-  private _id: string;
   /** 仕訳種別 */
   private _category: IAccountCategory;
   /** 価額 */
@@ -31,17 +34,10 @@ export default class JournalDetail {
    * @param amount
    */
   constructor(id: string, category: IAccountCategory, amount: number) {
+    super();
     this._id = id;
     this._category = category;
     this._amount = amount;
-  }
-
-  /**
-   * Getter id
-   * @return {string}
-   */
-  public get id(): string {
-    return this._id;
   }
 
   /**
@@ -66,13 +62,6 @@ export default class JournalDetail {
 
   public get isDebit(): boolean {
     return this.category.isDebit;
-  }
-
-  public set id(id: string) {
-    if (this.id) {
-      return;
-    }
-    this._id = id;
   }
 
   public simplify(): DJournalDetail {

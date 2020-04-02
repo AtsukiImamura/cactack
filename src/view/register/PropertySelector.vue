@@ -1,7 +1,7 @@
 <template>
   <div class="property-selector">
-    <div class="wrapper" @click="openSearch">
-      <div class="top">
+    <div class="wrapper">
+      <div class="top" @click="openSearch">
         <span>{{ selected.name ? selected.name : "-- select --"}}</span>
       </div>
       <div class="selections" v-if="open">
@@ -9,11 +9,16 @@
           <input type="text" v-model="searchInput" ref="searchInput" />
         </div>
         <ul class="results">
-          <li class="cell" v-for="(header, index) in candidates" :key="index">
+          <li
+            class="cell"
+            v-for="(header, index) in candidates"
+            :key="index"
+            @click="select(header)"
+          >
             <span>{{header.name}}</span>
             <span>{{header.amount}}</span>
           </li>
-          <li class="cell" v-if="canCreateNew">
+          <li class="cell" v-if="canCreateNew" @click="addNew">
             <span>{{ searchInput }}</span>
             <span>新規作成</span>
           </li>
@@ -25,15 +30,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Emit } from "vue-property-decorator";
 import { PropertyHeader } from "@/model/interface/dto/PropertyDto";
-import PropertyStore from "@/store/PropertyStore";
+import PropertyModule from "@/store/PropertyStore";
 @Component({})
-export default class PropertySelector extends Vue {
+export default class extends Vue {
   public searchInput: string = "";
 
   public get candidates(): PropertyHeader[] {
-    return PropertyStore.headers.filter(
+    return PropertyModule.headers.filter(
       h => h.name.startsWith(this.searchInput) || this.searchInput === ""
     );
   }
@@ -46,9 +51,23 @@ export default class PropertySelector extends Vue {
     // (this.$refs.searchInput as HTMLInputElement).focus();
   }
 
-  public closeSearch(e: Event) {
+  public closeSearch(e?: Event) {
     this.open = false;
-    e.stopPropagation();
+    if (e) {
+      e.stopPropagation();
+    }
+  }
+
+  @Emit()
+  public select(header: PropertyHeader) {
+    this.selected = header;
+    this.closeSearch();
+    return header;
+  }
+
+  public addNew(): void {
+    const header = { name: this.searchInput, seq: -1, amount: 0 };
+    this.select(header);
   }
 
   public selected: PropertyHeader | {} = {};
@@ -70,6 +89,7 @@ export default class PropertySelector extends Vue {
       height: 24px;
       padding: 4px 6px;
       border: 1px solid #c0c0c0;
+      cursor: pointer;
     }
     .selections {
       width: 100%;
@@ -79,6 +99,7 @@ export default class PropertySelector extends Vue {
       .cell {
         width: calc(100% - #{$padding-x * 2});
         padding: $padding-x;
+        cursor: pointer;
       }
       .search {
         width: $width;
@@ -107,6 +128,11 @@ export default class PropertySelector extends Vue {
         li {
           list-style: none;
           border-bottom: 1px solid #c0c0c0;
+          &:hover {
+            background-color: #f8f8f8;
+            transition-duration: 0.2s;
+            transition-delay: 0.08s;
+          }
         }
       }
     }

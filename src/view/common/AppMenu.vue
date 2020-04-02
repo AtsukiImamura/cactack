@@ -26,11 +26,7 @@ import { Component, Vue } from "vue-property-decorator";
 import MenuItem from "@/view/common/MenuItem.vue";
 
 @Component({ components: { MenuItem } })
-export default class AppMenu extends Vue {
-  public mounted(): void {
-    console.log("Menu --> ok!");
-  }
-}
+export default class AppMenu extends Vue {}
 </script>
 
 <style lang="scss" scoped>

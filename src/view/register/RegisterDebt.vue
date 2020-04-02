@@ -16,7 +16,7 @@
       </div>
     </div>
     <div class="depts">
-      <DebtLines :transactions="transactions"></DebtLines>
+      <DebtLines></DebtLines>
     </div>
   </div>
 </template>
@@ -24,15 +24,15 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import NumberInput from "@/view/common/NumberInput.vue";
-import { ITransaction } from "../../model/interface/dto/Transaction";
-import TransactionModule from "../../store/TransactionStore";
+import { IJournalControl } from "../../model/interface/dto/JournalControl";
+import TransactionModule from "@/store/TransactionStore";
 import { PaymentType } from "@/model/interface/dto/Payment";
 import DebtLines from "./DebtLines.vue";
 
 @Component({ components: { NumberInput, DebtLines } })
 export default class RegisterDebt extends Vue {
   public get paymentType(): PaymentType {
-    return this.transactions.length === 1
+    return this.controls.length === 1
       ? PaymentType.LumpSum
       : PaymentType.Installment;
   }
@@ -54,16 +54,16 @@ export default class RegisterDebt extends Vue {
 
   // public get amountDiff(): number {
   //   return (
-  //     container.resolve(TransactionHelper).calcSum(this.transactions) -
+  //     container.resolve(TransactionHelper).calcSum(this.controls) -
   //     this.totalAmount
   //   );
   // }
 
   public get isInstallment(): boolean {
-    return this.transactions.length > 1;
+    return this.controls.length > 1;
   }
 
-  public get transactions(): ITransaction[] {
+  public get controls(): IJournalControl[] {
     return TransactionModule.debts;
   }
 }

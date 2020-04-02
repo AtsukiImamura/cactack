@@ -10,7 +10,7 @@ export default class StabJournalDetailRepository extends StabRepositoryBase<
 > {
   constructor() {
     super();
-    this.jsonKey = "journal_detail";
+    this.dbKey = "journal_detail";
   }
 
   public async aggregate(detail: DJournalDetail): Promise<IJournalDetail> {

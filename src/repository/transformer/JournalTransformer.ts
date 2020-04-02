@@ -29,6 +29,7 @@ export default class JournalTransformer extends Transformer<
     return new Journal(
       journal.transactionId ? journal.transactionId : "",
       journal.id,
+      journal.amount,
       journal.accountAt,
       journal.executeAt,
       credit,

@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Emit } from "vue-property-decorator";
+import { Component, Vue, Prop, Emit, Watch } from "vue-property-decorator";
 
 @Component({})
 export default class NumberInput extends Vue {
@@ -20,6 +20,11 @@ export default class NumberInput extends Vue {
   public message: string = "";
 
   public mounted(): void {
+    this.value = String(this.default);
+  }
+
+  @Watch("default")
+  public onDefaultValueChanged(): void {
     this.value = String(this.default);
   }
 

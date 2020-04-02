@@ -4,6 +4,8 @@ import Strable from "@/model/interface/common/Strable";
 export interface DJournal extends Identifiable, Strable {
   transactionId?: string;
 
+  amount: number;
+
   accountAt: string;
 
   executeAt: string;

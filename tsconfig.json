@@ -27,7 +27,8 @@
       //   "service/*": ["src/service/*"],
       //   "util/*": ["src/util/*"],
       //   "view/*": ["src/view/*"],
-      "@": ["src"]
+      "config": ["src/env/node.ts", "src/env/web.ts"],
+      "@/*": ["src/*"]
     },
     "typeRoots": ["src/declaration", "node_modules/@types"]
   },
