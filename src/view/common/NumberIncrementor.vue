@@ -7,7 +7,7 @@ import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 
 @Component({})
 export default class NumberIncrementor extends Vue {
-  public static readonly TOTAL_DURATION = 1500;
+  public static readonly TOTAL_DURATION = 700;
 
   public static readonly INTERVAL = 20;
 
@@ -23,7 +23,7 @@ export default class NumberIncrementor extends Vue {
   public onValueChanged(): void {
     for (
       let t = 0;
-      t < NumberIncrementor.TOTAL_DURATION;
+      t <= NumberIncrementor.TOTAL_DURATION;
       t += NumberIncrementor.INTERVAL
     ) {
       setTimeout(() => {

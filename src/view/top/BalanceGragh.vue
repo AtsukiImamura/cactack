@@ -34,7 +34,8 @@ export default class BalanceGragh extends Vue {
     return (item: IBalanceItem) => {
       return {
         ...item,
-        heightRate: (Math.abs(item.amount) / this.totalMount) * 100
+        heightRate: (Math.abs(item.amount) / this.totalMount) * 100,
+        absoluteHeight: 0 // FIXME
       };
     };
   }

@@ -5,9 +5,9 @@ export default interface IBaseRepository<T extends Identifiable> {
 
   getByIds: (ids: string[]) => Promise<T[]>;
 
-  update: (value: T) => Promise<void>;
+  update: (value: T) => Promise<T>;
 
-  batchUpdate: (values: T[]) => Promise<void>;
+  batchUpdate: (values: T[]) => Promise<T[]>;
 
   insert: (value: T) => Promise<T>;
 

@@ -17,4 +17,8 @@ export default class StabBadgetGroupRepository
   public async aggregate(journal: DBadgetGroup): Promise<IBadgetGroup> {
     return container.resolve(BadgetGroupTransformer).aggregate(journal);
   }
+
+  public async getByUserId(uid: string): Promise<IBadgetGroup[]> {
+    return Promise.resolve([]);
+  }
 }

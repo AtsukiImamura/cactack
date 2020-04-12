@@ -1,10 +1,10 @@
 import IJournal, {
-  IJournalDetail,
+  // IJournalDetail,
   IAccountCategory
 } from "@/model/interface/IJournal";
 import JournalDate from "@/model/common/JournalDate";
 import IJournalDate from "@/model/interface/IJournalDate";
-import JournalDetail from "@/model/JournalDetail";
+// import JournalDetail from "@/model/JournalDetail";
 import AccountCategory from "@/model/AccountCategory";
 import { DJournal } from "@/model/interface/DJournal";
 import IdBase from "./IdBase";
@@ -23,8 +23,8 @@ export default class Journal extends IdBase implements IJournal {
       amount,
       accountAt,
       executeAt,
-      JournalDetail.createNew(creditType, amount),
-      JournalDetail.createNew(debitType, amount)
+      creditType,
+      debitType
     );
   }
 
@@ -52,15 +52,15 @@ export default class Journal extends IdBase implements IJournal {
     );
   }
 
-  public static receivable(amount: number, executeAt?: IJournalDate | string) {
-    return Journal.simple(
-      JournalDate.today(),
-      executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
-      amount,
-      AccountCategory.netAssets(),
-      AccountCategory.receivable()
-    );
-  }
+  // public static receivable(amount: number, executeAt?: IJournalDate | string) {
+  //   return Journal.simple(
+  //     JournalDate.today(),
+  //     executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
+  //     amount,
+  //     AccountCategory.netAssets(),
+  //     AccountCategory.receivable()
+  //   );
+  // }
 
   public static receivableCounter(
     amount: number,
@@ -71,7 +71,7 @@ export default class Journal extends IdBase implements IJournal {
       executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
       amount,
       AccountCategory.receivable(),
-      AccountCategory.cash()
+      AccountCategory.netAssets()
     );
   }
 
@@ -109,9 +109,9 @@ export default class Journal extends IdBase implements IJournal {
 
   private _amount: number;
   /** 貸方（右） */
-  private _credit: IJournalDetail;
+  private _credit: IAccountCategory;
   /** 借方（左） */
-  private _debit: IJournalDetail;
+  private _debit: IAccountCategory;
 
   /**
    * 仕訳
@@ -128,8 +128,8 @@ export default class Journal extends IdBase implements IJournal {
     amount: number,
     accountAt: string | IJournalDate,
     executeAt: string | IJournalDate,
-    credit: IJournalDetail,
-    debit: IJournalDetail
+    credit: IAccountCategory,
+    debit: IAccountCategory
   ) {
     super();
     this._transactionId = transactionId;
@@ -182,8 +182,6 @@ export default class Journal extends IdBase implements IJournal {
    */
   public setAmount(amount: number) {
     this._amount = amount;
-    this.credit = JournalDetail.createNew(this.credit.category, amount);
-    this.debit = JournalDetail.createNew(this.debit.category, amount);
   }
 
   public setTransactionId(id: string): void {
@@ -195,15 +193,15 @@ export default class Journal extends IdBase implements IJournal {
       this.accountAt,
       executeAt ? JournalDate.cast(executeAt) : this.executeAt,
       this.amount,
-      this.debit.category,
-      this.credit.category
+      this.debit,
+      this.credit
     );
   }
   /**
    * Getter credit
    * @return {IJournalDetail}
    */
-  public get credit(): IJournalDetail {
+  public get credit(): IAccountCategory {
     return this._credit;
   }
 
@@ -211,16 +209,16 @@ export default class Journal extends IdBase implements IJournal {
    * Getter debit
    * @return {IJournalDetail}
    */
-  public get debit(): IJournalDetail {
+  public get debit(): IAccountCategory {
     return this._debit;
   }
 
-  public set credit(credit: IJournalDetail) {
-    this.credit = credit;
+  public set credit(credit: IAccountCategory) {
+    this._credit = credit;
   }
 
-  public set debit(debit: IJournalDetail) {
-    this.debit = debit;
+  public set debit(debit: IAccountCategory) {
+    this._debit = debit;
   }
 
   /**
@@ -237,8 +235,8 @@ export default class Journal extends IdBase implements IJournal {
       amount: this._amount,
       accountAt: this.accountAt.toString(),
       executeAt: this.executeAt.toString(),
-      creditId: this.credit.id,
-      debitId: this.debit.id
+      credit: this.credit.code,
+      debit: this.debit.code
     };
   }
 }

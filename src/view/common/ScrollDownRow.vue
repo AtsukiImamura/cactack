@@ -1,5 +1,5 @@
 <template>
-  <div class="scroll-down-row">
+  <div class="scroll-down-row" :class="{'display': displayHiddenContent}">
     <div class="default-content">
       <div class="wrapper" @click="onClickWrapper">
         <slot name="display"></slot>
@@ -48,6 +48,7 @@ export default class ScrollDownRow extends Vue {
 
 <style lang="scss" scoped>
 .scroll-down-row {
+  background-color: #ffffff;
   .default-content {
     position: relative;
     cursor: pointer;
@@ -64,6 +65,9 @@ export default class ScrollDownRow extends Vue {
       right: $base-right + 0px;
       top: $base-top;
       z-index: 10;
+      @include xs {
+        content: none;
+      }
     }
     .wrapper {
       &:after,
@@ -74,6 +78,9 @@ export default class ScrollDownRow extends Vue {
         height: 1.5px;
         width: 10px;
         top: $base-top + 10px;
+        @include xs {
+          content: none;
+        }
       }
       &:after {
         right: $base-right + 9px;
@@ -86,6 +93,7 @@ export default class ScrollDownRow extends Vue {
     }
   }
   .hidden-content {
+    background-color: #ffffff;
     overflow: hidden;
     &.first {
       display: none;

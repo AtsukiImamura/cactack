@@ -73,5 +73,9 @@ export default class RegisterDebt extends Vue {
 .depts {
   width: calc(80% - 14px);
   padding-left: calc(20% + 14px);
+  @include sm {
+    width: calc(100% - 44px);
+    padding-left: 30px;
+  }
 }
 </style>

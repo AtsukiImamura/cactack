@@ -4,8 +4,8 @@
     <div class="ctrl next-btn" @mouseup="attemptToTransformToRight" :disabled="!canScroll"></div>
     <div class="menu-list-wrap">
       <div class="menu-list" ref="menuList">
-        <div class="dummy" style="display:none"></div>
-        <div class="dummy" style="display:none"></div>
+        <div class="dummy" style="display:none; width: 0px;"></div>
+        <div class="dummy" style="display:none; width: 0px;"></div>
         <slot>
           <div
             v-html="content"
@@ -16,8 +16,8 @@
             'sub': Math.abs(index - currentMainIndex) === 1}"
           ></div>
         </slot>
-        <div class="dummy" style="display:none"></div>
-        <div class="dummy" style="display:none"></div>
+        <div class="dummy" style="display:none; width: 0px;"></div>
+        <div class="dummy" style="display:none; width: 0px;"></div>
       </div>
     </div>
   </div>
@@ -125,13 +125,13 @@ export default class SlideMenu extends Vue {
     // タイマースタート
     this.timer = ScrollTimer.start(SlideMenu.SCROLL_DURATION);
 
-    for (const elem of this.lastDummyElements) {
-      elem.style.display =
-        this.currentMainIndex === this.menuContentsNum - 1 ? "none" : "block";
-    }
-    for (const elem of this.firstDummyElements) {
-      elem.style.display = this.currentMainIndex === 0 ? "none" : "block";
-    }
+    // for (const elem of this.lastDummyElements) {
+    //   elem.style.display =
+    //     this.currentMainIndex === this.menuContentsNum - 1 ? "none" : "block";
+    // }
+    // for (const elem of this.firstDummyElements) {
+    //   elem.style.display = this.currentMainIndex === 0 ? "none" : "block";
+    // }
 
     const widthTransformControlls: {
       elem: HTMLElement;
@@ -304,6 +304,9 @@ class ScrollTimer {
         border: 1px solid $color-main-skeleton;
       }
       .dummy {
+        width: 0px !important;
+        border: none;
+        background: transparent;
       }
     }
   }

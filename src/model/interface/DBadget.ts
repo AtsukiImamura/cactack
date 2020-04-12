@@ -1,16 +1,20 @@
-import Identifiable from "@/model/interface/Identifiable";
+import Identifiable, { UserIdentifiable } from "@/model/interface/Identifiable";
 import Strable from "@/model/interface/common/Strable";
 
-export interface DBadgetGroup extends Identifiable, Strable {
+export interface DBadgetGroup extends Identifiable, Strable, UserIdentifiable {
   name: string;
+
+  description: string;
+
+  cycle: number;
 }
 
 export interface DBadget extends Identifiable, Strable {
-  baseId: string;
+  groupId: string;
 
-  startAt: string;
+  year: number;
 
-  finishAt: string;
+  month: number;
 
   amount: number;
 }

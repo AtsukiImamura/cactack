@@ -6,14 +6,18 @@ import IUser from "@/model/interface/IUser";
 import DUser from "@/model/interface/DUser";
 
 @singleton()
-export default class StabUserRepository extends RepositoryBase<DUser, IUser>
+export default class UserRepository extends RepositoryBase<DUser, IUser>
   implements IUserRepository {
   constructor() {
     super();
-    this.dbKey = "user";
+    this.dbKey = "users";
   }
 
   public async aggregate(journal: DUser): Promise<IUser> {
     return container.resolve(UserTransformer).aggregate(journal);
+  }
+
+  public async getByUserId(uid: string): Promise<IUser | undefined> {
+    return container.resolve(UserRepository).getById(uid);
   }
 }

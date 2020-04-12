@@ -1,5 +1,11 @@
-import { singleton } from "tsyringe";
-import firebase from "firebase";
+import { singleton, container } from "tsyringe";
+import * as firebase from "firebase/app";
+// import "firebase/firestore";
+import "firebase/auth";
+import UserRepository from "@/repository/UserRepository";
+import User from "@/model/User";
+import JournalDate from "@/model/common/JournalDate";
+import IUser from "@/model/interface/IUser";
 
 @singleton()
 export default class UserAuthService {
@@ -8,16 +14,29 @@ export default class UserAuthService {
    * @param email
    * @param password
    */
-  public createUserIfNotExist(email: string, password: string) {
-    return firebase
+  public async createUserIfNotExist(email: string, password: string) {
+    const info = await firebase
       .auth()
-      .createUserWithEmailAndPassword(email, password)
-      .catch(err => {
-        console.log(err);
-        // var errorCode = error.code;
-        // var errorMessage = error.message;
-        throw new Error(err);
-      });
+      .createUserWithEmailAndPassword(email, password);
+    if (!info.user) {
+      return;
+    }
+    const uid = info.user.uid;
+    return await this.insertNewUser(
+      info.user.displayName ? info.user.displayName : "",
+      uid
+    );
+  }
+
+  private async insertNewUser(name: string, uid: string) {
+    return await firebase
+      .firestore()
+      .collection("users")
+      .doc(uid)
+      .set(new User(name, uid, JournalDate.today()).simplify());
+    // return await container
+    //   .resolve(UserRepository)
+    //   .insert(new User(name, uid, JournalDate.today()));
   }
 
   /**
@@ -26,13 +45,7 @@ export default class UserAuthService {
    * @param password
    */
   public signIn(email: string, password: string) {
-    return firebase
-      .auth()
-      .signInWithEmailAndPassword(email, password)
-      .catch(err => {
-        console.log(err);
-        throw new Error(err);
-      });
+    return firebase.auth().signInWithEmailAndPassword(email, password);
   }
 
   /** let user sign out */
@@ -43,5 +56,42 @@ export default class UserAuthService {
   public get userId(): string {
     const user = firebase.auth().currentUser;
     return user ? user.uid : "";
+  }
+
+  public async getUser(): Promise<IUser | undefined> {
+    const fbUser = firebase.auth().currentUser;
+    if (!fbUser) {
+      return undefined;
+    }
+    return container.resolve(UserRepository).getByUserId(fbUser.uid);
+  }
+
+  public async finishTopIntroduction(): Promise<void> {
+    return await this.updateUserInfo("introTopFinished", true);
+  }
+
+  public async finishFlowIntroduction(): Promise<void> {
+    return await this.updateUserInfo("introFlowFinished", true);
+  }
+
+  public async finishBadgetIntroduction(): Promise<void> {
+    return await this.updateUserInfo("introBadgetFinished", true);
+  }
+
+  public async finishStoreIntroduction(): Promise<void> {
+    return await this.updateUserInfo("introStoreFinished", true);
+  }
+
+  private async updateUserInfo(key: string, value: any) {
+    if (!this.userId) {
+      return;
+    }
+    const target = {};
+    (target as any)[key] = value;
+    return await firebase
+      .firestore()
+      .collection("users")
+      .doc(this.userId)
+      .update(target);
   }
 }

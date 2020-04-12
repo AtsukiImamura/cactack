@@ -11,9 +11,13 @@
       </div>
       <div class="attr amount">
         <label v-if="index === 0">金額</label>
-        <NumberInput :default="tr.amount" @commit="onInputAmount(tr, $event)"></NumberInput>
+        <NumberInput v-model="tr.amount" @commit="onInputAmount(tr, $event)"></NumberInput>
       </div>
-      <div class="delete-button" :class="{'enabled': index > 0}" @click="deleteTransaction(tr)"></div>
+      <div
+        class="round-delete-button"
+        :class="{'enabled': index > 0}"
+        @click="deleteTransaction(tr)"
+      ></div>
     </div>
     <div class="line add-mark" type="button" @click="addTransaction"></div>
   </div>
@@ -98,6 +102,9 @@ export default class TransactionLines extends Vue {
     $attr-width: 250px;
 
     width: $attr-width * 2;
+    @include sm {
+      width: 100%;
+    }
     display: flex;
     padding-top: 3px;
     &.effect {
@@ -115,46 +122,17 @@ export default class TransactionLines extends Vue {
     }
     .attr {
       width: $attr-width;
+      @include sm {
+        width: 50%;
+      }
     }
     &.add-mark {
       margin-top: 10px;
       // height: 22px;
       @include add-mark(150px, 24px);
     }
-    .delete-button {
-      $delete-button-color: #c0c0c0;
-
-      margin: 6px 0px 0px;
-      height: 20px;
-      width: 20px;
-      border: transparent;
-      &.enabled {
-        background-color: $delete-button-color;
-        border-radius: 10px;
-        position: relative;
-        cursor: pointer;
-        &:hover {
-          background-color: #c8c8c8;
-        }
-        &:after,
-        &:before {
-          content: "";
-          position: absolute;
-          width: 14px;
-          height: 1.5px;
-          // background-color: $delete-button-color;
-          background-color: #ffffff;
-          top: 9px;
-          left: 3px;
-          z-index: 1;
-        }
-        &:after {
-          transform: rotate(45deg);
-        }
-        &:before {
-          transform: rotate(-45deg);
-        }
-      }
+    .round-delete-button {
+      @include round-delete-button;
     }
   }
 }

@@ -6,5 +6,13 @@ export default interface DUser extends Identifiable {
 
   registeredAt: string;
 
+  introTopFinished?: boolean;
+
+  introFlowFinished?: boolean;
+
+  introBadgetFinished?: boolean;
+
+  introStoreFinished?: boolean;
+
   deletedAt: string;
 }

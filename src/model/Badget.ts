@@ -1,49 +1,39 @@
-import { IBadget, IBadgetGroup } from "@/model/interface/IBadget";
+import { IBadget } from "@/model/interface/IBadget";
 import JournalDate from "@/model/common/JournalDate";
 import { DBadget } from "@/model/interface/DBadget";
 import IJournalDate from "@/model/interface/IJournalDate";
+import IdBase from "./IdBase";
 
-export default class Badget implements IBadget {
-  private _id: string;
+export default class Badget extends IdBase implements IBadget {
+  private _groupId: string;
 
   private _amount: number;
 
-  private _startAt: IJournalDate;
+  private _year: number;
 
-  private _finishAt: IJournalDate;
-
-  private _badgetGroup: IBadgetGroup;
+  private _month: number;
 
   constructor(
     id: string,
+    groupId: string,
     amount: number,
-    startAt: string | IJournalDate,
-    finishAt: string | IJournalDate,
-    badgetGroup: IBadgetGroup
+    year: number,
+    month: number
   ) {
+    super();
     this._id = id;
+    this._groupId = groupId;
     this._amount = amount;
-    this._startAt =
-      typeof startAt === "string" ? JournalDate.fromToken(startAt) : startAt;
-    this._finishAt =
-      typeof finishAt === "string" ? JournalDate.fromToken(finishAt) : finishAt;
-    this._badgetGroup = badgetGroup;
+    this._year = year;
+    this._month = month;
   }
 
   /**
-   * Getter id
+   * Getter groupId
    * @return {string}
    */
-  public get id(): string {
-    return this._id;
-  }
-
-  /**
-   * Getter badgetBaseId
-   * @return {string}
-   */
-  public get badgetGroup(): IBadgetGroup {
-    return this._badgetGroup;
+  public get groupId(): string {
+    return this._groupId;
   }
 
   /**
@@ -55,27 +45,36 @@ export default class Badget implements IBadget {
   }
 
   public get isTarget(): boolean {
-    const today = JournalDate.today();
-    return (
-      this._startAt.beforeThanOrEqualsTo(today) &&
-      this._finishAt.afterThanOrEqualsTo(today)
-    );
+    return this.isInMonthOf(JournalDate.today());
   }
 
-  public set id(id: string) {
-    if (this.id) {
-      return;
-    }
-    this._id = id;
+  /**
+   * Getter year
+   * @return {number}
+   */
+  public get year(): number {
+    return this._year;
+  }
+
+  /**
+   * Getter month
+   * @return {number}
+   */
+  public get month(): number {
+    return this._month;
   }
 
   public simplify(): DBadget {
     return {
       id: this.id,
-      baseId: this._badgetGroup.id,
-      startAt: this._startAt.toString(),
-      finishAt: this._finishAt.toString(),
-      amount: this._amount
+      groupId: this._groupId,
+      year: this._year,
+      month: this._month,
+      amount: this._amount,
     };
+  }
+
+  public isInMonthOf(date: IJournalDate) {
+    return this._year === date.year && this._month === date.month;
   }
 }

@@ -1,7 +1,7 @@
 import Identifiable from "./Identifiable";
 import Treatable from "./common/Treatable";
 import DTransaction from "./DTransaction";
-import { IBadget } from "./IBadget";
+import { IBadgetGroup } from "./IBadget";
 import IJournalDate from "./IJournalDate";
 import IJournal from "./IJournal";
 
@@ -12,7 +12,7 @@ export default interface ITransaction
 
   createdAt: IJournalDate;
 
-  badget?: IBadget;
+  badget?: IBadgetGroup;
 
   journals: IJournal[];
 

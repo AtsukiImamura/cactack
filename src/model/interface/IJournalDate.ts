@@ -21,5 +21,15 @@ export default interface IJournalDate {
 
   getAfterMonthOf: (val: number) => IJournalDate;
 
+  getPreviousMonth: () => IJournalDate;
+
+  getBeforeMonthOf: (val: number) => IJournalDate;
+
   isInMonthOf: (date: IJournalDate) => boolean;
+
+  getMonthsOfAfter: (num: number) => IJournalDate[];
+
+  firstDay: IJournalDate;
+
+  toDate: () => Date;
 }

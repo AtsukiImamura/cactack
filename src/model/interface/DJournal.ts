@@ -10,9 +10,9 @@ export interface DJournal extends Identifiable, Strable {
 
   executeAt: string;
 
-  creditId: string;
+  credit: number;
 
-  debitId: string;
+  debit: number;
 
   badgetId?: string;
 }

@@ -1,41 +1,87 @@
 <template>
-  <div class="user-registration">
-    <div class="header">
+  <AuthFrame>
+    <template v-slot:title>
       <h1>ユーザー登録</h1>
+    </template>
+    <div class="area message">
+      <span>{{ message }}</span>
     </div>
-    <div class="email">
-      <label for="ur-email"></label>
+    <div class="area email">
+      <label for="ur-email">email</label>
       <input id="ur-email" name="email" type="text" v-model="email" placeholder="email" />
     </div>
-    <div class="password">
-      <label for="ur-password"></label>
-      <input id="ur-password" name="password" type="text" v-model="password" placeholder="password" />
+    <div class="area password">
+      <label for="ur-password">password</label>
+      <input
+        id="ur-password"
+        name="password"
+        type="password"
+        v-model="password"
+        placeholder="password"
+      />
     </div>
-    <div class="actions">
-      <input type="button" value="OK" @click="createUser" />
+    <div class="area password">
+      <label for="ur-password">password confirmation</label>
+      <input
+        id="ur-password"
+        name="password"
+        type="password"
+        v-model="passwordConfirmation"
+        placeholder="password"
+      />
     </div>
-  </div>
+    <div class="area actions">
+      <input class="btn" type="button" value="登録" @click="createUser" />
+    </div>
+  </AuthFrame>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { container } from "tsyringe";
 import UserAuthService from "@/service/UserAuthService";
+import AuthFrame from "@/view/auth/AuthFrame.vue";
 
-@Component({})
+@Component({ components: { AuthFrame } })
 export default class UserRegistration extends Vue {
   public email: string = "";
 
   public password: string = "";
 
-  public createUser(): void {
-    // TODO: バリデーション
+  public passwordConfirmation: string = "";
 
+  public message: string = "";
+
+  public createUser(): void {
+    if (!this.email) {
+      this.message = "メールアドレスを入力して下さい";
+      return;
+    }
+    if (!this.password) {
+      this.message = "パスワードを入力して下さい";
+      return;
+    }
+    if (this.password.length < 8) {
+      this.message = "パスワードは8文字以上にする必要があります";
+      return;
+    }
+    if (this.password !== this.passwordConfirmation) {
+      this.message = "パスワードが一致しません";
+      return;
+    }
     container
       .resolve(UserAuthService)
       .createUserIfNotExist(this.email, this.password)
-      .then(res => console.log(res))
-      .catch(err => console.log(" --> ERR!"));
+      .then(user => {
+        return container
+          .resolve(UserAuthService)
+          .signIn(this.email, this.password);
+      })
+      .then(() => this.$router.push("/user/init"))
+      .catch(err => {
+        console.log(err);
+        this.message = "エラーが発生しました";
+      });
   }
 }
 </script>

@@ -9,6 +9,14 @@ export default interface IUser extends Identifiable, Treatable<DUser> {
 
   registeredAt: IJournalDate;
 
+  introTopFinished: boolean;
+
+  introFlowFinished: boolean;
+
+  introBadgetFinished: boolean;
+
+  introStoreFinished: boolean;
+
   isDeleted: boolean;
 
   setDeleted: () => void;

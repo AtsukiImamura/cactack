@@ -22,6 +22,9 @@
         <div class="cell date">
           <span>執行日</span>
         </div>
+        <div class="cell amount-xs">
+          <span>金額</span>
+        </div>
         <div class="cell name">
           <span>区分</span>
         </div>
@@ -39,9 +42,7 @@
         :key="index"
       >
         <div class="cell name">
-          <span
-            :class="`category-color c-${journal.debit.category.code}`"
-          >{{ journal.debit.category.name }}</span>
+          <span :class="`category-color c-${journal.debit.code}`">{{ journal.debit.name }}</span>
         </div>
         <div class="cell amount">
           <span>{{ journal.amount }}</span>
@@ -52,10 +53,11 @@
         <div class="cell date">
           <span>{{ journal.executeAt.toString() }}</span>
         </div>
+        <div class="cell amount-xs">
+          <span>{{ journal.amount }}</span>
+        </div>
         <div class="cell name">
-          <span
-            :class="`category-color c-${journal.credit.category.code}`"
-          >{{ journal.credit.category.name }}</span>
+          <span :class="`category-color c-${journal.credit.code}`">{{ journal.credit.name }}</span>
         </div>
         <div class="cell amount">
           <span>{{ journal.amount }}</span>
@@ -86,6 +88,9 @@ export default class JournalLines extends Vue {
         width: calc(35% - 20px);
         padding: 6px 10px;
         border-bottom: 1px solid #c0c0c0;
+        @include xs {
+          width: calc(20% - 20px);
+        }
       }
     }
   }
@@ -127,14 +132,34 @@ export default class JournalLines extends Vue {
     }
     .cell {
       padding: 6px 10px;
+      @include xs {
+        padding: 6px 4px;
+      }
       &.name {
         width: calc(20% - 20px);
+        @include xs {
+          width: calc(15% - 8px);
+        }
       }
       &.date {
         width: calc(15% - 20px);
+        @include xs {
+          width: calc(22% - 8px);
+        }
       }
       &.amount {
         width: calc(15% - 20px);
+        @include xs {
+          width: calc(25% - 8px);
+          display: none;
+        }
+      }
+      &.amount-xs {
+        display: none;
+        @include xs {
+          display: block;
+          width: calc(20% - 8px);
+        }
       }
     }
   }

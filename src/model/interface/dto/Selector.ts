@@ -5,5 +5,7 @@ export interface SelectorItem {
 
   default?: boolean;
 
+  itemClass?: string;
+
   onSelected?: () => void;
 }

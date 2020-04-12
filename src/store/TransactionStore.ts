@@ -17,7 +17,7 @@ import TransactionHelper from "./helper/TransactionHelper";
 import { PropertyHeader } from "@/model/interface/dto/PropertyDto";
 import DepreciationModule from "./DepreciationStore";
 import AppModule from "./ApplicationStore";
-import { IBadget } from "@/model/interface/IBadget";
+import { IBadgetGroup } from "@/model/interface/IBadget";
 import TransactionService from "@/service/TransactionService";
 import Transaction from "@/model/Transaction";
 
@@ -31,9 +31,17 @@ class TransactionStore extends VuexModule {
 
   private _journals: IJournal[] = [];
 
+  private _results: IJournal[] = [];
+
   private _property?: PropertyHeader;
 
-  private _badget?: IBadget;
+  private _badget: IBadgetGroup | {} = {};
+
+  public get badget(): IBadgetGroup | undefined {
+    return typeof (this._badget as any).id === "string"
+      ? (this._badget as IBadgetGroup)
+      : undefined;
+  }
 
   /**
    * Getter name
@@ -43,17 +51,19 @@ class TransactionStore extends VuexModule {
     return this._name;
   }
 
-  public get journals(): IJournal[] {
+  public get totalJournals(): IJournal[] {
     const journals: IJournal[] = [];
-    journals.push(
-      Journal.simple(
-        this.accountAt,
-        this.accountAt,
-        this.amount,
-        AccountCategory.cash(),
-        AccountCategory.netAssets()
-      )
-    );
+    if (this.amount > 0) {
+      journals.push(
+        Journal.simple(
+          this.accountAt,
+          this.accountAt,
+          this.amount,
+          AccountCategory.cash(),
+          AccountCategory.netAssets()
+        )
+      );
+    }
     if (this._property) {
       journals.push(
         Journal.simple(
@@ -65,15 +75,34 @@ class TransactionStore extends VuexModule {
         )
       );
     }
+    // if(this.receivableJournals.length > 0){
+
+    // }
     journals.push(...this._journals);
     journals.push(
       ...this.debtJournals.map(debt => debt.counter(this.accountAt))
     );
     journals.push(
-      ...this.receivableJournals.map(rec => rec.counter(this.accountAt))
+      ...this.receivableJournals.map(rec =>
+        Journal.simple(
+          rec.accountAt,
+          rec.accountAt,
+          rec.amount,
+          AccountCategory.cash(),
+          AccountCategory.receivable()
+        )
+      )
     );
     journals.push(...DepreciationModule.journals);
     return journals;
+  }
+
+  public get results(): IJournal[] {
+    return this._results.length === 0 ? this.totalJournals : this._results;
+  }
+
+  public get journals(): IJournal[] {
+    return this._journals;
   }
 
   public get diff(): number {
@@ -139,8 +168,15 @@ class TransactionStore extends VuexModule {
     this._amount = 0;
     this._journals = [];
     this._property = undefined;
-    this._badget = undefined;
+    this._badget = {};
+    this._results = [];
   }
+
+  @Action({ rawError: true })
+  public commitJournals(journals: IJournal[]) {
+    this._results.push(...journals);
+  }
+
   @Action({ rawError: true })
   public commitDebts(debts: IJournalControl[]) {
     this.clearDebtCounters();
@@ -175,12 +211,15 @@ class TransactionStore extends VuexModule {
   @Action({ rawError: true })
   public addReceivableTransaction(): void {
     this._journals.push(
-      Journal.receivableCounter(
-        0,
+      Journal.simple(
+        this.accountAt,
         container
           .resolve(TransactionHelper)
           .findLatestMonthOf(this.receivableJournals)
-          .getNextMonth()
+          .getNextMonth(),
+        0,
+        AccountCategory.receivable(),
+        AccountCategory.netAssets()
       )
     );
   }
@@ -273,17 +312,27 @@ class TransactionStore extends VuexModule {
   }
 
   @Action({ rawError: true })
+  public badgetSelected(badget: IBadgetGroup) {
+    this.BADGET(badget);
+  }
+
+  @Action({ rawError: true })
   public async saveAll(): Promise<void> {
-    return container
-      .resolve(TransactionService)
-      .insertTransaction(Transaction.createNew(this.name, this.journals))
-      .then(() => {
-        AppModule.appendNew({
-          name: this.name,
-          journals: this.journals,
-          badget: this._badget
-        });
-      });
+    return (
+      container
+        .resolve(TransactionService)
+        .insertTransaction(
+          Transaction.createNew(this.name, this.totalJournals, this.badget)
+        )
+        // .then(() => {
+        //   AppModule.appendNew({
+        //     name: this.name,
+        //     journals: this.totalJournals,
+        //     badget: this.badget,
+        //   });
+        // });
+        .then(() => AppModule.init())
+    );
   }
 
   @Mutation
@@ -305,7 +354,7 @@ class TransactionStore extends VuexModule {
   @Action({ rawError: true })
   private clearDebtCounters(): void {
     const after = this._journals.filter(
-      jnl => jnl.debit.category.code !== AccountCategory.DEBT
+      jnl => jnl.debit.code !== AccountCategory.DEBT
     );
     this.clearJournalAll();
     this._journals.push(...after);
@@ -314,7 +363,7 @@ class TransactionStore extends VuexModule {
   @Action({ rawError: true })
   private clearReceivableCounters(): void {
     const after = this._journals.filter(
-      jnl => jnl.credit.category.code !== AccountCategory.RECEIVABLE
+      jnl => jnl.credit.code !== AccountCategory.RECEIVABLE
     );
     this.clearJournalAll();
     this._journals.push(...after);
@@ -328,6 +377,11 @@ class TransactionStore extends VuexModule {
   @Mutation
   private PROPERTY(header: PropertyHeader) {
     this._property = header;
+  }
+
+  @Mutation
+  private BADGET(badget: IBadgetGroup) {
+    this._badget = badget;
   }
 }
 

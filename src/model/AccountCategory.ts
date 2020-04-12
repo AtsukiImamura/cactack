@@ -84,6 +84,33 @@ export default class AccountCategory implements IAccountCategory {
     }
   }
 
+  public static all(): AccountCategory[] {
+    return [
+      AccountCategory.debt(),
+      AccountCategory.receivable(),
+      AccountCategory.netAssets(),
+      AccountCategory.cash(),
+      AccountCategory.cashEquivalent(),
+      AccountCategory.stock(),
+      AccountCategory.deposit(),
+      AccountCategory.durableAsset()
+    ];
+  }
+
+  public static credits(): AccountCategory[] {
+    return [AccountCategory.debt(), AccountCategory.netAssets()];
+  }
+
+  public static debits(): AccountCategory[] {
+    return [
+      AccountCategory.receivable(),
+      AccountCategory.cash(),
+      AccountCategory.cashEquivalent(),
+      AccountCategory.stock(),
+      AccountCategory.deposit(),
+      AccountCategory.durableAsset()
+    ];
+  }
   /** 債務 */
   public static readonly DEBT = 1;
   /** 純資産 */
@@ -132,14 +159,6 @@ export default class AccountCategory implements IAccountCategory {
   public get code(): number {
     return this._category;
   }
-
-  // /**
-  //  * Getter category
-  //  * @return {number}
-  //  */
-  // public get category(): number {
-  //   return this._category;
-  // }
 
   /**
    * 貸方か

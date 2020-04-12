@@ -1,10 +1,12 @@
 const VueLoaderplugin = require("vue-loader/lib/plugin"); //vue-loader/lib/plugin
 const path = require("path");
+const webpack = require("webpack");
 
 const env =
   process.env.NODE_ENV === "production" ? "production" : "development";
 const target = process.env.NODE_ENV === "development" ? "node" : "web";
 const fileName = target === "web" ? "index" : "test";
+// const fileName = "slider";
 console.log(`env=${env} target=${target} fileName=${fileName}`);
 
 const scssPath = path.resolve(__dirname, "./src/resources/common.scss");
@@ -17,7 +19,8 @@ module.exports = {
   entry: `./src/${fileName}.ts`,
   output: {
     path: path.join(__dirname, "./dist"),
-    filename: `${fileName}.js`
+    filename: `${fileName}.js`,
+    chunkFilename: `[name].bundle.js`
   },
   module: {
     rules: [
@@ -32,14 +35,14 @@ module.exports = {
         test: /\.vue/,
         loader: "vue-loader"
       },
-      {
-        test: /\.js/,
-        loader: "babel-loader",
-        exclude: /node_modules/,
-        query: {
-          presets: ["es2015"]
-        }
-      },
+      // {
+      //   test: /\.js/,
+      //   loader: "babel-loader",
+      //   exclude: /node_modules/,
+      //   query: {
+      //     presets: ["es2015"],
+      //   },
+      // },
       {
         test: /\.css/,
         use: ["vue-style-loader", "css-loader"]
@@ -93,7 +96,13 @@ module.exports = {
     // root: [path.resolve("./src")]
   },
 
-  plugins: [new VueLoaderplugin()],
+  plugins: [
+    new VueLoaderplugin(),
+    new webpack.ProvidePlugin({
+      // other modules
+      introJs: ["intro.js"]
+    })
+  ],
   node: {
     fs: "empty",
     net: "empty"

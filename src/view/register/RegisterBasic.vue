@@ -4,15 +4,16 @@
       <div class="k">
         <label>名称</label>
       </div>
-      <div class="v">
-        <input type="text" v-model="name" />
+      <div class="v r-name">
+        <!-- <input type="text" v-model="name" /> -->
+        <TransactionNameInput v-model="name"></TransactionNameInput>
       </div>
     </div>
     <div class="form-item" v-if="options.dispAccountAt">
       <div class="k">
         <label>発生日</label>
       </div>
-      <div class="v">
+      <div class="v r-date">
         <DatePicker format="yyyy/MM/dd" @selected="onSelectAccountAt" :value="accountAt"></DatePicker>
       </div>
     </div>
@@ -20,15 +21,15 @@
       <div class="k">
         <label>金額</label>
       </div>
-      <div class="v">
-        <NumberInput @commit="onInputAmount"></NumberInput>
+      <div class="v r-amount">
+        <NumberInput v-model="amount"></NumberInput>
       </div>
     </div>
     <div class="form-item">
       <div class="k">
         <label>予算</label>
       </div>
-      <div class="v">
+      <div class="v r-badget">
         <BadgetSelector @select="onSelectBadget"></BadgetSelector>
       </div>
     </div>
@@ -42,8 +43,11 @@ import DatePicker from "vuejs-datepicker";
 import NumberInput from "@/view/common/NumberInput.vue";
 import BadgetSelector from "@/view/register/BadgetSelector.vue";
 import { IBadgetGroup } from "../../model/interface/IBadget";
+import TransactionNameInput from "@/view/register/TransactionNameInput.vue";
 
-@Component({ components: { DatePicker, NumberInput, BadgetSelector } })
+@Component({
+  components: { DatePicker, NumberInput, BadgetSelector, TransactionNameInput }
+})
 export default class RegisterBasic extends Vue {
   @Prop({
     default: () => {
@@ -70,16 +74,32 @@ export default class RegisterBasic extends Vue {
     return TransactionModule.amount;
   }
 
+  public set amount(amount: number) {
+    TransactionModule.setAmount(amount);
+  }
+
   public onSelectAccountAt(date: Date) {
     TransactionModule.setAccountAt(date);
   }
 
-  public onInputAmount(amount: number) {
-    TransactionModule.setAmount(amount);
+  public onSelectBadget(badget: IBadgetGroup) {
+    TransactionModule.badgetSelected(badget);
   }
-  public onSelectBadget(badget: IBadgetGroup) {}
 }
 </script>
 
 <style lang="scss" scoped>
+.form-item {
+  .v {
+    &.r-date {
+      width: 220px;
+    }
+    &.r-name {
+      width: 80%;
+    }
+    &.r-amount {
+      width: 210px;
+    }
+  }
+}
 </style>

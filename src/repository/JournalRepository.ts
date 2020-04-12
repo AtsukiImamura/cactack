@@ -23,7 +23,7 @@ export default class JournalRepository
     from: IJournalDate,
     to: IJournalDate
   ): Promise<IJournal[]> {
-    return this.getAll().then(journals => {
+    return this.getAll().then((journals) => {
       const targets = [];
       for (const jor of journals) {
         if (jor.accountAt.beforeThan(from) || jor.accountAt.afterThan(to)) {
@@ -47,9 +47,11 @@ export default class JournalRepository
       .where("transactionId", "==", transactionId)
       .get();
     const journalAggregates: Promise<IJournal>[] = [];
-    docs.forEach(doc =>
-      journalAggregates.push(this.aggregate(doc.data() as DJournal))
-    );
+    docs.forEach((doc) => {
+      const data = doc.data();
+      data.id = doc.id;
+      journalAggregates.push(this.aggregate(data as DJournal));
+    });
     return Promise.all(journalAggregates);
   }
 }

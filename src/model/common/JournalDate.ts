@@ -69,7 +69,7 @@ export default class JournalDate implements IJournalDate {
   }
 
   private static parse(token: string): number[] {
-    return token.split("/").map(t => Number(t));
+    return token.split("/").map((t) => Number(t));
   }
 
   private _year: number;
@@ -127,6 +127,10 @@ export default class JournalDate implements IJournalDate {
     return this._day;
   }
 
+  public get firstDay(): IJournalDate {
+    return JournalDate.byDay(this.year, this.month, 1);
+  }
+
   public beforeThan(date: IJournalDate): boolean {
     if (date.year < this.year) {
       return false;
@@ -170,20 +174,45 @@ export default class JournalDate implements IJournalDate {
     return `${this.year}/${this.month}${this.day > 0 ? `/${this.day}` : ""}`;
   }
 
+  public toDate(): Date {
+    return new Date(this.year, this.month - 1, this.day > 0 ? this.day : 1);
+  }
+
   public getNextMonth(): IJournalDate {
     return this.getAfterMonthOf(1);
   }
 
   public getAfterMonthOf(val: number) {
+    const rawMonth = (this.month + val) % 12;
     return JournalDate.byDay(
       this.year + Math.floor((this.month + val) / 12),
-      ((this.month + val) % 12) +
-        Math.floor((12 - ((this.month + val) % 12)) / 12) * 12,
+      rawMonth + Math.floor((12 - rawMonth) / 12) * 12,
       this._givenDay
     );
   }
 
   public isInMonthOf(date: IJournalDate) {
     return date.year === this.year && date.month === this.month;
+  }
+
+  public getMonthsOfAfter(num: number): IJournalDate[] {
+    const months: IJournalDate[] = [this];
+    for (let i = 0; i < num; i++) {
+      months.push(this.getAfterMonthOf(i + 1));
+    }
+    return months;
+  }
+
+  public getPreviousMonth(): IJournalDate {
+    return this.getBeforeMonthOf(1);
+  }
+
+  public getBeforeMonthOf(val: number): IJournalDate {
+    const rawMonth = (12 + this.month - (val % 12)) % 12;
+    return JournalDate.byDay(
+      this.year - Math.floor((12 - (this.month - val)) / 12),
+      rawMonth + Math.floor((12 - rawMonth) / 12) * 12,
+      this._givenDay
+    );
   }
 }

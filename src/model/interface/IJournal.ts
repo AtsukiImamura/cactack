@@ -11,13 +11,9 @@ export default interface IJournal
 
   accountAt: IJournalDate;
 
-  // executeAt: IJournalDate;
+  credit: IAccountCategory;
 
-  credit: IJournalDetail;
-
-  debit: IJournalDetail;
-
-  // badget: IBadget | undefined;
+  debit: IAccountCategory;
 
   amount: number;
 

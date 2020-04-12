@@ -26,11 +26,17 @@ export default class DiffGraphUtil {
     );
   }
 
-  public calcDiffs(transactions: ITransaction[]): IJouranlItem[] {
-    const today = JournalDate.today();
+  public calcDiffs(
+    transactions: ITransaction[],
+    target: IJournalDate,
+    onlyCash: boolean = false
+  ): IJouranlItem[] {
+    // const today = JournalDate.today();
     const diffs: IJouranlItem[] = [];
     for (const tr of transactions) {
-      const amount = tr.getMonthlyAmountOf(today);
+      const amount = onlyCash
+        ? tr.getMonthlyCashFlowOf(target)
+        : tr.getMonthlyAmountOf(target);
       if (amount === 0) {
         continue;
       }
@@ -66,38 +72,31 @@ export default class DiffGraphUtil {
     } = {};
     for (const journal of journals) {
       const credit = journal.credit;
-      if (!(credit.category.code in summary)) {
-        summary[credit.category.code] = {
-          category: credit.category,
+      if (!(credit.code in summary)) {
+        summary[credit.code] = {
+          category: credit,
           amount: 0
         };
       }
-      if (credit.category.code > 100) {
-        summary[credit.category.code].amount -= credit.amount;
+      if (credit.isDebit) {
+        summary[credit.code].amount -= journal.amount;
       } else {
-        if (credit.category.code === 3) {
-          // console.log(credit.id, credit.amount);
-        }
-        summary[credit.category.code].amount += credit.amount;
+        summary[credit.code].amount += journal.amount;
       }
 
       const debit = journal.debit;
-      if (!(debit.category.code in summary)) {
-        summary[debit.category.code] = {
-          category: debit.category,
+      if (!(debit.code in summary)) {
+        summary[debit.code] = {
+          category: debit,
           amount: 0
         };
       }
-      if (debit.category.code > 100) {
-        summary[debit.category.code].amount += debit.amount;
-        if (debit.category.code === 3) {
-          // console.log(debit);
-        }
+      if (debit.isDebit) {
+        summary[debit.code].amount += journal.amount;
       } else {
-        summary[debit.category.code].amount -= debit.amount;
+        summary[debit.code].amount -= journal.amount;
       }
     }
-    // console.log(summary);
     return summary;
   }
 }

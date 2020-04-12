@@ -16,4 +16,19 @@ export default class BadgetRepository extends RepositoryBase<DBadget, IBadget>
   public async aggregate(journal: DBadget): Promise<IBadget> {
     return container.resolve(BadgetTransformer).aggregate(journal);
   }
+
+  public async getByGroupId(groupId: string): Promise<IBadget[]> {
+    const badgetAggregates: Promise<IBadget>[] = [];
+    await this.ref
+      .where("groupId", "==", groupId)
+      .get()
+      .then((docs) => {
+        docs.forEach((doc) => {
+          const data = doc.data();
+          data.id = doc.id;
+          badgetAggregates.push(this.aggregate(data as DBadget));
+        });
+      });
+    return Promise.all(badgetAggregates);
+  }
 }

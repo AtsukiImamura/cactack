@@ -43,7 +43,7 @@ export default class DiffGragh extends Vue {
 
   public get diffs(): IDiffItemDispInfo[] {
     const sorted = this.option.diffs.sort((a, b) => b.amount - a.amount);
-    const targets = [];
+    const targets: IDiffItemDispInfo[] = [];
     if (sorted.length === 0) {
       return [];
     }
@@ -53,8 +53,6 @@ export default class DiffGragh extends Vue {
       const d = sorted[i];
       current += d.amount;
       targets.push({
-        name: d.name,
-        amount: d.amount,
         heightRate: (Math.abs(d.amount) / total) * 100,
         margin:
           ((((i === 0 ? 0 : current) / total) * this.diffHeightRate) / 100) *

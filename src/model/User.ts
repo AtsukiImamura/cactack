@@ -2,8 +2,9 @@ import IUser from "@/model/interface/IUser";
 import JournalDate from "@/model/common/JournalDate";
 import IJournalDate from "@/model/interface/IJournalDate";
 import DUser from "@/model/interface/DUser";
+import IdBase from "./IdBase";
 
-export default class User implements IUser {
+export default class User extends IdBase implements IUser {
   /**
    * 新規ユーザーを一つ作成する
    */
@@ -13,12 +14,18 @@ export default class User implements IUser {
 
   /** ユーザー名 */
   private _name: string;
-  /** ID */
-  private _id: string;
   /** 登録日 */
   private _registeredAt: IJournalDate;
   /** 削除日 */
   private _deletedAt?: IJournalDate | undefined;
+
+  private _introTopFinished?: boolean;
+
+  private _introFlowFinished?: boolean;
+
+  private _introBadgetFinished?: boolean;
+
+  private _introStoreFinished?: boolean;
 
   /**
    * ユーザー
@@ -26,10 +33,23 @@ export default class User implements IUser {
    * @param {string} id ID
    * @param {Date} registeredAt  登録日
    */
-  constructor(name: string, id: string, registeredAt: IJournalDate) {
+  constructor(
+    name: string,
+    id: string,
+    registeredAt: IJournalDate,
+    introTopFinished: boolean = false,
+    introFlowFinished: boolean = false,
+    introBadgetFinished: boolean = false,
+    introStoreFinished: boolean = false
+  ) {
+    super();
     this._name = name;
     this._id = id;
     this._registeredAt = registeredAt;
+    this._introTopFinished = introTopFinished;
+    this._introFlowFinished = introFlowFinished;
+    this._introBadgetFinished = introBadgetFinished;
+    this._introStoreFinished = introStoreFinished;
   }
 
   /**
@@ -38,14 +58,6 @@ export default class User implements IUser {
    */
   public get name(): string {
     return this._name;
-  }
-
-  /**
-   * Getter id
-   * @return {string}
-   */
-  public get id(): string {
-    return this._id;
   }
 
   /**
@@ -69,17 +81,46 @@ export default class User implements IUser {
     return this._deletedAt !== undefined;
   }
 
+  public get introTopFinished(): boolean {
+    return !!this._introTopFinished;
+  }
+
+  public get introFlowFinished(): boolean {
+    return !!this._introFlowFinished;
+  }
+
+  public get introBadgetFinished(): boolean {
+    return !!this._introBadgetFinished;
+  }
+
+  public get introStoreFinished(): boolean {
+    return !!this._introStoreFinished;
+  }
+
   /** 削除扱いにする */
   public setDeleted(): void {
     this._deletedAt = JournalDate.today();
   }
 
   public simplify(): DUser {
-    return {
+    const simple: DUser = {
       id: this.id,
       name: this.name,
       registeredAt: this.registeredAt.toString(),
       deletedAt: this._deletedAt ? this._deletedAt.toString() : ""
     };
+    if (this._introTopFinished !== undefined) {
+      simple.introTopFinished = this._introTopFinished;
+    }
+    if (this._introFlowFinished !== undefined) {
+      simple.introFlowFinished = this.introFlowFinished;
+    }
+    if (this._introBadgetFinished !== undefined) {
+      simple.introBadgetFinished = this._introBadgetFinished;
+    }
+    if (this._introStoreFinished !== undefined) {
+      simple.introStoreFinished = this._introStoreFinished;
+    }
+    return simple;
   }
 }

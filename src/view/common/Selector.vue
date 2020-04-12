@@ -1,12 +1,15 @@
 <template>
-  <div class="seelctor">
-    <div class="disp cell" @click="openSelections">
+  <div class="selector">
+    <div
+      :class="`disp cell ${selectedItem.content ? (selectedItem.itemClass ? selectedItem.itemClass : '' ): ''}`"
+      @click="openSelections"
+    >
       <span>{{ selectedItem.content ? selectedItem.content : "-- select --" }}</span>
     </div>
     <div class="bg" v-if="open" @click="closeSelections" />
     <div class="selections" v-show="open">
       <div
-        class="item cell"
+        :class="`item cell ${item.itemClass ? item.itemClass : ''}`"
         v-for="(item, index) in items"
         :key="index"
         @click="selectItem(item, $event)"
@@ -25,9 +28,22 @@ import { SelectorItem } from "@/model/interface/dto/Selector";
 export default class Selector extends Vue {
   @Prop({ default: () => [] }) items!: SelectorItem[];
 
+  @Prop() default?: SelectorItem;
+
   public selectedItem: SelectorItem = { content: "", seq: 0 };
 
   public open = false;
+
+  public mounted(): void {
+    if (this.default) {
+      this.selectedItem = this.default;
+    }
+    for (const item of this.items) {
+      if (item.default) {
+        this.selectedItem = item;
+      }
+    }
+  }
 
   public openSelections(e?: Event): void {
     if (e) e.stopPropagation();
@@ -55,15 +71,17 @@ export default class Selector extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.seelctor {
-  width: 210px;
-  max-width: 100%;
+.selector {
+  // max-width: 210px;
+  // max-width: 100%;
+  width: 100%;
   position: relative;
   .disp {
     width: 100%;
     border: 1px solid #c0c0c0;
     height: 20px;
     cursor: pointer;
+    background-color: #ffffff;
   }
   .selections {
     position: absolute;
@@ -85,6 +103,10 @@ export default class Selector extends Vue {
   .cell {
     width: calc(100% - 20px);
     padding: 6px 10px;
+    @include sm {
+      width: calc(100% - 6px);
+      padding: 6px 3px;
+    }
   }
   .bg {
     position: fixed;

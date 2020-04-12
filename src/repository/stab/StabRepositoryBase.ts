@@ -13,7 +13,7 @@ export default abstract class StabRepositoryBase<
   public abstract aggregate(value: S): Promise<T>;
 
   public getById(id: string): Promise<T | undefined> {
-    return this.getAllWithoutConvert().then(values => {
+    return this.getAllWithoutConvert().then((values) => {
       for (const v of values) {
         if (v.id === id) {
           return this.aggregate(v);
@@ -24,20 +24,20 @@ export default abstract class StabRepositoryBase<
   }
 
   public getByIds(ids: string[]): Promise<T[]> {
-    return this.getAllWithoutConvert().then(values => {
+    return this.getAllWithoutConvert().then((values) => {
       const targets = [];
       for (const v of values) {
         if (ids.includes(v.id)) {
           targets.push(v);
         }
       }
-      return Promise.all(targets.map(t => this.aggregate(t)));
+      return Promise.all(targets.map((t) => this.aggregate(t)));
     });
   }
 
   public insert(value: T): Promise<T> {
     return this.getAllWithoutConvert()
-      .then(values => {
+      .then((values) => {
         const simplified = value.simplify();
         if (!simplified.id) {
           simplified.id = String(values.length + 1);
@@ -45,7 +45,7 @@ export default abstract class StabRepositoryBase<
         values.push(simplified);
         return JsonUtil.save(this.dbKey, values).then(() => simplified);
       })
-      .then(simplified => {
+      .then((simplified) => {
         return this.aggregate(simplified);
       });
   }
@@ -60,11 +60,11 @@ export default abstract class StabRepositoryBase<
       targets.push(target);
     }
     await JsonUtil.save(this.dbKey, [...records, ...targets]);
-    return Promise.all(targets.map(t => this.aggregate(t)));
+    return Promise.all(targets.map((t) => this.aggregate(t)));
   }
 
-  public update(value: T): Promise<void> {
-    return this.getAllWithoutConvert().then(values => {
+  public async update(value: T): Promise<T> {
+    await this.getAllWithoutConvert().then((values) => {
       const newValues = [];
       for (const v of values) {
         if (v.id !== value.id) {
@@ -75,22 +75,24 @@ export default abstract class StabRepositoryBase<
       }
       return JsonUtil.save(this.dbKey, newValues);
     });
+    return value;
   }
 
-  public async batchUpdate(values: T[]): Promise<void> {
+  public async batchUpdate(values: T[]): Promise<T[]> {
     const records = await this.getAllWithoutConvert();
-    const ids = records.map(r => r.id);
+    const ids = records.map((r) => r.id);
     for (const v of values) {
       if (!ids.includes(v.id)) {
         continue;
       }
       records[ids.indexOf(v.id)] = v.simplify();
     }
-    return JsonUtil.save(this.dbKey, records);
+    await JsonUtil.save(this.dbKey, records);
+    return values;
   }
 
   public delete(value: T): Promise<void> {
-    return this.getAllWithoutConvert().then(values => {
+    return this.getAllWithoutConvert().then((values) => {
       const newValues = [];
       for (const v of values) {
         if (v.id === value.id) {
@@ -104,7 +106,7 @@ export default abstract class StabRepositoryBase<
 
   public async getAll(): Promise<T[]> {
     return JsonUtil.read<S[]>(this.dbKey).then((values: S[]) =>
-      Promise.all(values.map(v => this.aggregate(v)))
+      Promise.all(values.map((v) => this.aggregate(v)))
     );
   }
 

@@ -1,10 +1,10 @@
 import { VuexModule, getModule, Module, Action } from "vuex-module-decorators";
 import store from ".";
-import { IProperty } from "@/model/interface/IProperty";
+// import { IProperty } from "@/model/interface/IProperty";
 import { PropertyHeader } from "@/model/interface/dto/PropertyDto";
 @Module({ dynamic: true, store, name: "property", namespaced: true })
 class PropertyStore extends VuexModule {
-  private _properties: IProperty[] = [];
+  // private _properties: IProperty[] = [];
 
   public get headers(): PropertyHeader[] {
     // return Object.values(
@@ -22,7 +22,7 @@ class PropertyStore extends VuexModule {
       { name: "aaaaa", amount: 1 },
       { name: "aaab", amount: 1 },
       { name: "aaac", amount: 1 },
-      { name: "aaacc", amount: 1 }
+      { name: "aaacc", amount: 1 },
     ].map((h, index) => {
       return { ...h, seq: index };
     });

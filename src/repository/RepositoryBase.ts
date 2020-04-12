@@ -2,7 +2,9 @@ import Identifiable from "@/model/interface/Identifiable";
 import Strable from "@/model/interface/common/Strable";
 import IBaseRepository from "@/repository/interface/IBaseRepository";
 import Treatable from "@/model/interface/common/Treatable";
-import firebase from "firebase";
+
+import * as firebase from "firebase/app";
+import "firebase/firestore";
 
 export default abstract class RepositoryBase<
   S extends Strable & Identifiable,
@@ -67,7 +69,9 @@ export default abstract class RepositoryBase<
       (simplyfied as any).userId = currentUser.uid;
     }
     const docRef = await this.ref.add(simplyfied);
-    return (await this.getById(docRef.id)) as T;
+    value.id = docRef.id;
+    return value;
+    // return (await this.getById(docRef.id)) as T;
   }
 
   public async batchInsert(values: T[]): Promise<T[]> {
@@ -95,14 +99,15 @@ export default abstract class RepositoryBase<
     return Promise.all(inserts);
   }
 
-  public update(value: T): Promise<void> {
-    return this.ref.doc(value.id).set(value);
+  public async update(value: T): Promise<T> {
+    await this.ref.doc(value.id).set(value.simplify());
+    return value;
   }
 
-  public async batchUpdate(values: T[]): Promise<void> {
-    return Promise.all(
-      values.map(val => this.ref.doc(val.id).set(val))
-    ).then(() => {});
+  public async batchUpdate(values: T[]): Promise<T[]> {
+    return Promise.all(values.map(val => this.ref.doc(val.id).set(val))).then(
+      () => values
+    );
   }
 
   public delete(value: T): Promise<void> {

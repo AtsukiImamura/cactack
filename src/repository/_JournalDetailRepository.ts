@@ -4,7 +4,7 @@ import { IJournalDetail } from "@/model/interface/IJournal";
 import { container } from "tsyringe";
 import JournalDetailTransformer from "@/repository/transformer/JournalDetailTransformer";
 
-export default class JournalDetailRepository extends RepositoryBase<
+export default class _JournalDetailRepository extends RepositoryBase<
   DJournalDetail,
   IJournalDetail
 > {

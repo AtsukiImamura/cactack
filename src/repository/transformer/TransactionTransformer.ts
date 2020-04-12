@@ -5,7 +5,7 @@ import { singleton, container } from "tsyringe";
 import DTransaction from "@/model/interface/DTransaction";
 import IJournalRepository from "../interface/IJournalRepository";
 import Transaction from "@/model/Transaction";
-import IBadgetRepository from "../interface/IBadgetRepository";
+import IBadgetGroupRepository from "../interface/IBadgetGroupRepository";
 
 @singleton()
 export default class TransactionTransformer extends Transformer<
@@ -17,8 +17,8 @@ export default class TransactionTransformer extends Transformer<
       "JournalRepository"
     ) as IJournalRepository;
     const badgetRepo = container.resolve(
-      "BadgetRepository"
-    ) as IBadgetRepository;
+      "BadgetGroupRepository"
+    ) as IBadgetGroupRepository;
     return new Transaction(
       transaction.id,
       transaction.name,

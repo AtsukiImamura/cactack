@@ -33,7 +33,7 @@ export default class TransactionHelper {
         tr.date,
         tr.amount,
         AccountCategory.receivable(),
-        AccountCategory.cash()
+        AccountCategory.netAssets()
       )
     );
   }
@@ -84,20 +84,18 @@ export default class TransactionHelper {
   }
 
   public findDebtCounters(journals: IJournal[]) {
-    return journals.filter(
-      jnl => jnl.debit.category.code === AccountCategory.DEBT
-    );
+    return journals.filter(jnl => jnl.debit.code === AccountCategory.DEBT);
   }
 
   public findReceivableCounters(journals: IJournal[]) {
     return journals.filter(
-      jnl => jnl.credit.category.code === AccountCategory.RECEIVABLE
+      jnl => jnl.credit.code === AccountCategory.RECEIVABLE
     );
   }
 
   public findDepreciations(journals: IJournal[]) {
     return journals.filter(
-      jnl => jnl.debit.category.code === AccountCategory.NET_ASSETS
+      jnl => jnl.debit.code === AccountCategory.NET_ASSETS
     );
   }
 }

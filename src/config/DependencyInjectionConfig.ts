@@ -14,10 +14,11 @@ import PropertyRepository from "@/repository/PropertyRepository";
 import BadgetRepository from "@/repository/BadgetRepository";
 import BadgetGroupRepository from "@/repository/BadgetGroupRepository";
 import DepreciationRepository from "@/repository/DepreciationRepository";
-import JournalDetailRepository from "@/repository/JournalDetailRepository";
+// import JournalDetailRepository from "@/repository/_JournalDetailRepository";
 import UserRepository from "@/repository/UserRepository";
 
-import firebase from "firebase";
+import * as firebase from "firebase/app";
+import "firebase/firestore";
 import TransactionRepository from "@/repository/TransactionRepository";
 /**
  * DI管理用クラス
@@ -42,9 +43,9 @@ export default class DependencyInjectionConfig {
     container.register("DepreciationRepository", {
       useClass: DepreciationRepository
     });
-    container.register("JournalDetailRepository", {
-      useClass: JournalDetailRepository
-    });
+    // container.register("JournalDetailRepository", {
+    //   useClass: JournalDetailRepository,
+    // });
     container.register("UserRepository", {
       useClass: UserRepository
     });
@@ -52,11 +53,15 @@ export default class DependencyInjectionConfig {
       useClass: TransactionRepository
     });
 
-    firebase.initializeApp({
-      apiKey: "AIzaSyAzW1labZ1ykRxMOahBv3Z4Jil8wsbqIyc",
-      // authDomain: "### FIREBASE AUTH DOMAIN ###",
-      projectId: "cactack-26e4c"
-    });
+    try {
+      firebase.initializeApp({
+        apiKey: "AIzaSyAzW1labZ1ykRxMOahBv3Z4Jil8wsbqIyc",
+        // authDomain: "### FIREBASE AUTH DOMAIN ###",
+        projectId: "cactack-26e4c"
+      });
+    } catch (e) {
+      console.error("Error on init firebase");
+    }
   }
 
   /**

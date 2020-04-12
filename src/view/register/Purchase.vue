@@ -1,109 +1,104 @@
 <template>
-  <div class="register-area">
-    <div class="contents">
-      <div class="title">購入</div>
-      <div class="main">
-        <RegisterBasic></RegisterBasic>
-        <div class="debt">
-          <div class="form-item">
-            <div class="k">
-              <label>支払い</label>
-            </div>
-            <div class="v picks">
-              <div class="c">
-                <input name="payment-timing" type="radio" v-model="isDebt" :value="false" />
-                <label>当月</label>
+  <CommonFrame>
+    <div class="register-area">
+      <div class="contents">
+        <div class="title">購入</div>
+        <div class="main">
+          <RegisterBasic></RegisterBasic>
+          <div class="debt">
+            <div class="form-item">
+              <div class="k">
+                <label>支払い</label>
               </div>
+              <div class="v picks">
+                <div class="c">
+                  <input name="payment-timing" type="radio" v-model="isDebt" :value="false" />
+                  <label>当月</label>
+                </div>
 
-              <div class="c">
-                <input name="payment-timing" type="radio" v-model="isDebt" :value="true" />
-                <label>来月以降</label>
+                <div class="c">
+                  <input name="payment-timing" type="radio" v-model="isDebt" :value="true" />
+                  <label>来月以降</label>
+                </div>
               </div>
             </div>
+            <RegisterDebt v-if="isDebt"></RegisterDebt>
           </div>
-          <RegisterDebt v-if="isDebt"></RegisterDebt>
-        </div>
-        <div class="receivable">
-          <div class="form-item">
-            <div class="k">
-              <label>還元</label>
-            </div>
-            <div class="v picks">
-              <div class="c">
-                <input name="receivable" type="radio" :value="false" v-model="isReceivable" />
-                <label>なし</label>
+          <div class="receivable">
+            <div class="form-item">
+              <div class="k">
+                <label>還元</label>
               </div>
+              <div class="v picks">
+                <div class="c">
+                  <input name="receivable" type="radio" :value="false" v-model="isReceivable" />
+                  <label>なし</label>
+                </div>
 
-              <div class="c">
-                <input name="receivable" type="radio" :value="true" v-model="isReceivable" />
-                <label>あり</label>
+                <div class="c">
+                  <input name="receivable" type="radio" :value="true" v-model="isReceivable" />
+                  <label>あり</label>
+                </div>
               </div>
             </div>
+            <div class="receivable-lines" v-if="isReceivable">
+              <ReceivableLines></ReceivableLines>
+            </div>
           </div>
-          <div class="receivable-lines" v-if="isReceivable">
-            <ReceivableLines></ReceivableLines>
+          <div class="depreciation">
+            <div class="form-item">
+              <div class="k">
+                <label>資産紐づけ</label>
+              </div>
+              <div class="v picks">
+                <div class="c">
+                  <input name="stock" type="radio" :value="false" v-model="hasStockRelation" />
+                  <label>なし</label>
+                </div>
+                <div class="c">
+                  <input name="stock" type="radio" :value="true" v-model="hasStockRelation" />
+                  <label>あり</label>
+                </div>
+              </div>
+            </div>
+            <PropertySelector
+              @select="onPropertySelected"
+              class="property-selections"
+              v-if="hasStockRelation"
+            ></PropertySelector>
+            <div class="form-item" v-if="canSetDepreciations">
+              <div class="k">
+                <label>減価償却</label>
+              </div>
+              <div class="v picks">
+                <div class="c">
+                  <input name="depreciation" type="radio" :value="false" v-model="hasDepreciation" />
+                  <label>なし</label>
+                </div>
+                <div class="c">
+                  <input name="depreciation" type="radio" :value="true" v-model="hasDepreciation" />
+                  <label>あり</label>
+                </div>
+              </div>
+            </div>
+            <div class="depreciation-area">
+              <RegisterDepreciation v-if="hasDepreciation" :amount="amount"></RegisterDepreciation>
+            </div>
           </div>
         </div>
-        <div class="depreciation">
-          <div class="form-item">
-            <div class="k">
-              <label>資産紐づけ</label>
-            </div>
-            <div class="v picks">
-              <div class="c">
-                <input name="stock" type="radio" :value="false" v-model="hasStockRelation" />
-                <label>なし</label>
-              </div>
-              <div class="c">
-                <input name="stock" type="radio" :value="true" v-model="hasStockRelation" />
-                <label>あり</label>
-              </div>
+        <div class="footer">
+          <div class="check-sum">
+            <div class="attr" :class="{'negative': diff < 0, 'positive': diff > 0}">
+              <span class="mark"></span>
+              <span class="value">{{ Math.abs(diff) }}</span>
             </div>
           </div>
-          <PropertySelector
-            @select="onPropertySelected"
-            class="property-selections"
-            v-if="hasStockRelation"
-          ></PropertySelector>
-          <div class="form-item" v-if="canSetDepreciations">
-            <div class="k">
-              <label>減価償却</label>
-            </div>
-            <div class="v picks">
-              <div class="c">
-                <input name="depreciation" type="radio" :value="false" v-model="hasDepreciation" />
-                <label>なし</label>
-              </div>
-              <div class="c">
-                <input name="depreciation" type="radio" :value="true" v-model="hasDepreciation" />
-                <label>あり</label>
-              </div>
-            </div>
-          </div>
-          <div class="depreciation-area">
-            <RegisterDepreciation v-if="hasDepreciation" :amount="amount"></RegisterDepreciation>
-          </div>
+          <input type="button" value="キャンセル" class="btn cancel-btn" @click="cancel" />
+          <ProcessButton value="登録" :click="register" :disabled="diff !== 0 || name === ''"></ProcessButton>
         </div>
-      </div>
-      <div class="footer">
-        <div class="check-sum">
-          <div class="attr" :class="{'negative': diff < 0, 'positive': diff > 0}">
-            <span class="mark"></span>
-            <span class="value">{{ Math.abs(diff) }}</span>
-          </div>
-        </div>
-        <input type="button" value="キャンセル" class="btn cancel-btn" @click="cancel" />
-        <input
-          type="button"
-          value="登録"
-          class="btn ok-btn"
-          :class="{'disabled': diff!==0}"
-          @click="register"
-          :disabled="diff !== 0"
-        />
       </div>
     </div>
-  </div>
+  </CommonFrame>
 </template>
 
 <script lang="ts">
@@ -117,6 +112,8 @@ import PropertySelector from "@/view/register/PropertySelector.vue";
 import { PropertyHeader } from "../../model/interface/dto/PropertyDto";
 import RegisterDepreciation from "@/view/register/RegisterDepreciation.vue";
 import RegisterBasic from "@/view/register/RegisterBasic.vue";
+import CommonFrame from "@/view/common/CommonFrame.vue";
+import ProcessButton from "@/view/common/ProcessButton.vue";
 
 @Component({
   components: {
@@ -126,10 +123,16 @@ import RegisterBasic from "@/view/register/RegisterBasic.vue";
     NumberInput,
     PropertySelector,
     RegisterDepreciation,
-    RegisterBasic
+    RegisterBasic,
+    CommonFrame,
+    ProcessButton
   }
 })
 export default class Purchase extends Vue {
+  public get name(): string {
+    return TransactionModule.name;
+  }
+
   public get amount(): number {
     return TransactionModule.amount;
   }
@@ -172,8 +175,10 @@ export default class Purchase extends Vue {
     this.canSetDepreciations = true;
   }
 
-  public register(): void {
-    TransactionModule.saveAll().then(() => this.$router.push("/register/ok"));
+  public register(): Promise<void> {
+    return TransactionModule.saveAll().then(() => {
+      this.$router.push("/register/ok");
+    });
   }
 
   public cancel(): void {

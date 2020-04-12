@@ -1,7 +1,7 @@
 
 <template>
   <div class="number-input">
-    <input type="text" v-model="value" @input="onInput" @blur="onBlur" />
+    <input type="text" :value="value" @input="onInput" @blur="onBlur" />
     <div class="message">
       <span>{{ message }}</span>
     </div>
@@ -9,47 +9,33 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Emit, Watch } from "vue-property-decorator";
+import { Component, Vue, Prop, Emit } from "vue-property-decorator";
 
 @Component({})
 export default class NumberInput extends Vue {
-  @Prop({ default: () => 0 }) default!: number;
-
-  public value: string = "0";
+  @Prop({ default: () => 0 }) value!: number;
 
   public message: string = "";
 
-  public mounted(): void {
-    this.value = String(this.default);
-  }
-
-  @Watch("default")
-  public onDefaultValueChanged(): void {
-    this.value = String(this.default);
-  }
-
-  public onInput(): void {
-    if (isNaN(Number(this.value))) {
+  public onInput(e: Event): void {
+    const value = (e.srcElement as HTMLInputElement).value;
+    if (isNaN(Number(value))) {
       this.message = "数値を入力してください";
       return;
     }
     this.message = "";
-    this.noticeInput();
+    this.noticeInput(Number(value));
   }
 
-  public onBlur(): void {
-    this.noticeCommit();
+  public onBlur(e: Event): void {
+    this.noticeCommit(Number((e.srcElement as HTMLInputElement).value));
   }
 
   @Emit("input")
-  private noticeInput(): number {
-    return Number(this.value);
-  }
+  private noticeInput(value: number) {}
 
   @Emit("commit")
-  private noticeCommit(): number {
-    return Number(this.value);
-  }
+  private noticeCommit(value: number) {}
 }
 </script>
 

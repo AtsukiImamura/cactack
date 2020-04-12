@@ -1,6 +1,6 @@
 import ITransaction from "./interface/ITransaction";
 import IJournalDate from "./interface/IJournalDate";
-import { IBadget } from "./interface/IBadget";
+import { IBadgetGroup } from "./interface/IBadget";
 import JournalDate from "./common/JournalDate";
 import IJournal from "./interface/IJournal";
 import AccountCategory from "./AccountCategory";
@@ -12,14 +12,14 @@ export default class Transaction extends IdBase implements ITransaction {
 
   private _createdAt: IJournalDate;
 
-  private _badget?: IBadget;
+  private _badget?: IBadgetGroup;
 
   private _journals: IJournal[];
 
   public static createNew(
     name: string,
     journals: IJournal[],
-    badget?: IBadget
+    badget?: IBadgetGroup
   ) {
     return new Transaction("", name, JournalDate.today(), journals, badget);
   }
@@ -29,7 +29,7 @@ export default class Transaction extends IdBase implements ITransaction {
     name: string,
     createdAt: string | IJournalDate,
     journals: IJournal[],
-    badget?: IBadget
+    badget?: IBadgetGroup
   ) {
     super();
     this._id = id;
@@ -57,8 +57,8 @@ export default class Transaction extends IdBase implements ITransaction {
     return this._createdAt;
   }
 
-  public get badget(): IBadget | undefined {
-    return this._badget ? this.badget : undefined;
+  public get badget(): IBadgetGroup | undefined {
+    return this._badget ? this._badget : undefined;
   }
 
   /**
@@ -86,12 +86,16 @@ export default class Transaction extends IdBase implements ITransaction {
   }
 
   public simplify(): DTransaction {
-    return {
+    const transaction: DTransaction = {
       id: this.id,
       name: this.name,
       createdAt: this.createdAt.toString(),
       userId: "" // TODO
     };
+    if (this.badget) {
+      transaction.badgetId = this.badget.id;
+    }
+    return transaction;
   }
 
   public getMonthlyJournalsOf(date: IJournalDate) {
@@ -102,12 +106,8 @@ export default class Transaction extends IdBase implements ITransaction {
     return journals.reduce(
       (acc, cur) =>
         (acc +=
-          (cur.credit.category.code === AccountCategory.NET_ASSETS
-            ? cur.credit.amount
-            : 0) -
-          (cur.debit.category.code === AccountCategory.NET_ASSETS
-            ? cur.debit.amount
-            : 0)),
+          (cur.credit.code === AccountCategory.NET_ASSETS ? cur.amount : 0) -
+          (cur.debit.code === AccountCategory.NET_ASSETS ? cur.amount : 0)),
       0
     );
   }
@@ -116,12 +116,8 @@ export default class Transaction extends IdBase implements ITransaction {
     return journals.reduce(
       (acc, cur) =>
         (acc +=
-          (cur.debit.category.code === AccountCategory.CASH
-            ? cur.credit.amount
-            : 0) -
-          (cur.credit.category.code === AccountCategory.CASH
-            ? cur.debit.amount
-            : 0)),
+          (cur.debit.code === AccountCategory.CASH ? cur.amount : 0) -
+          (cur.credit.code === AccountCategory.CASH ? cur.amount : 0)),
       0
     );
   }

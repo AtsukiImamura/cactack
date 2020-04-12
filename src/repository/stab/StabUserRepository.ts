@@ -16,4 +16,8 @@ export default class StabUserRepository extends StabRepositoryBase<DUser, IUser>
   public async aggregate(journal: DUser): Promise<IUser> {
     return container.resolve(UserTransformer).aggregate(journal);
   }
+
+  public async getByUserId(uid: string): Promise<IUser | undefined> {
+    return undefined;
+  }
 }

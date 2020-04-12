@@ -2,12 +2,12 @@
   <router-link
     :to="url"
     class="menu-item"
-    :class="{highlight: needHighlight}"
+    :class="{highlight: needHighlight, disabled: disabled}"
     :image-path="imagePath"
     tag="div"
   >
-    <span class="icon" :style="{'background-image': `url(${imagePath})`}"></span>
-    {{ title }}
+    <img class="icon" :src="needHighlight ? hilightImagePath : imagePath" />
+    <span class="title">{{ title }}</span>
   </router-link>
 </template>
 
@@ -22,7 +22,11 @@ export default class MenuItem extends Vue {
 
   @Prop() imagePath!: string;
 
+  @Prop() hilightImagePath!: string;
+
   @Prop() url!: string;
+
+  @Prop({ default: () => false }) disabled?: boolean;
 
   public get needHighlight(): boolean {
     const match = location.hash.substr(1).match(this.regex ? this.regex : "");
@@ -36,45 +40,67 @@ export default class MenuItem extends Vue {
 
 <style lang="scss" scoped>
 .menu-item {
-  width: calc(100% - 50px);
-  padding: 8px 12px 8px 38px;
+  width: calc(100% - 23px);
+  padding: 18px 8px 10px 15px;
   text-align: center;
-  color: $color-main;
-  font-size: 1.1rem;
+  display: flex;
   cursor: pointer;
   position: relative;
+  $icon-size: 32px;
+  @include sm {
+    height: calc(100% - 28px);
+    width: calc(100% - 4px);
+    padding: 18px 2px 10px 4px;
+  }
+  @include xs {
+    margin: 0px 6px 0px 0px;
+    width: calc(100% - 10px);
+    flex-wrap: wrap;
+    justify-content: center;
+    height: calc(100% - 11px);
+    padding: 6px 8px 5px 6px;
+  }
+  &.disabled {
+    .title {
+      color: $color-main-skeleton;
+    }
+  }
+  .icon {
+    display: block;
+    width: $icon-size;
+    height: $icon-size;
+    margin-top: -3px;
+    @include xs {
+      margin-left: 3px;
+      width: 32px;
+      height: 32px;
+    }
+  }
+  .title {
+    display: block;
+    text-align: center;
+    width: calc(100% - #{$icon-size} - 2px);
+    font-size: 1.1rem;
+    color: $color-main;
+    @include sm {
+      text-align: left;
+      padding: 5px 0px 0px 6px;
+      font-size: 0.9rem;
+    }
+    @include xs {
+      width: 100%;
+      text-align: center;
+      font-size: 0.7rem;
+    }
+  }
   &:hover {
-    // background-color: $color-main-skeleton;
     font-weight: bold;
   }
   &.highlight {
     background-color: $color-main;
-    color: #ffffff;
-    font-weight: bold;
-  }
-
-  .icon {
-    display: block;
-    // background-color: #ffffff;
-    width: 28px;
-    height: 28px;
-    // border-radius: 15px;
-    // border: 1px solid $color-main;
-    position: absolute;
-    left: 10px;
-    top: 6px;
-    z-index: 3;
-    &:before {
-      content: "";
-      position: absolute;
-      //   background-color: #ffffff;
-      width: 34px;
-      height: 34px;
-      border: 2px solid $color-main;
-      border-radius: 18px;
-      top: -4px;
-      left: -4px;
-      z-index: 2;
+    .title {
+      color: #ffffff;
+      font-weight: bold;
     }
   }
 }
