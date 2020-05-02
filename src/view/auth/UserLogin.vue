@@ -24,7 +24,7 @@
       <ProcessButton value="LOGIN" :click="signIn" :disabled="!canLogin"></ProcessButton>
       <div class="new-user">
         <span>ユーザー登録は</span>
-        <router-link to="/auth/register">こちら</router-link>
+        <router-link to="/auth/create">こちら</router-link>
       </div>
     </div>
   </AuthFrame>

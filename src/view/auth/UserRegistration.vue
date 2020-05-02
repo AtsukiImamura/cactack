@@ -38,8 +38,8 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { container } from "tsyringe";
-import UserAuthService from "@/service/UserAuthService";
+// import { container } from "tsyringe";
+// import UserAuthService from "@/service/UserAuthService";
 import AuthFrame from "@/view/auth/AuthFrame.vue";
 
 @Component({ components: { AuthFrame } })
@@ -53,35 +53,36 @@ export default class UserRegistration extends Vue {
   public message: string = "";
 
   public createUser(): void {
-    if (!this.email) {
-      this.message = "メールアドレスを入力して下さい";
-      return;
-    }
-    if (!this.password) {
-      this.message = "パスワードを入力して下さい";
-      return;
-    }
-    if (this.password.length < 8) {
-      this.message = "パスワードは8文字以上にする必要があります";
-      return;
-    }
-    if (this.password !== this.passwordConfirmation) {
-      this.message = "パスワードが一致しません";
-      return;
-    }
-    container
-      .resolve(UserAuthService)
-      .createUserIfNotExist(this.email, this.password)
-      .then(user => {
-        return container
-          .resolve(UserAuthService)
-          .signIn(this.email, this.password);
-      })
-      .then(() => this.$router.push("/user/init"))
-      .catch(err => {
-        console.log(err);
-        this.message = "エラーが発生しました";
-      });
+    this.$router.push("/user/create/begin");
+    // if (!this.email) {
+    //   this.message = "メールアドレスを入力して下さい";
+    //   return;
+    // }
+    // if (!this.password) {
+    //   this.message = "パスワードを入力して下さい";
+    //   return;
+    // }
+    // if (this.password.length < 8) {
+    //   this.message = "パスワードは8文字以上にする必要があります";
+    //   return;
+    // }
+    // if (this.password !== this.passwordConfirmation) {
+    //   this.message = "パスワードが一致しません";
+    //   return;
+    // }
+    // container
+    //   .resolve(UserAuthService)
+    //   .createUserIfNotExist(this.email, this.password)
+    //   .then(user => {
+    //     return container
+    //       .resolve(UserAuthService)
+    //       .signIn(this.email, this.password);
+    //   })
+    //   .then(() => this.$router.push("/user/create/begin"))
+    //   .catch(err => {
+    //     console.log(err);
+    //     this.message = "エラーが発生しました";
+    //   });
   }
 }
 </script>

@@ -7,7 +7,7 @@
         <p>資産額が把握できなければどう活用すべきかも分からない。</p>
         <p>つまり、家計簿だけつけてもいつまでも小市民。</p>
         <p>さぁ、資産全部を把握しよう。</p>
-        <router-link to="/auth/register" tag="a" class="to-register-btn landing">使ってみる</router-link>
+        <router-link to="/auth/create" tag="a" class="to-register-btn landing">使ってみる</router-link>
       </div>
       <div class="images">
         <img src="image/store-white.svg" />
@@ -69,7 +69,7 @@
     </div>
     <div class="to-register">
       <router-link
-        to="/auth/register"
+        to="/auth/create"
         tag="input"
         type="button"
         class="to-register-btn btn ok-btn"
