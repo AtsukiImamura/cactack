@@ -16,6 +16,7 @@ import BadgetGroupRepository from "@/repository/BadgetGroupRepository";
 import DepreciationRepository from "@/repository/DepreciationRepository";
 // import JournalDetailRepository from "@/repository/_JournalDetailRepository";
 import UserRepository from "@/repository/UserRepository";
+import UserCreationMasterRepository from "@/repository/UserCreationMasterRepository";
 
 import * as firebase from "firebase/app";
 import "firebase/firestore";
@@ -29,35 +30,38 @@ export default class DependencyInjectionConfig {
    */
   public static runWeb(): void {
     container.register("JournalRepository", {
-      useClass: JournalRepository
+      useClass: JournalRepository,
     });
     container.register("PropertyRepository", {
-      useClass: PropertyRepository
+      useClass: PropertyRepository,
     });
     container.register("BadgetRepository", {
-      useClass: BadgetRepository
+      useClass: BadgetRepository,
     });
     container.register("BadgetGroupRepository", {
-      useClass: BadgetGroupRepository
+      useClass: BadgetGroupRepository,
     });
     container.register("DepreciationRepository", {
-      useClass: DepreciationRepository
+      useClass: DepreciationRepository,
     });
     // container.register("JournalDetailRepository", {
     //   useClass: JournalDetailRepository,
     // });
     container.register("UserRepository", {
-      useClass: UserRepository
+      useClass: UserRepository,
     });
     container.register("TransactionRepository", {
-      useClass: TransactionRepository
+      useClass: TransactionRepository,
+    });
+    container.register("UserCreationMasterRepository", {
+      useClass: UserCreationMasterRepository,
     });
 
     try {
       firebase.initializeApp({
         apiKey: "AIzaSyAzW1labZ1ykRxMOahBv3Z4Jil8wsbqIyc",
         // authDomain: "### FIREBASE AUTH DOMAIN ###",
-        projectId: "cactack-26e4c"
+        projectId: "cactack-26e4c",
       });
     } catch (e) {
       console.error("Error on init firebase");
@@ -69,25 +73,25 @@ export default class DependencyInjectionConfig {
    */
   public static runLocal(): void {
     container.register("JournalRepository", {
-      useClass: StabJournalRepository
+      useClass: StabJournalRepository,
     });
     container.register("PropertyRepository", {
-      useClass: StabPropertyRepository
+      useClass: StabPropertyRepository,
     });
     container.register("BadgetRepository", {
-      useClass: StabBadgetRepository
+      useClass: StabBadgetRepository,
     });
     container.register("BadgetGroupRepository", {
-      useClass: StabBadgetGroupRepository
+      useClass: StabBadgetGroupRepository,
     });
     container.register("DepreciationRepository", {
-      useClass: StabDepreciationRepository
+      useClass: StabDepreciationRepository,
     });
     container.register("JournalDetailRepository", {
-      useClass: StabJournalDetailRepository
+      useClass: StabJournalDetailRepository,
     });
     container.register("UserRepository", {
-      useClass: StabUserRepository
+      useClass: StabUserRepository,
     });
   }
 

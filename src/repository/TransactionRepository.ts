@@ -19,14 +19,13 @@ export default class TransactionRepository
     return container.resolve(TransactionTransformer).aggregate(transaction);
   }
 
-  // 実質使えん気がする
   public async getAll(): Promise<ITransaction[]> {
     return this.ref
       .where("userId", "==", container.resolve(UserAuthService).userId)
       .get()
-      .then(value => {
+      .then((value) => {
         const aggregates: Promise<ITransaction>[] = [];
-        value.forEach(doc => {
+        value.forEach((doc) => {
           const data = doc.data() as DTransaction;
           data.id = doc.id;
           aggregates.push(this.aggregate(data));
