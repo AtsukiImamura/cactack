@@ -10,18 +10,13 @@
             <div class="h">普段使いの現金はどこで管理していますか？</div>
             <div class="b">
               <div class="selections">
-                <div class="select">
-                  <input type="checkbox" name="cash" value="0" />
-                  <label>財布</label>
-                </div>
-                <div class="select">
-                  <input type="checkbox" name="cash" value="1" />
-                  <label>へそくり</label>
-                </div>
-                <div class="select">
-                  <input type="checkbox" name="cash" value="1" />
-                  <label>タンス貯金</label>
-                </div>
+                <div
+                  v-for="strage in cashStrages"
+                  :key="strage.id"
+                  class="box-select"
+                  :class="{'selected' : selectedMasters.includes(strage)}"
+                  @click="checkMaster(strage)"
+                >{{ strage.title }}</div>
               </div>
             </div>
           </div>
@@ -30,30 +25,12 @@
             <div class="b">
               <div class="selections">
                 <div
+                  v-for="bank in banks"
+                  :key="bank.id"
                   class="box-select"
-                  :class="{'selected' : banks.includes(0)}"
-                  @click="checkBanks(0)"
-                >みずほ銀行</div>
-                <div
-                  class="box-select"
-                  :class="{'selected' : banks.includes(1)}"
-                  @click="checkBanks(1)"
-                >三井住友銀行</div>
-                <div
-                  class="box-select"
-                  :class="{'selected' : banks.includes(2)}"
-                  @click="checkBanks(2)"
-                >三菱東京UFJ銀行</div>
-                <div
-                  class="box-select"
-                  :class="{'selected' : banks.includes(3)}"
-                  @click="checkBanks(3)"
-                >りそな銀行</div>
-                <div
-                  class="box-select"
-                  :class="{'selected' : banks.includes(4)}"
-                  @click="checkBanks(4)"
-                >関西アーバン銀行</div>
+                  :class="{'selected' : selectedMasters.includes(bank)}"
+                  @click="checkMaster(bank)"
+                >{{ bank.title }}</div>
               </div>
             </div>
           </div>
@@ -62,20 +39,12 @@
             <div class="b">
               <div class="selections">
                 <div
+                  v-for="prepaid in prepaids"
+                  :key="prepaid.id"
                   class="box-select"
-                  :class="{'selected' : prepaids.includes(0)}"
-                  @click="checkPrepaids(0)"
-                >Pay Pay</div>
-                <div
-                  class="box-select"
-                  :class="{'selected' : prepaids.includes(1)}"
-                  @click="checkPrepaids(1)"
-                >Line Pay</div>
-                <div
-                  class="box-select"
-                  :class="{'selected' : prepaids.includes(2)}"
-                  @click="checkPrepaids(2)"
-                >Fami Pay</div>
+                  :class="{'selected' : selectedMasters.includes(prepaid)}"
+                  @click="checkMaster(prepaid)"
+                >{{ prepaid.title }}</div>
               </div>
             </div>
           </div>
@@ -84,20 +53,12 @@
             <div class="b">
               <div class="selections">
                 <div
+                  v-for="creca in creditCards"
+                  :key="creca.id"
                   class="box-select"
-                  :class="{'selected' : creditCards.includes(0)}"
-                  @click="checkCreditCards(0)"
-                >VISA</div>
-                <div
-                  class="box-select"
-                  :class="{'selected' : creditCards.includes(1)}"
-                  @click="checkCreditCards(1)"
-                >Master</div>
-                <div
-                  class="box-select"
-                  :class="{'selected' : creditCards.includes(2)}"
-                  @click="checkCreditCards(2)"
-                >JCB</div>
+                  :class="{'selected' : selectedMasters.includes(creca)}"
+                  @click="checkMaster(creca)"
+                >{{ creca.title }}</div>
               </div>
             </div>
           </div>
@@ -109,13 +70,7 @@
           </div>
         </div>
         <div class="action">
-          <router-link
-            to="/user/create/balance"
-            tag="input"
-            type="button"
-            class="btn ok-btn"
-            value="次へ"
-          ></router-link>
+          <input type="button" class="btn ok-btn" value="次へ" @click="next()" />
         </div>
       </div>
     </div>
@@ -126,30 +81,58 @@
 import { Component, Vue } from "vue-property-decorator";
 import PublicFrame from "@/view/common/PublicFrame.vue";
 import Step from "@/view/common/Step.vue";
+import IUserCreationMaster from "../../../model/interface/IUserCreationMaster";
+import UserCreationModule from "../../../store/UserCreationStore";
+import UserCreationMaster from "../../../model/UserCreationMaster";
 
 @Component({ components: { PublicFrame, Step } })
 export default class UserCreationCash extends Vue {
-  public banks: number[] = [];
-  public checkBanks(value: number) {
-    this.checkArray(this.banks, value);
-  }
+  public userCreationMasters: IUserCreationMaster[] = [];
 
-  public prepaids: number[] = [];
-  public checkPrepaids(value: number) {
-    this.checkArray(this.prepaids, value);
-  }
-
-  public creditCards: number[] = [];
-  public checkCreditCards(value: number) {
-    this.checkArray(this.creditCards, value);
-  }
-
-  public checkArray(arr: number[], value: number) {
-    if (arr.includes(value)) {
-      arr.splice(arr.indexOf(value), 1);
-    } else {
-      arr.push(value);
+  public mounted(): void {
+    if (UserCreationModule.creationMasters.length === 0) {
+      this.$router.push("/user/create/begin");
     }
+    this.userCreationMasters = UserCreationModule.creationMasters;
+  }
+
+  public get cashStrages(): IUserCreationMaster[] {
+    return this.userCreationMasters.filter(
+      m => m.type === UserCreationMaster.TYPE_CASH_STRAGE
+    );
+  }
+
+  public get banks(): IUserCreationMaster[] {
+    return this.userCreationMasters.filter(
+      m => m.type === UserCreationMaster.TYPE_CASH_BANK
+    );
+  }
+
+  public get prepaids(): IUserCreationMaster[] {
+    return this.userCreationMasters.filter(
+      m => m.type === UserCreationMaster.TYPE_CASH_PREPAID
+    );
+  }
+  public get creditCards(): IUserCreationMaster[] {
+    return this.userCreationMasters.filter(
+      m => m.type === UserCreationMaster.TYPE_CASH_CREDIT_CARD
+    );
+  }
+
+  public selectedMasters: IUserCreationMaster[] = [];
+
+  public checkMaster(value: IUserCreationMaster) {
+    const index = this.selectedMasters.indexOf(value);
+    if (index < 0) {
+      this.selectedMasters.push(value);
+    } else {
+      this.selectedMasters.splice(index, 1);
+    }
+  }
+
+  public next(): void {
+    UserCreationModule.selectCreationMasters(this.selectedMasters);
+    this.$router.push("/user/create/balance");
   }
 }
 </script>

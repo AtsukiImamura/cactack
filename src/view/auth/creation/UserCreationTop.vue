@@ -23,9 +23,14 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import PublicFrame from "@/view/common/PublicFrame.vue";
+import UserCreationModule from "../../../store/UserCreationStore";
 
 @Component({ components: { PublicFrame } })
-export default class UserCreationTop extends Vue {}
+export default class UserCreationTop extends Vue {
+  public mounted(): void {
+    UserCreationModule.init();
+  }
+}
 </script>
 
 <style lang="scss" scoped>
