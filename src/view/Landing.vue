@@ -9,11 +9,11 @@
         <p>さぁ、資産全部を把握しよう。</p>
         <router-link to="/auth/create" tag="a" class="to-register-btn landing">使ってみる</router-link>
       </div>
-      <div class="images">
+      <!-- <div class="images">
         <img src="image/store-white.svg" />
         <img src="image/badget-white.svg" />
         <img src="image/flow-white.svg" />
-      </div>
+      </div>-->
     </div>
     <div class="contents-info">
       <div class="features">
@@ -95,6 +95,8 @@ export default class Landing extends Vue {}
   height: 360px;
   background-color: $color-main;
   display: flex;
+  background-image: url("./image/top-image.jpg");
+  // background-image
   .discription {
     width: 35%;
     @include responsive-width(40%, 50%, calc(100% - 180px), 100%);
