@@ -5,12 +5,15 @@ import Treatable from "@/model/interface/common/Treatable";
 
 import * as firebase from "firebase/app";
 import "firebase/firestore";
+import IdCache from "./cache/IdCache";
 
 export default abstract class RepositoryBase<
   S extends Strable & Identifiable,
   T extends Identifiable & Treatable<S>
 > implements IBaseRepository<T> {
   protected dbKey: string = "";
+
+  protected cache: IdCache<T> = new IdCache<T>();
 
   public abstract aggregate(value: S): Promise<T>;
 
@@ -19,10 +22,14 @@ export default abstract class RepositoryBase<
   }
 
   public getById(id: string): Promise<T | undefined> {
+    const item = this.cache.getById(id);
+    if (item) {
+      return Promise.resolve(item);
+    }
     return this.ref
       .doc(id)
       .get()
-      .then(doc => {
+      .then((doc) => {
         if (doc.exists) {
           const data = doc.data() as S;
           data.id = doc.id;
@@ -31,7 +38,7 @@ export default abstract class RepositoryBase<
           return undefined;
         }
       })
-      .then(val => {
+      .then((val) => {
         if (!val) {
           return val;
         }
@@ -41,21 +48,34 @@ export default abstract class RepositoryBase<
   }
 
   public getByIds(ids: string[]): Promise<T[]> {
-    return Promise.all(ids.map(id => this.ref.doc(id).get()))
-      .then(docs => {
+    const idNeedSearch: string[] = [];
+    const items: T[] = [];
+
+    // Search on the cache in advance.
+    for (const id of ids) {
+      const item = this.cache.getById(id);
+      if (item) {
+        items.push(item);
+      } else {
+        idNeedSearch.push(id);
+      }
+    }
+    return Promise.all(idNeedSearch.map((id) => this.ref.doc(id).get()))
+      .then((docs) => {
         return Promise.all(
           docs
-            .filter(doc => doc.exists)
-            .map(doc => {
+            .filter((doc) => doc.exists)
+            .map((doc) => {
               const data = doc.data() as S;
               data.id = doc.id;
               return data;
             })
-            .map(data => this.aggregate(data))
+            .map((data) => this.aggregate(data))
         );
       })
-      .then(values => {
-        return values;
+      .then((values) => {
+        items.push(...values);
+        return items;
       });
   }
 
@@ -70,6 +90,7 @@ export default abstract class RepositoryBase<
     }
     const docRef = await this.ref.add(simplyfied);
     value.id = docRef.id;
+    this.cache.add(value);
     return value;
     // return (await this.getById(docRef.id)) as T;
   }
@@ -101,32 +122,46 @@ export default abstract class RepositoryBase<
 
   public async update(value: T): Promise<T> {
     await this.ref.doc(value.id).set(value.simplify());
+    this.cache.add(value);
     return value;
   }
 
   public async batchUpdate(values: T[]): Promise<T[]> {
-    return Promise.all(values.map(val => this.ref.doc(val.id).set(val))).then(
-      () => values
+    return Promise.all(values.map((val) => this.ref.doc(val.id).set(val))).then(
+      () => {
+        this.cache.addAll(values);
+        return values;
+      }
     );
   }
 
   public delete(value: T): Promise<void> {
-    return this.ref.doc(value.id).delete();
+    return this.ref
+      .doc(value.id)
+      .delete()
+      .then(() => this.cache.remove(value));
   }
 
   // 実質使えん気がする
   public async getAll(): Promise<T[]> {
-    return this.ref.get().then(value => {
+    return this.ref.get().then((value) => {
       const aggregates: Promise<T>[] = [];
-      value.forEach(doc => aggregates.push(this.aggregate(doc.data() as S)));
-      return Promise.all(aggregates);
+      value.forEach((doc) => {
+        const val = doc.data() as S;
+        val.id = doc.id;
+        aggregates.push(this.aggregate(val));
+      });
+      return Promise.all(aggregates).then((values) => {
+        this.cache.addAll(values);
+        return values;
+      });
     });
   }
 
   protected async getAllWithoutConvert(): Promise<S[]> {
-    return this.ref.get().then(value => {
+    return this.ref.get().then((value) => {
       return Promise.all(
-        value.docs.filter(doc => doc.exists).map(doc => doc.data() as S)
+        value.docs.filter((doc) => doc.exists).map((doc) => doc.data() as S)
       );
     });
   }
