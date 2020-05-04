@@ -9,10 +9,8 @@ export default class CategoryItemMasterTransaformer extends Transformer<
   ICategoryItemMaster
 > {
   public async aggregate(
-    user: DCategoryItemMaster
+    master: DCategoryItemMaster
   ): Promise<ICategoryItemMaster> {
-    return Promise.resolve().then(() => {
-      return {} as ICategoryItemMaster;
-    });
+    return master as ICategoryItemMaster;
   }
 }

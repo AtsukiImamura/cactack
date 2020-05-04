@@ -7,8 +7,8 @@ export default class CategoryItemBase extends IdBase {
 
   protected _name: string;
 
-  constructor(userId: string, parentId: string, name: string) {
-    super();
+  constructor(id: string, userId: string, parentId: string, name: string) {
+    super(id);
     this._userId = userId;
     this._parentId = parentId;
     this._name = name;

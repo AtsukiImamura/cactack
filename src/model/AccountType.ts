@@ -12,10 +12,29 @@ export default class AccountType implements IAccountType {
   /** 収入 */
   public static readonly TYPE_INCOME = 2;
 
-  private _code: number;
+  protected _code: number;
+
+  protected _name: string = "";
 
   constructor(type: number) {
     this._code = type;
+    switch (type) {
+      case AccountType.TYPE_DEBT:
+        this._name = "負債";
+        break;
+      case AccountType.TYPE_NET_ASSET:
+        this._name = "純資産";
+        break;
+      case AccountType.TYPE_ASSET:
+        this._name = "資産";
+        break;
+      case AccountType.TYPE_SPENDING:
+        this._name = "費用";
+        break;
+      case AccountType.TYPE_INCOME:
+        this._name = "収入";
+        break;
+    }
   }
 
   /**
@@ -24,6 +43,10 @@ export default class AccountType implements IAccountType {
    */
   public get code(): number {
     return this._code;
+  }
+
+  public get name(): string {
+    return this._name;
   }
 
   public get isVirtual(): boolean {

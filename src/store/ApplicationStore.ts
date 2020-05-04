@@ -10,10 +10,22 @@ import IJournal from "@/model/interface/IJournal";
 import IJournalDate from "@/model/interface/IJournalDate";
 import { container } from "tsyringe";
 import JournalRepository from "@/repository/JournalRepository";
+import CategoryList from "@/model/category/CategoryList";
+import UserCategoryRepository from "@/repository/UserCategoryRepository";
 
 @Module({ dynamic: true, store, name: "app", namespaced: true })
 class AppStore extends VuexModule {
   private _journals: IJournal[] = [];
+
+  private _categories: CategoryList = new CategoryList();
+
+  /**
+   * Getter categories
+   * @return {CategoryList }
+   */
+  public get categories(): CategoryList {
+    return this._categories;
+  }
 
   /**
    * Getter journals
@@ -27,6 +39,20 @@ class AppStore extends VuexModule {
   public async init() {
     const journals = await container.resolve(JournalRepository).getUsersAll();
     this.INIT(journals);
+
+    const userCategories = await container
+      .resolve(UserCategoryRepository)
+      .getUsersAll();
+    this.CATEGORIES(new CategoryList(userCategories));
+    // console.log(
+    //   this.categories
+    //     .getAllItems()
+    //     .forEach((item) =>
+    //       console.log(
+    //         `id: ${item.id}  name: ${item.name}  parentId: ${item.parentId}`
+    //       )
+    //     )
+    // );
   }
 
   @Mutation
@@ -35,6 +61,11 @@ class AppStore extends VuexModule {
     if (journals) {
       this._journals.push(...journals);
     }
+  }
+
+  @Mutation
+  private CATEGORIES(list: CategoryList) {
+    this._categories = list;
   }
 
   @Action({ rawError: true })

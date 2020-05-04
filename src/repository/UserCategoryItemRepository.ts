@@ -1,15 +1,15 @@
 import { singleton, container } from "tsyringe";
-import RepositoryBase from "@/repository/RepositoryBase";
 import {
   DUserCategoryItem,
   IUserCategoryItem,
 } from "@/model/interface/ICategory";
 import IUserCategoryItemRepository from "./interface/IUserCategoryItemRepository";
 import UserCategoryItemTransaformer from "./transformer/UserCategoryItemTransaformer";
+import UserIdentifiedRepositoryBase from "./UserIdentifiedRepositoryBase";
 
 @singleton()
 export default class UserCategoryItemRepository
-  extends RepositoryBase<DUserCategoryItem, IUserCategoryItem>
+  extends UserIdentifiedRepositoryBase<DUserCategoryItem, IUserCategoryItem>
   implements IUserCategoryItemRepository {
   constructor() {
     super();
@@ -25,17 +25,18 @@ export default class UserCategoryItemRepository
   }
 
   public async getByParentId(parentId: string): Promise<IUserCategoryItem[]> {
-    const items = this.cache.get("parentId", parentId);
-    if (items && items.length > 0) {
-      return items;
-    }
-    const docs = await this.ref.where("parentId", "==", parentId).get();
-    const categoryAggregates: Promise<IUserCategoryItem>[] = [];
-    docs.forEach((doc) => {
-      const data = doc.data();
-      data.id = doc.id;
-      categoryAggregates.push(this.aggregate(data as DUserCategoryItem));
-    });
-    return Promise.all(categoryAggregates);
+    // const items = this.cache.get("parentId", parentId);
+    // if (items && items.length > 0) {
+    //   return items;
+    // }
+    // const docs = await this.ref.where("parentId", "==", parentId).get();
+    // const categoryAggregates: Promise<IUserCategoryItem>[] = [];
+    // docs.forEach((doc) => {
+    //   const data = doc.data();
+    //   data.id = doc.id;
+    //   categoryAggregates.push(this.aggregate(data as DUserCategoryItem));
+    // });
+    // return Promise.all(categoryAggregates);
+    return this.getByKey("parentId", parentId);
   }
 }

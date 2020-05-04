@@ -3,8 +3,8 @@ import CategoryItemBase from "./CategoryItemBase";
 
 export default class UserCategoryItem extends CategoryItemBase
   implements IUserCategoryItem {
-  constructor(userId: string, parentId: string, name: string) {
-    super(userId, parentId, name);
+  constructor(id: string, userId: string, parentId: string, name: string) {
+    super(id, userId, parentId, name);
   }
 
   public simplify(): DUserCategoryItem {

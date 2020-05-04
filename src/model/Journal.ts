@@ -1,4 +1,7 @@
-import IJournal, { IJournalDetail } from "@/model/interface/IJournal";
+import IJournal, {
+  IJournalDetail,
+  IJournalPeriodInfo,
+} from "@/model/interface/IJournal";
 import JournalDate from "@/model/common/JournalDate";
 import IJournalDate from "@/model/interface/IJournalDate";
 import { DJournal } from "@/model/interface/DJournal";
@@ -43,6 +46,8 @@ export default class Journal extends IdBase implements IJournal {
   /** 借方（左） */
   private _debits: IJournalDetail[] = [];
 
+  private _period?: IJournalPeriodInfo;
+
   /**
    * 仕訳
    * @param transactionId
@@ -61,7 +66,8 @@ export default class Journal extends IdBase implements IJournal {
     accountAt: string | IJournalDate,
     executeAt: string | IJournalDate,
     credits: IJournalDetail[],
-    debits: IJournalDetail[]
+    debits: IJournalDetail[],
+    period?: IJournalPeriodInfo
   ) {
     super(id);
     this._title = title;
@@ -72,6 +78,7 @@ export default class Journal extends IdBase implements IJournal {
     this._executeAt = JournalDate.cast(executeAt);
     this._credits = credits;
     this._debits = debits;
+    period && (this._period = period);
   }
 
   /**
@@ -118,6 +125,10 @@ export default class Journal extends IdBase implements IJournal {
     return this._amount;
   }
 
+  public get period(): IJournalPeriodInfo | undefined {
+    return this._period;
+  }
+
   /**
    * set amount.
    * the amount values of credit and debit in this journal will be changed as well.
@@ -151,7 +162,7 @@ export default class Journal extends IdBase implements IJournal {
   }
 
   public simplify(): DJournal {
-    return {
+    const djournal = {
       id: this.id,
       userId: this.userId,
       title: this.title,
@@ -167,6 +178,15 @@ export default class Journal extends IdBase implements IJournal {
         amount: detail.amount,
         categoryItemId: detail.category.id,
       })),
-    };
+    } as DJournal;
+    if (this.period) {
+      djournal.period = {
+        startAt: this.period.startAt.toString(),
+        finishAt: this.period.finishAt.toString(),
+        debitCategoryItemId: this.period.debit.id,
+        creditCategoryItemId: this.period.credit.id,
+      };
+    }
+    return djournal;
   }
 }

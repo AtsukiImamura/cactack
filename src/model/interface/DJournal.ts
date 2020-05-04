@@ -15,14 +15,22 @@ export interface DJournal extends Identifiable, UserIdentifiable, Strable {
   debits: DJournalDetail[];
 
   amount: number;
-  // 対象期間のあるもののみ: 開始日
-  periodStartAt?: string;
-  // 対象期間のあるもののみ: 終了日
-  periodFinishAt?: string;
+
+  period?: DJournalPeriodInfo;
 }
 
 export interface DJournalDetail extends Strable {
   amount: number;
 
   categoryItemId: string;
+}
+
+export interface DJournalPeriodInfo {
+  startAt: string;
+  // 対象期間のあるもののみ: 終了日
+  finishAt: string;
+
+  debitCategoryItemId: string;
+
+  creditCategoryItemId: string;
 }

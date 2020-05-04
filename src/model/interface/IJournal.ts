@@ -2,7 +2,7 @@ import IJournalDate from "@/model/interface/IJournalDate";
 import Identifiable, { UserIdentifiable } from "@/model/interface/Identifiable";
 import Treatable from "@/model/interface/common/Treatable";
 import { DJournal } from "@/model/interface/DJournal";
-import { IUserCategoryItem } from "./ICategory";
+import { IUserCategoryItem, IAccountCategory } from "./ICategory";
 
 export default interface IJournal
   extends Identifiable,
@@ -20,16 +20,25 @@ export default interface IJournal
   debits: IJournalDetail[];
 
   amount: number;
-  // 対象期間のあるもののみ: 開始日
-  periodStartAt?: IJournalDate;
-  // 対象期間のあるもののみ: 終了日
-  periodFinishAt?: IJournalDate;
+
+  period?: IJournalPeriodInfo;
 }
 
 export interface IJournalDetail {
   category: IUserCategoryItem;
 
   amount: number;
+}
+
+export interface IJournalPeriodInfo {
+  // 対象期間のあるもののみ: 開始日
+  startAt: IJournalDate;
+  // 対象期間のあるもののみ: 終了日
+  finishAt: IJournalDate;
+
+  debit: IAccountCategory;
+
+  credit: IAccountCategory;
 }
 
 export interface IExecutable {

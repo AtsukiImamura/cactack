@@ -1,12 +1,12 @@
 import { singleton, container } from "tsyringe";
-import RepositoryBase from "@/repository/RepositoryBase";
 import { DUserCategory, IUserCategory } from "@/model/interface/ICategory";
 import IUserCategoryRepository from "./interface/IUserCategoryRepository";
 import UserCategoryTransaformer from "./transformer/UserCategoryTransaformer";
+import UserIdentifiedRepositoryBase from "./UserIdentifiedRepositoryBase";
 
 @singleton()
 export default class UserCategoryRepository
-  extends RepositoryBase<DUserCategory, IUserCategory>
+  extends UserIdentifiedRepositoryBase<DUserCategory, IUserCategory>
   implements IUserCategoryRepository {
   constructor() {
     super();

@@ -19,18 +19,6 @@ export default abstract class UserIdentifiedRepositoryBase<
     if (!userId) {
       return [];
     }
-    const cacheItems = this.cache.get("userId", userId);
-    if (cacheItems && cacheItems.length > 0) {
-      return cacheItems;
-    }
-
-    const docs = await this.ref.where("userId", "==", userId).get();
-    const journalAggregates: Promise<T>[] = [];
-    docs.forEach((doc) => {
-      const data = doc.data();
-      data.id = doc.id;
-      journalAggregates.push(this.aggregate(data as S));
-    });
-    return Promise.all(journalAggregates);
+    return this.getByKey("userId", userId);
   }
 }

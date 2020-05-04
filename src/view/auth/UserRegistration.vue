@@ -57,6 +57,10 @@ export default class UserRegistration extends Vue {
     //   .resolve(UserCreationMasterRepository)
     //   .insertAll()
     //   .then(() => console.log(":OK"));
+    // container
+    //   .resolve(CategoryMasterRepository)
+    //   .insertAll()
+    //   .then(() => console.log(":OK"));
   }
 
   public createUser(): void {

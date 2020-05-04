@@ -14,11 +14,19 @@ export default class CategoryItemMasterRepository
   constructor() {
     super();
     this.dbKey = "categoryItemMaster";
+    this.cache.addIndex(
+      "parentId",
+      (value: ICategoryItemMaster) => value.parentId
+    );
   }
 
   public async aggregate(
     item: DCategoryItemMaster
   ): Promise<ICategoryItemMaster> {
     return container.resolve(CategoryItemMasterTransaformer).aggregate(item);
+  }
+
+  public async getByParentId(parentId: string): Promise<ICategoryItemMaster[]> {
+    return this.getByKey("parentId", parentId);
   }
 }

@@ -139,13 +139,13 @@ const router = new Router({
     //       /* webpackChunkName: "register" */ "@/view/register/RegisterResults.vue"
     //     ),
     // },
-    // {
-    //   path: "/journalize/transfer",
-    //   component: () =>
-    //     import(
-    //       /* webpackChunkName: "register" */ "@/view/register/Manually.vue"
-    //     ),
-    // },
+    {
+      path: "/journalize/transfer",
+      component: () =>
+        import(
+          /* webpackChunkName: "register" */ "@/view/register/Manually.vue"
+        ),
+    },
     // {
     //   path: "/transaction/:transactionId/:method",
     //   component: () =>
@@ -184,6 +184,7 @@ router.beforeEach((to, from, next) => {
     !to.path.startsWith("/auth") &&
     !to.path.startsWith("/top") &&
     !to.path.startsWith("/user") &&
+    !to.path.startsWith("/journalize") &&
     !container.resolve(UserAuthService).userId
   ) {
     next("/auth/login");

@@ -3,4 +3,6 @@ import IBaseRepository from "./IBaseRepository";
 
 export default interface IUserIdentifiedBaseRepository<
   T extends Identifiable & UserIdentifiable
-> extends IBaseRepository<T> {}
+> extends IBaseRepository<T> {
+  getUsersAll: () => Promise<T[]>;
+}

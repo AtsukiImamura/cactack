@@ -68,7 +68,7 @@ class UserCreationStore extends VuexModule {
           .resolve(UserCategoryItemRepository)
           .batchInsert(
             info[type].map(
-              (m) => new UserCategoryItem(userId, inserted.id, m.name)
+              (m) => new UserCategoryItem("", userId, inserted.id, m.name)
             )
           )
       );

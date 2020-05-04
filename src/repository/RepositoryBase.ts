@@ -80,12 +80,12 @@ export default abstract class RepositoryBase<
   }
 
   public async insert(value: T): Promise<T> {
-    const currentUser = firebase.auth().currentUser;
     const simplyfied = value.simplify();
-    if (!currentUser) {
-      throw new Error("user not found.");
-    }
     if (typeof (simplyfied as any).userId === "string") {
+      const currentUser = firebase.auth().currentUser;
+      if (!currentUser) {
+        throw new Error("user not found.");
+      }
       (simplyfied as any).userId = currentUser.uid;
     }
     const docRef = await this.ref.add(simplyfied);
@@ -168,5 +168,21 @@ export default abstract class RepositoryBase<
 
   public clearAll(): Promise<void> {
     return Promise.resolve();
+  }
+
+  protected async getByKey(index: string, key: string): Promise<T[]> {
+    const cacheItems = this.cache.get(index, key);
+    if (cacheItems && cacheItems.length > 0) {
+      return cacheItems;
+    }
+
+    const docs = await this.ref.where(index, "==", key).get();
+    const journalAggregates: Promise<T>[] = [];
+    docs.forEach((doc) => {
+      const data = doc.data();
+      data.id = doc.id;
+      journalAggregates.push(this.aggregate(data as S));
+    });
+    return Promise.all(journalAggregates);
   }
 }
