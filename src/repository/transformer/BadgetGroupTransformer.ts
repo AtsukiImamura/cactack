@@ -3,7 +3,7 @@ import { IBadgetGroup } from "@/model/interface/IBadget";
 import { DBadgetGroup } from "@/model/interface/DBadget";
 import BadgetGroup from "@/model/BadgetGroup";
 import { container } from "tsyringe";
-import IBadgetRepository from "../interface/IBadgetRepository";
+import IBadgetRepository from "@/repository/interface/IBadgetRepository";
 
 export default class BadgetGroupTransformer extends Transformer<
   DBadgetGroup,

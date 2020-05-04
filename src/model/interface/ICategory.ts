@@ -1,31 +1,39 @@
 import Identifiable, { UserIdentifiable } from "./Identifiable";
 import Strable from "./common/Strable";
 import Treatable from "./common/Treatable";
+import IAccountType from "./IType";
 
-interface ICategory extends Identifiable {
+interface ICategoryBase extends Identifiable {
   name: string;
-
-  home: number;
-
-  isReal: boolean;
 }
 
-export interface DCategoryMaster extends ICategory, Strable {}
+export interface IAccountCategory extends ICategoryBase {
+  type: IAccountType;
 
-export interface ICategoryMaster extends ICategory, Treatable<DCategoryMaster> {
-  isCredit: boolean;
-
-  isDebit: boolean;
+  items: ICategoryItem[];
 }
 
-export interface DUserCategory extends ICategory, Strable, UserIdentifiable {}
+export interface DCategoryMaster extends ICategoryBase, Strable {
+  type: number;
+}
+
+export interface ICategoryMaster
+  extends IAccountCategory,
+    Treatable<DCategoryMaster> {}
+
+export interface DUserCategory
+  extends ICategoryBase,
+    Strable,
+    UserIdentifiable {
+  type: number;
+}
 
 export interface IUserCategory
-  extends ICategory,
+  extends IAccountCategory,
     UserIdentifiable,
     Treatable<DUserCategory> {}
 
-interface ICategoryItem {
+export interface ICategoryItem extends Identifiable {
   name: string;
 
   parentId: string;

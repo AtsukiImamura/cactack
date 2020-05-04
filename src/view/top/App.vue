@@ -2,34 +2,6 @@
   <CommonFrame>
     <div class="top">
       <div class="h">
-        <div class="month-move prev" @click="prev"></div>
-        <div class="month-move next" @click="next"></div>
-        <div class="month-list-wrap">
-          <div
-            class="month-list"
-            @scroll="onMonthScrolled"
-            :key="monthlyInfoList[0].month"
-            v-if="!loading"
-            ref="monthlyList"
-          >
-            <div class="monthly" v-for="(info, index) in monthlyInfoList" :key="index">
-              <div class="month-name">
-                <h2>{{ info.month }}</h2>
-                <!-- <h3>Febrary</h3> -->
-              </div>
-              <div class="money-change">
-                <div class="m prev-month">
-                  <span>&yen;</span>
-                  <NumberIncrementor :value="info.prev"></NumberIncrementor>
-                </div>
-                <div class="m this-month">
-                  <span>&yen;</span>
-                  <NumberIncrementor :value="info.value"></NumberIncrementor>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
         <div class="gragh" v-intro="'今月の資産変動を表示しています。左が月初、右が月末です。'" v-intro-step="1">
           <div class="loading" v-if="loading">
             <div class="loading-linear"></div>
@@ -45,33 +17,32 @@
         >
           <FlowTypeSelector @select="onlyCashFlow = $event" :cash-only="onlyCashFlow"></FlowTypeSelector>
         </div>
-        <div class="c">
+        <!-- <div class="c">
           <TopDetails :image-path="'image/in.svg'" title="IN" :transactions="inTransactions"></TopDetails>
         </div>
         <div class="c" v-intro="'支出を表示しています。詳細は「フロー」ページで確認できます。'" v-intro-step="3">
           <TopDetails :image-path="'image/out.svg'" title="OUT" :transactions="outTransactions"></TopDetails>
-        </div>
+        </div>-->
       </div>
     </div>
   </CommonFrame>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import { IDiffGraghOption } from "@/view/interface/IDiffGragh";
-import TopDetails, { TopDetailTransactionDto } from "@/view/top/TopDetails.vue";
+import TopDetails from "@/view/top/TopDetails.vue";
 import CactackBalance from "vue-balance";
 import JournalDate from "@/model/common/JournalDate";
-import IJournal from "../../model/interface/IJournal";
-import AppModule from "../../store/ApplicationStore";
+import IJournal from "@/model/interface/IJournal";
+import AppModule from "@/store/ApplicationStore";
 import { container } from "tsyringe";
 import DiffGraphUtil from "@/view/util/DiffGraphUtil";
-import AccountCategory from "../../model/AccountCategory";
-import ITransaction from "../../model/interface/ITransaction";
+// import AccountCategory from "@/model/AccountCategory";
 import NumberIncrementor from "@/view/common/NumberIncrementor.vue";
-import UserAuthService from "../../service/UserAuthService";
+import UserAuthService from "@/service/UserAuthService";
 import CommonFrame from "@/view/common/CommonFrame.vue";
-import IJournalDate from "../../model/interface/IJournalDate";
+import IJournalDate from "@/model/interface/IJournalDate";
 import FlowTypeSelector from "@/view/common/FlowTypeSelector.vue";
 
 @Component({
@@ -124,35 +95,35 @@ export default class App extends Vue {
     }
   }
 
-  public get monthlyInfoList(): {
-    month: number;
-    prev: number;
-    value: number;
-  }[] {
-    return [
-      { month: this.date.getPreviousMonth().month, prev: 0, value: 0 },
-      {
-        month: this.date.month,
-        prev: this.totalAmountOfPreviousMonth,
-        value: this.totalAmountOfThisMonth
-      },
-      { month: this.date.getNextMonth().month, prev: 0, value: 0 }
-    ];
-  }
+  // public get monthlyInfoList(): {
+  //   month: number;
+  //   prev: number;
+  //   value: number;
+  // }[] {
+  //   return [
+  //     { month: this.date.getPreviousMonth().month, prev: 0, value: 0 },
+  //     {
+  //       month: this.date.month,
+  //       prev: this.totalAmountOfPreviousMonth,
+  //       value: this.totalAmountOfThisMonth
+  //     },
+  //     { month: this.date.getNextMonth().month, prev: 0, value: 0 }
+  //   ];
+  // }
 
-  @Watch("monthlyInfoList")
-  public onMonthlyInfoChanged(): void {
-    setTimeout(() => {
-      const elem = this.$refs.monthlyList as HTMLDivElement;
-      if (!elem) {
-        return;
-      }
-      if (document.body.clientWidth > 768) {
-        return;
-      }
-      elem.scrollLeft = elem.clientWidth * 0.55 + 20 + 5;
-    }, 10);
-  }
+  // @Watch("monthlyInfoList")
+  // public onMonthlyInfoChanged(): void {
+  //   setTimeout(() => {
+  //     const elem = this.$refs.monthlyList as HTMLDivElement;
+  //     if (!elem) {
+  //       return;
+  //     }
+  //     if (document.body.clientWidth > 768) {
+  //       return;
+  //     }
+  //     elem.scrollLeft = elem.clientWidth * 0.55 + 20 + 5;
+  //   }, 10);
+  // }
 
   public get month(): number {
     return this.date.month;
@@ -162,24 +133,24 @@ export default class App extends Vue {
     return AppModule.journals;
   }
 
-  public get inTransactions(): TopDetailTransactionDto[] {
-    return this.toDetailDto(AppModule.transactions).filter(tr => tr.amount > 0);
-  }
+  // public get inTransactions(): TopDetailTransactionDto[] {
+  //   return this.toDetailDto(AppModule.transactions).filter(tr => tr.amount > 0);
+  // }
 
-  public get outTransactions(): TopDetailTransactionDto[] {
-    return this.toDetailDto(AppModule.transactions).filter(tr => tr.amount < 0);
-  }
+  // public get outTransactions(): TopDetailTransactionDto[] {
+  //   return this.toDetailDto(AppModule.transactions).filter(tr => tr.amount < 0);
+  // }
 
-  private toDetailDto(transactions: ITransaction[]): TopDetailTransactionDto[] {
-    return transactions.map(tr => ({
-      name: tr.name,
-      createdAt: tr.createdAt.toString(),
-      badget: tr.badget ? tr.badget.name : "",
-      amount: this.onlyCashFlow
-        ? tr.getMonthlyCashFlowOf(this.date)
-        : tr.getMonthlyAmountOf(this.date)
-    }));
-  }
+  // private toDetailDto(transactions: ITransaction[]): TopDetailTransactionDto[] {
+  //   return transactions.map(tr => ({
+  //     name: tr.name,
+  //     createdAt: tr.createdAt.toString(),
+  //     badget: tr.badget ? tr.badget.name : "",
+  //     amount: this.onlyCashFlow
+  //       ? tr.getMonthlyCashFlowOf(this.date)
+  //       : tr.getMonthlyAmountOf(this.date)
+  //   }));
+  // }
 
   public get diffGraghOption(): IDiffGraghOption {
     return {
@@ -189,9 +160,7 @@ export default class App extends Vue {
       right: container
         .resolve(DiffGraphUtil)
         .calcBalance(this.journals, this.date.getNextMonth().firstDay),
-      diffs: container
-        .resolve(DiffGraphUtil)
-        .calcDiffs(AppModule.transactions, this.date, this.onlyCashFlow),
+      diffs: [],
       displayOptions: {
         displayItemName: true,
         displayItemAmount: true,
@@ -202,41 +171,41 @@ export default class App extends Vue {
     };
   }
 
-  public get totalAmountOfPreviousMonth(): number {
-    const summary = container
-      .resolve(DiffGraphUtil)
-      .calcBalance(this.journals, this.date.firstDay);
-    for (const item of [...summary.credit, ...summary.debit]) {
-      if (
-        !this.onlyCashFlow &&
-        item.name === AccountCategory.netAssets().name
-      ) {
-        return item.amount;
-      }
-      if (this.onlyCashFlow && item.name === AccountCategory.cash().name) {
-        return item.amount;
-      }
-    }
-    return 0;
-  }
+  // public get totalAmountOfPreviousMonth(): number {
+  //   const summary = container
+  //     .resolve(DiffGraphUtil)
+  //     .calcBalance(this.journals, this.date.firstDay);
+  //   for (const item of [...summary.credit, ...summary.debit]) {
+  //     if (
+  //       !this.onlyCashFlow &&
+  //       item.name === AccountCategory.netAssets().name
+  //     ) {
+  //       return item.amount;
+  //     }
+  //     if (this.onlyCashFlow && item.name === AccountCategory.cash().name) {
+  //       return item.amount;
+  //     }
+  //   }
+  //   return 0;
+  // }
 
-  public get totalAmountOfThisMonth(): number {
-    const summary = container
-      .resolve(DiffGraphUtil)
-      .calcBalance(this.journals, this.date.getNextMonth().firstDay);
-    for (const item of [...summary.credit, ...summary.debit]) {
-      if (
-        !this.onlyCashFlow &&
-        item.name === AccountCategory.netAssets().name
-      ) {
-        return item.amount;
-      }
-      if (this.onlyCashFlow && item.name === AccountCategory.cash().name) {
-        return item.amount;
-      }
-    }
-    return 0;
-  }
+  // public get totalAmountOfThisMonth(): number {
+  //   const summary = container
+  //     .resolve(DiffGraphUtil)
+  //     .calcBalance(this.journals, this.date.getNextMonth().firstDay);
+  //   for (const item of [...summary.credit, ...summary.debit]) {
+  //     if (
+  //       !this.onlyCashFlow &&
+  //       item.name === AccountCategory.netAssets().name
+  //     ) {
+  //       return item.amount;
+  //     }
+  //     if (this.onlyCashFlow && item.name === AccountCategory.cash().name) {
+  //       return item.amount;
+  //     }
+  //   }
+  //   return 0;
+  // }
 
   public get loading(): boolean {
     return this.journals.length === 0;

@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
-import { IBlanceItemDispInfo } from "../interface/IDiffGragh";
+import { IBlanceItemDispInfo } from "@/view/interface/IDiffGragh";
 
 @Component({})
 export default class JouranlDetailGragh extends Vue {

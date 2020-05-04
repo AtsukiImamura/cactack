@@ -1,24 +1,28 @@
-import Identifiable from "@/model/interface/Identifiable";
+import Identifiable, { UserIdentifiable } from "@/model/interface/Identifiable";
 import Strable from "@/model/interface/common/Strable";
 
-export interface DJournal extends Identifiable, Strable {
-  transactionId?: string;
+export interface DJournal extends Identifiable, UserIdentifiable, Strable {
+  title: string;
 
-  amount: number;
+  createdAt: string;
 
   accountAt: string;
 
   executeAt: string;
 
-  credit: number;
+  credits: DJournalDetail[];
 
-  debit: number;
+  debits: DJournalDetail[];
 
-  badgetId?: string;
+  amount: number;
+  // 対象期間のあるもののみ: 開始日
+  periodStartAt?: string;
+  // 対象期間のあるもののみ: 終了日
+  periodFinishAt?: string;
 }
 
-export interface DJournalDetail extends Identifiable, Strable {
+export interface DJournalDetail extends Strable {
   amount: number;
 
-  category: number;
+  categoryItemId: string;
 }

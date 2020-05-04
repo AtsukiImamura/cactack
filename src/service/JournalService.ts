@@ -1,15 +1,7 @@
 import { container } from "tsyringe";
-import IJournalRepostory from "../repository/interface/IJournalRepository";
-import IJournal, {
-  IJournalDetail,
-  ICreditDebt
-} from "../model/interface/IJournal";
-
+import IJournalRepostory from "@/repository/interface/IJournalRepository";
+import IJournal from "@/model/interface/IJournal";
 import { singleton } from "tsyringe";
-// import IJournalDetailRepository from "../repository/interface/IJournalDetailRepository";
-// import IBadgetRepository from "../repository/interface/IBadgetRepository";
-import Journal from "../model/Journal";
-import IJournalDate from "../model/interface/IJournalDate";
 
 @singleton()
 export default class JournalService {
@@ -39,7 +31,7 @@ export default class JournalService {
     //   .catch((err) => console.warn(err));
     await this.journalRepository
       .insert(journal)
-      .catch(err => console.warn(err));
+      .catch((err) => console.warn(err));
   }
 
   public async updateJournal(journal: IJournal) {
@@ -52,41 +44,7 @@ export default class JournalService {
     //   .catch(err => console.warn(err));
     await this.journalRepository
       .update(journal)
-      .catch(err => console.warn(err));
-  }
-
-  /**
-   * 負債を処理する一連の仕訳を生成
-   * @param debt 負債項目
-   * @param executeAt 執行日
-   */
-  public createJournalsOfDebt(
-    debt: IJournalDetail,
-    executeAt: string | IJournalDate
-  ): IJournal[] {
-    if (debt.isDebit) {
-      throw new Error("Debt must be on credit side.");
-    }
-    return [Journal.debt(debt.amount, executeAt), Journal.cashOut(debt.amount)];
-  }
-
-  public createJournalsOfCreditDebt(creditDebt: ICreditDebt): IJournal[] {
-    return this.createJournalsOfDebt(
-      creditDebt as IJournalDetail,
-      creditDebt.executeAt
-    );
-  }
-
-  /**
-   * 一連の負債を処理する仕訳を生成
-   * @param debts
-   */
-  public createJournalsOfDebts(debts: ICreditDebt[]): IJournal[] {
-    const totalAmount = debts.reduce((acc, cur) => (acc += cur.amount), 0);
-    return [
-      Journal.cashOut(totalAmount),
-      ...debts.map(debt => Journal.debt(debt.amount, debt.executeAt))
-    ];
+      .catch((err) => console.warn(err));
   }
   public async deleteJournal(journal: IJournal) {
     await this.journalRepository.delete(journal);

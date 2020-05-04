@@ -1,14 +1,14 @@
 import { singleton, container } from "tsyringe";
 import IJournalRepository from "@/repository/interface/IJournalRepository";
 import IJournal from "@/model/interface/IJournal";
-import RepositoryBase from "@/repository/RepositoryBase";
 import IJournalDate from "@/model/interface/IJournalDate";
 import { DJournal } from "@/model/interface/DJournal";
 import JournalTransformer from "@/repository/transformer/JournalTransformer";
+import UserIdentifiedRepositoryBase from "./UserIdentifiedRepositoryBase";
 
 @singleton()
 export default class JournalRepository
-  extends RepositoryBase<DJournal, IJournal>
+  extends UserIdentifiedRepositoryBase<DJournal, IJournal>
   implements IJournalRepository {
   constructor() {
     super();
@@ -40,18 +40,5 @@ export default class JournalRepository
     to: IJournalDate
   ): Promise<IJournal[]> {
     return this.getByAccountedAt(from, to); // TODO: 実装
-  }
-
-  public async getByTransactionId(transactionId: string): Promise<IJournal[]> {
-    const docs = await this.ref
-      .where("transactionId", "==", transactionId)
-      .get();
-    const journalAggregates: Promise<IJournal>[] = [];
-    docs.forEach((doc) => {
-      const data = doc.data();
-      data.id = doc.id;
-      journalAggregates.push(this.aggregate(data as DJournal));
-    });
-    return Promise.all(journalAggregates);
   }
 }

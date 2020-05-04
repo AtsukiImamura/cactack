@@ -1,39 +1,35 @@
 import IJournalDate from "@/model/interface/IJournalDate";
-import Identifiable from "@/model/interface/Identifiable";
+import Identifiable, { UserIdentifiable } from "@/model/interface/Identifiable";
 import Treatable from "@/model/interface/common/Treatable";
-import { DJournalDetail, DJournal } from "@/model/interface/DJournal";
+import { DJournal } from "@/model/interface/DJournal";
+import { IUserCategoryItem } from "./ICategory";
 
 export default interface IJournal
   extends Identifiable,
+    UserIdentifiable,
     Treatable<DJournal>,
     IExecutable {
-  transactionId: string;
+  title: string;
+
+  createdAt: IJournalDate;
 
   accountAt: IJournalDate;
 
-  credit: IAccountCategory;
+  credits: IJournalDetail[];
 
-  debit: IAccountCategory;
+  debits: IJournalDetail[];
 
   amount: number;
-
-  setAmount: (amount: number) => void;
-
-  setTransactionId: (id: string) => void;
-
-  counter: (executeAt?: IJournalDate | string) => IJournal;
+  // 対象期間のあるもののみ: 開始日
+  periodStartAt?: IJournalDate;
+  // 対象期間のあるもののみ: 終了日
+  periodFinishAt?: IJournalDate;
 }
 
-export interface IJournalDetail
-  extends Identifiable,
-    Treatable<DJournalDetail> {
+export interface IJournalDetail {
+  category: IUserCategoryItem;
+
   amount: number;
-
-  category: IAccountCategory;
-
-  isCredit: boolean;
-
-  isDebit: boolean;
 }
 
 export interface IExecutable {
@@ -42,14 +38,12 @@ export interface IExecutable {
   execute: () => void;
 }
 
-export interface ICreditDebt extends IJournalDetail, IExecutable {}
+// export interface IAccountCategory {
+//   code: number;
 
-export interface IAccountCategory {
-  code: number;
+//   name: string;
 
-  name: string;
+//   isCredit: boolean;
 
-  isCredit: boolean;
-
-  isDebit: boolean;
-}
+//   isDebit: boolean;
+// }

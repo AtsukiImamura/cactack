@@ -4,13 +4,24 @@ import IdBase from "./IdBase";
 
 export default class UserCreationMaster extends IdBase
   implements IUserCreationMaster {
+  /** 現金 */
   public static readonly TYPE_CASH_STRAGE: number = 0;
-
-  public static readonly TYPE_CASH_BANK: number = 1;
-
-  public static readonly TYPE_CASH_PREPAID: number = 2;
-
-  public static readonly TYPE_CASH_CREDIT_CARD: number = 3;
+  /** 銀行口座 */
+  public static readonly TYPE_BANK: number = 1;
+  /** プリペイド */
+  public static readonly TYPE_PREPAID: number = 2;
+  /** クレジットカード */
+  public static readonly TYPE_CREDIT_CARD: number = 3;
+  /** 資産 */
+  public static readonly TYPE_PROPERTY: number = 4;
+  /** 収入 */
+  public static readonly TYPE_INCOME: number = 20;
+  /** 固定収入 */
+  public static readonly TYPE_STEADY_INCOME: number = 21;
+  /** 支出 */
+  public static readonly TYPE_SPENDING: number = 22;
+  /** 固定支出 */
+  public static readonly TYPE_STEADY_SPENDING: number = 23;
 
   private _title: string;
 

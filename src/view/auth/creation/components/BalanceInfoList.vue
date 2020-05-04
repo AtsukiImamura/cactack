@@ -5,7 +5,7 @@
         <input type="text" v-model="info.name" @blur="onUpdate" />
       </div>
       <div class="cell amount">
-        <NumberInput v-model="info.amount"></NumberInput>
+        <NumberInput v-model="info.amount" @commit="onUpdate"></NumberInput>
       </div>
       <div class="cell delete">
         <div class="delete-button enabled" @click="remove(index)"></div>
@@ -21,20 +21,18 @@
 import { Component, Vue, Prop, Emit } from "vue-property-decorator";
 import IUserCreationMaster from "@/model/interface/IUserCreationMaster";
 import NumberInput from "@/view/common/NumberInput.vue";
-
-export interface IBalanceInfo {
-  name: string;
-  amount: number;
-}
+import { IBalanceInfo } from "@/store/UserCreationStore";
 
 @Component({ components: { NumberInput } })
 export default class BalanceInfoList extends Vue {
-  @Prop({ default: () => [] }) value!: IUserCreationMaster[];
+  @Prop({ default: () => [] }) masters!: IUserCreationMaster[];
+
+  @Prop({ default: () => 0 }) category!: number;
 
   public infoList: IBalanceInfo[] = [];
 
   public mounted(): void {
-    this.infoList = this.value.map(m => ({ name: m.title, amount: 0 }));
+    this.infoList = this.masters.map(m => ({ name: m.title, amount: 0 }));
   }
 
   public add(): void {
@@ -45,10 +43,12 @@ export default class BalanceInfoList extends Vue {
     this.infoList.splice(index, 1);
   }
 
-  @Emit("input")
   public onUpdate() {
-    return this.infoList;
+    this.commit(this.infoList, this.category);
   }
+
+  @Emit("commit")
+  public commit(values: IBalanceInfo[], category: number) {}
 }
 </script>
 

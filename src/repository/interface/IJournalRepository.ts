@@ -1,8 +1,9 @@
 import IJournal from "@/model/interface/IJournal";
-import IBaseRepository from "@/repository/interface/IBaseRepository";
 import IJournalDate from "@/model/interface/IJournalDate";
+import IUserIdentifiedBaseRepository from "./IUserIdentifiedBaseRepository";
 
-export default interface IJournalRepository extends IBaseRepository<IJournal> {
+export default interface IJournalRepository
+  extends IUserIdentifiedBaseRepository<IJournal> {
   getByAccountedAt: (
     from: IJournalDate,
     to: IJournalDate
@@ -11,6 +12,4 @@ export default interface IJournalRepository extends IBaseRepository<IJournal> {
     from: IJournalDate,
     to: IJournalDate
   ) => Promise<IJournal[]>;
-
-  getByTransactionId: (transactionId: string) => Promise<IJournal[]>;
 }

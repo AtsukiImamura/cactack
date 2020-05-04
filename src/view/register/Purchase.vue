@@ -109,7 +109,7 @@ import ReceivableLines from "@/view/register/ReceivableLines.vue";
 import NumberInput from "@/view/common/NumberInput.vue";
 import TransactionModule from "@/store/TransactionStore";
 import PropertySelector from "@/view/register/PropertySelector.vue";
-import { PropertyHeader } from "../../model/interface/dto/PropertyDto";
+import { PropertyHeader } from "@/model/interface/dto/PropertyDto";
 import RegisterDepreciation from "@/view/register/RegisterDepreciation.vue";
 import RegisterBasic from "@/view/register/RegisterBasic.vue";
 import CommonFrame from "@/view/common/CommonFrame.vue";

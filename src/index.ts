@@ -15,66 +15,16 @@ Vue.use(Router);
 
 const router = new Router({
   routes: [
+    /** ------------------------------- ランディングページ -------------------------------------- */
+
     {
-      path: "/",
+      path: "/top",
       component: () =>
-        import(/* webpackChunkName: "app" */ "@/view/top/App.vue"),
+        import(/* webpackChunkName: "auth" */ "@/view/Landing.vue"),
     },
-    {
-      path: "/flow",
-      component: () =>
-        import(/* webpackChunkName: "flow" */ "@/view/flow/Flow.vue"),
-    },
-    {
-      path: "/inventory",
-      component: () =>
-        import(/* webpackChunkName: "app" */ "@/view/top/App.vue"),
-    },
-    {
-      path: "/register",
-      component: () =>
-        import(
-          /* webpackChunkName: "register" */ "@/view/register/RegisterMenu.vue"
-        ),
-    },
-    {
-      path: "/register/purchase",
-      component: () =>
-        import(
-          /* webpackChunkName: "register" */ "@/view/register/Purchase.vue"
-        ),
-    },
-    {
-      path: "/register/debt",
-      component: () =>
-        import(/* webpackChunkName: "register" */ "@/view/register/Debt.vue"),
-    },
-    {
-      path: "/register/receivable",
-      component: () =>
-        import(
-          /* webpackChunkName: "register" */ "@/view/register/Receivable.vue"
-        ),
-    },
-    {
-      path: "/register/ok",
-      component: () =>
-        import(
-          /* webpackChunkName: "register" */ "@/view/register/RegisterResults.vue"
-        ),
-    },
-    {
-      path: "/register/manually",
-      component: () =>
-        import(
-          /* webpackChunkName: "register" */ "@/view/register/Manually.vue"
-        ),
-    },
-    {
-      path: "/transaction/:transactionId/:method",
-      component: () =>
-        import(/* webpackChunkName: "top" */ "@/view/register/Manually.vue"),
-    },
+
+    /** ------------------------------- ユーザー登録 -------------------------------------- */
+
     {
       path: "/auth/create",
       component: () =>
@@ -138,28 +88,87 @@ const router = new Router({
           /* webpackChunkName: "top" */ "@/view/auth/creation/UserCreationFinish.vue"
         ),
     },
+
+    /** ------------------------------- アプリ -------------------------------------- */
+
+    {
+      path: "/",
+      component: () =>
+        import(/* webpackChunkName: "app" */ "@/view/top/App.vue"),
+    },
+    // {
+    //   path: "/flow",
+    //   component: () =>
+    //     import(/* webpackChunkName: "flow" */ "@/view/flow/Flow.vue"),
+    // },
+    // {
+    //   path: "/inventory",
+    //   component: () =>
+    //     import(/* webpackChunkName: "app" */ "@/view/top/App.vue"),
+    // },
+    {
+      path: "/journalize",
+      component: () =>
+        import(
+          /* webpackChunkName: "register" */ "@/view/register/RegisterMenu.vue"
+        ),
+    },
+    // {
+    //   path: "/journalize/purchase",
+    //   component: () =>
+    //     import(
+    //       /* webpackChunkName: "register" */ "@/view/register/Purchase.vue"
+    //     ),
+    // },
+    // {
+    //   path: "/journalize/debt",
+    //   component: () =>
+    //     import(/* webpackChunkName: "register" */ "@/view/register/Debt.vue"),
+    // },
+    // {
+    //   path: "/journalize/receivable",
+    //   component: () =>
+    //     import(
+    //       /* webpackChunkName: "register" */ "@/view/register/Receivable.vue"
+    //     ),
+    // },
+    // {
+    //   path: "/journalize/ok",
+    //   component: () =>
+    //     import(
+    //       /* webpackChunkName: "register" */ "@/view/register/RegisterResults.vue"
+    //     ),
+    // },
+    // {
+    //   path: "/journalize/transfer",
+    //   component: () =>
+    //     import(
+    //       /* webpackChunkName: "register" */ "@/view/register/Manually.vue"
+    //     ),
+    // },
+    // {
+    //   path: "/transaction/:transactionId/:method",
+    //   component: () =>
+    //     import(/* webpackChunkName: "top" */ "@/view/register/Manually.vue"),
+    // },
+
     {
       path: "/auth/login",
       component: () =>
         import(/* webpackChunkName: "auth" */ "@/view/auth/UserLogin.vue"),
     },
-    {
-      path: "/top",
-      component: () =>
-        import(/* webpackChunkName: "auth" */ "@/view/Landing.vue"),
-    },
-    {
-      path: "/badget",
-      component: () =>
-        import(/* webpackChunkName: "badget" */ "@/view/badget/Badget.vue"),
-    },
-    {
-      path: "/badget/detail",
-      component: () =>
-        import(
-          /* webpackChunkName: "badget" */ "@/view/badget/BadgetDetail.vue"
-        ),
-    },
+    // {
+    //   path: "/badget",
+    //   component: () =>
+    //     import(/* webpackChunkName: "badget" */ "@/view/badget/Badget.vue"),
+    // },
+    // {
+    //   path: "/badget/detail",
+    //   component: () =>
+    //     import(
+    //       /* webpackChunkName: "badget" */ "@/view/badget/BadgetDetail.vue"
+    //     ),
+    // },
     // {
     //   path: "/user/init",
     //   component: () =>

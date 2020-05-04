@@ -25,10 +25,10 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { IJournalControl } from "../../model/interface/dto/JournalControl";
+import { IJournalControl } from "@/model/interface/dto/JournalControl";
 import NumberInput from "@/view/common/NumberInput.vue";
 import DatePicker from "vuejs-datepicker";
-import JournalDate from "../../model/common/JournalDate";
+import JournalDate from "@/model/common/JournalDate";
 
 @Component({ components: { DatePicker, NumberInput } })
 export default class TransactionLines extends Vue {

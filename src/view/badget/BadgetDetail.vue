@@ -72,10 +72,8 @@ import { Component, Vue } from "vue-property-decorator";
 import { IBadgetGroup, IBadget } from "@/model/interface/IBadget";
 import BadgetModule from "@/store/BadgetStore";
 import CommonFrame from "@/view/common/CommonFrame.vue";
-import AppModule from "@/store/ApplicationStore";
 import ScrollDownRow from "@/view/common/ScrollDownRow.vue";
-import JournalDate from "@/model/common/JournalDate";
-import ITransaction from "@/model/interface/ITransaction";
+// import ITransaction from "@/model/interface/ITransaction";
 import BadgetEdition from "@/view/badget/BadgetEdition.vue";
 
 enum EditAreaDispContent {
@@ -103,46 +101,47 @@ export default class BadgetDetail extends Vue {
   }
 
   public get badgets() {
-    if (!this.target) {
-      return [];
-    }
-    return this.target.badgets.map(badget => {
-      const transactions = AppModule.transactions.filter(
-        tr => tr.badget && tr.badget.id == this.target!.id
-      );
-      const result = -transactions
-        .map(tr =>
-          JournalDate.byMonth(badget.year, badget.month)
-            .getMonthsOfAfter(this.target!.cycle - 1)
-            .map(month => {
-              return tr.getMonthlyAmountOf(month);
-            })
-            .reduce((acc, cur) => (acc += cur), 0)
-        )
-        .reduce((acc, cur) => (acc += cur), 0);
-      return {
-        date: `${badget.year}/${badget.month}`,
-        prediction: badget.amount,
-        result: result,
-        diff: result - badget.amount,
-        badget: badget,
-        transactions: transactions
-          .map(tr => {
-            return {
-              name: tr.name,
-              date: tr.createdAt.toString(),
-              amount: JournalDate.byMonth(badget.year, badget.month)
-                .getMonthsOfAfter(this.target!.cycle - 1)
-                .map(month => {
-                  return tr.getMonthlyAmountOf(month);
-                })
-                .reduce((acc, cur) => (acc += cur), 0),
-              transaction: tr
-            };
-          })
-          .filter(info => info.amount !== 0)
-      };
-    });
+    // if (!this.target) {
+    //   return [];
+    // }
+    // return this.target.badgets.map(badget => {
+    //   const transactions = AppModule.transactions.filter(
+    //     tr => tr.badget && tr.badget.id == this.target!.id
+    //   );
+    //   const result = -transactions
+    //     .map(tr =>
+    //       JournalDate.byMonth(badget.year, badget.month)
+    //         .getMonthsOfAfter(this.target!.cycle - 1)
+    //         .map(month => {
+    //           return tr.getMonthlyAmountOf(month);
+    //         })
+    //         .reduce((acc, cur) => (acc += cur), 0)
+    //     )
+    //     .reduce((acc, cur) => (acc += cur), 0);
+    //   return {
+    //     date: `${badget.year}/${badget.month}`,
+    //     prediction: badget.amount,
+    //     result: result,
+    //     diff: result - badget.amount,
+    //     badget: badget,
+    //     transactions: transactions
+    //       .map(tr => {
+    //         return {
+    //           name: tr.name,
+    //           date: tr.createdAt.toString(),
+    //           amount: JournalDate.byMonth(badget.year, badget.month)
+    //             .getMonthsOfAfter(this.target!.cycle - 1)
+    //             .map(month => {
+    //               return tr.getMonthlyAmountOf(month);
+    //             })
+    //             .reduce((acc, cur) => (acc += cur), 0),
+    //           transaction: tr
+    //         };
+    //       })
+    //       .filter(info => info.amount !== 0)
+    //   };
+    // });
+    return [];
   }
 
   public edit(badget: IBadget, e?: Event) {
@@ -158,7 +157,7 @@ export default class BadgetDetail extends Vue {
     this.editArea = EditAreaDispContent.BADGET;
   }
 
-  public displayTransaction(transaction: ITransaction) {}
+  // public displayTransaction(transaction: ITransaction) {}
 }
 </script>
 

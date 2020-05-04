@@ -43,15 +43,15 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import CommonFrame from "@/view/common/CommonFrame.vue";
-import IJournalDate from "../../model/interface/IJournalDate";
-import JournalDate from "../../model/common/JournalDate";
+import IJournalDate from "@/model/interface/IJournalDate";
+import JournalDate from "@/model/common/JournalDate";
 import BadgetAdditionModal from "@/view/badget/BadgetAdditionModal.vue";
-import { IBadgetGroup } from "../../model/interface/IBadget";
-import BadgetModule from "../../store/BadgetStore";
-import AppModule from "../../store/ApplicationStore";
-import MonthlySlider, { MonthlySliderItem } from "../common/MonthlySlider.vue";
+import { IBadgetGroup } from "@/model/interface/IBadget";
+import BadgetModule from "@/store/BadgetStore";
+import AppModule from "@/store/ApplicationStore";
+import MonthlySlider, { MonthlySliderItem } from "@/common/MonthlySlider.vue";
 import { container } from "tsyringe";
-import UserAuthService from "../../service/UserAuthService";
+import UserAuthService from "@/service/UserAuthService";
 
 @Component({
   components: {

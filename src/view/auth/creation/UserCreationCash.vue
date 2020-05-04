@@ -6,68 +6,36 @@
         <h2>お金の管理</h2>
         <p>どのようにお金を管理していますか？ 利用しているサービスはどのようなものですか？ 質問に答えて「次へ」を押してください！</p>
         <div class="questions">
-          <div class="q-box">
-            <div class="h">普段使いの現金はどこで管理していますか？</div>
-            <div class="b">
-              <div class="selections">
-                <div
-                  v-for="strage in cashStrages"
-                  :key="strage.id"
-                  class="box-select"
-                  :class="{'selected' : selectedMasters.includes(strage)}"
-                  @click="checkMaster(strage)"
-                >{{ strage.title }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="q-box">
-            <div class="h">どの銀行口座をもっていますか？（複数選択可）</div>
-            <div class="b">
-              <div class="selections">
-                <div
-                  v-for="bank in banks"
-                  :key="bank.id"
-                  class="box-select"
-                  :class="{'selected' : selectedMasters.includes(bank)}"
-                  @click="checkMaster(bank)"
-                >{{ bank.title }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="q-box">
-            <div class="h">どのプリペイドサービスを使っていますか？（複数選択可）</div>
-            <div class="b">
-              <div class="selections">
-                <div
-                  v-for="prepaid in prepaids"
-                  :key="prepaid.id"
-                  class="box-select"
-                  :class="{'selected' : selectedMasters.includes(prepaid)}"
-                  @click="checkMaster(prepaid)"
-                >{{ prepaid.title }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="q-box">
-            <div class="h">どのクレジットカードを使っていますか？（複数選択可）</div>
-            <div class="b">
-              <div class="selections">
-                <div
-                  v-for="creca in creditCards"
-                  :key="creca.id"
-                  class="box-select"
-                  :class="{'selected' : selectedMasters.includes(creca)}"
-                  @click="checkMaster(creca)"
-                >{{ creca.title }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="q-box">
-            <div class="h">他に持っているものはありますか？ （複数選択可）</div>
-            <div class="b">
-              <div class="selections"></div>
-            </div>
-          </div>
+          <QuestionBox
+            title="普段使いの現金はどこで管理していますか？"
+            :selections="cashStrages"
+            @add="selectedMasters.push($event)"
+            @remove="selectedMasters.indexOf($event) < 0 || selectedMasters.splice(selectedMasters.indexOf($event), 1)"
+          ></QuestionBox>
+          <QuestionBox
+            title="どの銀行口座をもっていますか？（複数選択可）"
+            :selections="banks"
+            @add="selectedMasters.push($event)"
+            @remove="selectedMasters.indexOf($event) < 0 || selectedMasters.splice(selectedMasters.indexOf($event), 1)"
+          ></QuestionBox>
+          <QuestionBox
+            title="どのプリペイドサービスを使っていますか？（複数選択可）"
+            :selections="prepaids"
+            @add="selectedMasters.push($event)"
+            @remove="selectedMasters.indexOf($event) < 0 || selectedMasters.splice(selectedMasters.indexOf($event), 1)"
+          ></QuestionBox>
+          <QuestionBox
+            title="どのクレジットカードを使っていますか？（複数選択可）"
+            :selections="creditCards"
+            @add="selectedMasters.push($event)"
+            @remove="selectedMasters.indexOf($event) < 0 || selectedMasters.splice(selectedMasters.indexOf($event), 1)"
+          ></QuestionBox>
+          <QuestionBox
+            title="他に持っているものはありますか？ （複数選択可）"
+            :selections="[]"
+            @add="selectedMasters.push($event)"
+            @remove="selectedMasters.indexOf($event) < 0 || selectedMasters.splice(selectedMasters.indexOf($event), 1)"
+          ></QuestionBox>
         </div>
         <div class="action">
           <input type="button" class="btn ok-btn" value="次へ" @click="next()" />
@@ -81,11 +49,12 @@
 import { Component, Vue } from "vue-property-decorator";
 import PublicFrame from "@/view/common/PublicFrame.vue";
 import Step from "@/view/common/Step.vue";
-import IUserCreationMaster from "../../../model/interface/IUserCreationMaster";
-import UserCreationModule from "../../../store/UserCreationStore";
-import UserCreationMaster from "../../../model/UserCreationMaster";
+import IUserCreationMaster from "@/model/interface/IUserCreationMaster";
+import UserCreationModule from "@/store/UserCreationStore";
+import UserCreationMaster from "@/model/UserCreationMaster";
+import QuestionBox from "@/view/auth/creation/components/QuestionBox.vue";
 
-@Component({ components: { PublicFrame, Step } })
+@Component({ components: { PublicFrame, Step, QuestionBox } })
 export default class UserCreationCash extends Vue {
   public userCreationMasters: IUserCreationMaster[] = [];
 
@@ -104,18 +73,18 @@ export default class UserCreationCash extends Vue {
 
   public get banks(): IUserCreationMaster[] {
     return this.userCreationMasters.filter(
-      m => m.type === UserCreationMaster.TYPE_CASH_BANK
+      m => m.type === UserCreationMaster.TYPE_BANK
     );
   }
 
   public get prepaids(): IUserCreationMaster[] {
     return this.userCreationMasters.filter(
-      m => m.type === UserCreationMaster.TYPE_CASH_PREPAID
+      m => m.type === UserCreationMaster.TYPE_PREPAID
     );
   }
   public get creditCards(): IUserCreationMaster[] {
     return this.userCreationMasters.filter(
-      m => m.type === UserCreationMaster.TYPE_CASH_CREDIT_CARD
+      m => m.type === UserCreationMaster.TYPE_CREDIT_CARD
     );
   }
 

@@ -49,13 +49,13 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, Watch, Emit } from "vue-property-decorator";
-import JournalDate from "../../model/common/JournalDate";
+import JournalDate from "@/model/common/JournalDate";
 import NumberInput from "@/view/common/NumberInput.vue";
-import { IBadget } from "../../model/interface/IBadget";
-import BadgetModule from "../../store/BadgetStore";
+import { IBadget } from "@/model/interface/IBadget";
+import BadgetModule from "@/store/BadgetStore";
 import Selector from "@/view/common/Selector.vue";
-import { SelectorItem } from "../../model/interface/dto/Selector";
-import IJournalDate from "../../model/interface/IJournalDate";
+import { SelectorItem } from "@/model/interface/dto/Selector";
+import IJournalDate from "@/model/interface/IJournalDate";
 
 @Component({ components: { NumberInput, Selector } })
 export default class BadgetEdition extends Vue {

@@ -1,5 +1,5 @@
 export interface SelectorItem {
-  seq: number;
+  seq: number | string;
 
   content: string;
 

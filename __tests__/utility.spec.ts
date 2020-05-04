@@ -1,4 +1,4 @@
-import JournalDate from "../src/model/common/JournalDate";
+import JournalDate from "@/src/model/common/JournalDate";
 
 test("2020/12/31 must be before than 2021/1/1 in JournalDate", () => {
   const before = JournalDate.byDay(2020, 12, 31);

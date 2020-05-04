@@ -61,7 +61,7 @@ import NumberInput from "@/view/common/NumberInput.vue";
 import DepreciationLines from "@/view/register/DepreciationLines.vue";
 import DepreciationModule from "@/store/DepreciationStore";
 import DatePicker from "vuejs-datepicker";
-import JournalDate from "../../model/common/JournalDate";
+import JournalDate from "@/model/common/JournalDate";
 
 @Component({ components: { NumberInput, DepreciationLines, DatePicker } })
 export default class RegisterDepreciation extends Vue {

@@ -9,7 +9,7 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import NumberInput from "@/view/common/NumberInput.vue";
-import { IJournalControl } from "../../model/interface/dto/JournalControl";
+import { IJournalControl } from "@/model/interface/dto/JournalControl";
 import TransactionModule from "@/store/TransactionStore";
 import ReceivableLines from "./ReceivableLines.vue";
 

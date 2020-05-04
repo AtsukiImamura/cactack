@@ -36,7 +36,7 @@ import { container } from "tsyringe";
 import UserAuthService from "@/service/UserAuthService";
 import AuthFrame from "@/view/auth/AuthFrame.vue";
 import ErrorMessage from "@/model/error/ErrorMessage";
-import BadgetModule from "../../store/BadgetStore";
+import BadgetModule from "@/store/BadgetStore";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 
 @Component({ components: { AuthFrame, ProcessButton } })

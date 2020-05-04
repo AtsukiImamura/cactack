@@ -6,14 +6,21 @@
         <h2>資産</h2>
         <p>資産として計上したい耐久財があれば選択して下さい</p>
         <p>TODO: どのようなものが資産として計上するにふさわしいかの説明</p>
-        <div class="balances"></div>
+        <div class="balances">
+          <QuestionBox
+            title="資産として計上したい耐久財があれば選択して下さい"
+            :selections="properties"
+            @add="selectedMasters.push($event)"
+            @remove="selectedMasters.indexOf($event) < 0 || selectedMasters.splice(selectedMasters.indexOf($event), 1)"
+          ></QuestionBox>
+        </div>
         <div class="action">
           <router-link
-            to="/user/create/credit-mapping"
+            to="/user/create/in-and-out"
             tag="input"
             type="button"
             class="btn cancel-btn"
-            value="戻る"
+            value="スキップ"
           ></router-link>
           <router-link
             to="/user/create/property"
@@ -32,9 +39,27 @@
 import { Component, Vue } from "vue-property-decorator";
 import PublicFrame from "@/view/common/PublicFrame.vue";
 import Step from "@/view/common/Step.vue";
+import IUserCreationMaster from "@/model/interface/IUserCreationMaster";
+import UserCreationMaster from "@/model/UserCreationMaster";
+import UserCreationModule from "@/store/UserCreationStore";
+import QuestionBox from "@/view/auth/creation/components/QuestionBox.vue";
 
-@Component({ components: { PublicFrame, Step } })
-export default class UserCreationPropertySelection extends Vue {}
+@Component({ components: { PublicFrame, Step, QuestionBox } })
+export default class UserCreationPropertySelection extends Vue {
+  public selectedMasters: IUserCreationMaster[] = [];
+
+  public mounted(): void {
+    if (UserCreationModule.creationMasters.length === 0) {
+      UserCreationModule.init();
+    }
+  }
+
+  public get properties(): IUserCreationMaster[] {
+    return UserCreationModule.creationMasters.filter(
+      m => m.type === UserCreationMaster.TYPE_PROPERTY
+    );
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -47,41 +72,9 @@ export default class UserCreationPropertySelection extends Vue {}
     h2 {
       font-size: 2rem;
     }
-    .questions {
-      .q-box {
-        margin: 20px 0px;
-        width: calc(100% - 20px);
-        padding: 18px 10px;
-        box-shadow: 2px 2px 3px 3px rgba(120, 120, 120, 0.25);
-        .h {
-          margin: 4px 0px 10px;
-        }
-        .b {
-          .selections {
-            display: flex;
-            .select {
-              margin-right: 20px;
-            }
-            .box-select {
-              width: 120px;
-              height: 40px;
-              border: 1px solid #c0c0c0;
-              padding: 5px;
-              margin: 6px;
-              cursor: pointer;
-              &.selected {
-                padding: 4px;
-                border: 2px solid $color-main;
-                background-color: $color-main-skeleton;
-              }
-            }
-          }
-        }
-      }
-    }
     .action {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
     }
   }
 }

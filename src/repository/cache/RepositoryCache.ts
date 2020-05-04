@@ -43,6 +43,10 @@ export default class RepositoryCache<T> {
   }
 
   public get(index: string, key: string): T[] | undefined {
+    console.log(this.mapping);
+    if (!this.mapping[index]) {
+      return undefined;
+    }
     const targets = this.mapping[index][key];
     if (!targets) {
       return targets;

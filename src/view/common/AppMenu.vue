@@ -4,8 +4,8 @@
       <router-link to="/" tag="h1" style="cursor: pointer;">Cactack</router-link>
     </div>
     <div class="register-area only-wide">
-      <router-link class="register-mark" tag="div" to="/register">
-        <span class="str">登録</span>
+      <router-link class="register-mark" tag="div" to="/journalize">
+        <span class="str">仕訳</span>
       </router-link>
     </div>
     <div class="items">

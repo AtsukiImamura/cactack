@@ -7,13 +7,14 @@
         <p>分からない部分や今埋めるのが難しい項目は飛ばしても構いません。</p>
         <p>では、始めましょう！</p>
         <div class="action">
-          <router-link
+          <!-- <router-link
             to="/user/create/cash"
             tag="input"
             type="button"
             class="btn ok-btn"
             value="始める"
-          ></router-link>
+          ></router-link>-->
+          <ProcessButton value="始める" :click="next" :disabled="!canNext"></ProcessButton>
         </div>
       </div>
     </div>
@@ -23,12 +24,23 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import PublicFrame from "@/view/common/PublicFrame.vue";
-import UserCreationModule from "../../../store/UserCreationStore";
+import UserCreationModule from "@/store/UserCreationStore";
+import ProcessButton from "@/view/common/ProcessButton.vue";
 
-@Component({ components: { PublicFrame } })
+@Component({ components: { PublicFrame, ProcessButton } })
 export default class UserCreationTop extends Vue {
   public mounted(): void {
     UserCreationModule.init();
+  }
+
+  public get canNext(): boolean {
+    return UserCreationModule.creationMasters.length > 0;
+  }
+
+  public next(): Promise<void> {
+    return Promise.resolve().then(() => {
+      this.$router.push("/user/create/cash");
+    });
   }
 }
 </script>

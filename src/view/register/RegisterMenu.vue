@@ -7,22 +7,14 @@
             <span>テンプレート</span>
           </div>
           <div class="items">
-            <router-link tag="input" type="button" class="item" to="/register/purchase" value="購入"></router-link>
-            <router-link tag="input" type="button" class="item" to="/register/debt" value="負債"></router-link>
+            <router-link tag="input" type="button" class="item" to="/journalize/out" value="出金"></router-link>
+            <router-link tag="input" type="button" class="item" to="/journalize/in" value="入金"></router-link>
             <router-link
               tag="input"
               type="button"
-              class="item"
-              to="/register/receivable"
-              value="債権"
-            ></router-link>
-            <router-link
-              tag="input"
-              type="button"
-              class="item"
-              to="/register/reserve"
-              :disabled="true"
-              value="積立"
+              class="item full-width"
+              to="/journalize/transfer"
+              value="振替"
             ></router-link>
           </div>
         </div>
@@ -31,17 +23,7 @@
             <span>カスタムテンプレート</span>
           </div>
           <div class="items">
-            <span>手動登録ページから登録したユーザー定義テンプレートがここに表示されます</span>
-          </div>
-        </div>
-        <div class="c register-manually">
-          <div class="title">
-            <span></span>
-          </div>
-          <div class="items">
-            <router-link class="item" to="/register/manually">
-              <span>手動登録</span>
-            </router-link>
+            <span>振替で登録したユーザー定義テンプレートがここに表示されます</span>
           </div>
         </div>
       </div>
@@ -97,7 +79,7 @@ export default class RegisterMenu extends Vue {}
 
     &.frequently-used {
       .item {
-        width: calc(48% - 22px);
+        width: calc(48% - 20px);
         display: inline-block;
         position: relative;
         text-decoration: none;
@@ -117,6 +99,9 @@ export default class RegisterMenu extends Vue {}
         }
         &:disabled {
           background: linear-gradient(#fff4d9 0%, #ffe298 100%);
+        }
+        &.full-width {
+          width: calc(96% - 20px);
         }
       }
     }

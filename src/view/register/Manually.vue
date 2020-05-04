@@ -2,10 +2,10 @@
   <CommonFrame>
     <div class="register-manually">
       <RegisterFrame>
-        <template v-slot:title>{{ isEdit ? "編集" : "手動登録"}}</template>
+        <template v-slot:title>振替</template>
         <div class="transaction">
           <div class="form-item">
-            <div class="k">名称</div>
+            <div class="k">メモ</div>
             <div class="v">
               <!-- <input type="text" v-model="name" :disabled="loading" /> -->
               <TransactionNameInput v-model="name" :disabled="loading"></TransactionNameInput>
@@ -90,31 +90,30 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import IJournalDate from "../../model/interface/IJournalDate";
-import JournalDate from "../../model/common/JournalDate";
-import AccountCategory from "../../model/AccountCategory";
+import IJournalDate from "@/model/interface/IJournalDate";
+import JournalDate from "@/model/common/JournalDate";
+import AccountCategory from "@/model/AccountCategory";
 import DatePicker from "vuejs-datepicker";
 import { container } from "tsyringe";
-import TransactionService from "../../service/TransactionService";
-import Transaction from "../../model/Transaction";
-import Journal from "../../model/Journal";
+import TransactionService from "@/service/TransactionService";
+import Journal from "@/model/Journal";
 import AccountCategorySelector from "@/view/common/AccountCategorySelector.vue";
 import RegisterFrame from "@/view/register/RegisterFrame.vue";
-import TransactionModule from "../../store/TransactionStore";
+import TransactionModule from "@/store/TransactionStore";
 import CommonFrame from "@/view/common/CommonFrame.vue";
-import TransactionRepository from "../../repository/TransactionRepository";
-import { IAccountCategory } from "../../model/interface/IJournal";
-import ITransaction from "../../model/interface/ITransaction";
-import AppModule from "../../store/ApplicationStore";
+import TransactionRepository from "@/repository/TransactionRepository";
+import ITransaction from "@/model/interface/ITransaction";
+import AppModule from "@/store/ApplicationStore";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import TransactionNameInput from "@/view/register/TransactionNameInput.vue";
+import { IUserCategoryItem } from "@/model/interface/ICategory";
 
-interface IjournalRegisterInfo {
+interface IJournalRegisterInfo {
   amount: number;
   accountAt: IJournalDate;
   executeAt: IJournalDate;
-  creditType: IAccountCategory;
-  debitType: IAccountCategory;
+  creditType: IUserCategoryItem;
+  debitType: IUserCategoryItem;
 }
 
 @Component({
@@ -130,7 +129,7 @@ interface IjournalRegisterInfo {
 export default class Manually extends Vue {
   public name: string = "";
 
-  public journalInfo: IjournalRegisterInfo[] = [];
+  public journalInfo: IJournalRegisterInfo[] = [];
 
   public needTemplate: boolean = false;
 
@@ -152,7 +151,7 @@ export default class Manually extends Vue {
     );
   }
 
-  public get journals(): IjournalRegisterInfo[] {
+  public get journals(): IJournalRegisterInfo[] {
     if (this.transaction.id) {
       return this.transaction.journals.map(jnl => {
         return {
@@ -212,7 +211,7 @@ export default class Manually extends Vue {
       });
   }
 
-  public accountAtSelected(info: IjournalRegisterInfo, date: Date) {
+  public accountAtSelected(info: IJournalRegisterInfo, date: Date) {
     info.accountAt = JournalDate.byDate(date);
     if (info.executeAt.beforeThan(info.accountAt)) {
       info.executeAt = info.accountAt;
@@ -220,12 +219,12 @@ export default class Manually extends Vue {
     this.dgKey++;
   }
 
-  public executeAtSelected(info: IjournalRegisterInfo, date: Date) {
+  public executeAtSelected(info: IJournalRegisterInfo, date: Date) {
     info.executeAt = JournalDate.byDate(date);
   }
 
   public onCategorySelected(
-    info: IjournalRegisterInfo,
+    info: IJournalRegisterInfo,
     isDebit: boolean,
     category: IAccountCategory
   ) {

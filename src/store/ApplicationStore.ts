@@ -8,60 +8,41 @@ import {
 import store from ".";
 import IJournal from "@/model/interface/IJournal";
 import IJournalDate from "@/model/interface/IJournalDate";
-import Transaction from "@/model/Transaction";
-import { IBadgetGroup } from "@/model/interface/IBadget";
-import ITransaction from "@/model/interface/ITransaction";
 import { container } from "tsyringe";
-import TransactionRepository from "@/repository/TransactionRepository";
+import JournalRepository from "@/repository/JournalRepository";
 
 @Module({ dynamic: true, store, name: "app", namespaced: true })
 class AppStore extends VuexModule {
-  private _transactions: ITransaction[] = [];
+  private _journals: IJournal[] = [];
 
   /**
    * Getter journals
    * @return {IJournal[] }
    */
   public get journals(): IJournal[] {
-    return this._transactions.reduce((acc, cur) => {
-      acc.push(...cur.journals);
-      return acc;
-    }, [] as IJournal[]);
-  }
-
-  /**
-   * Getter transactions
-   * @return {ITransaction[] }
-   */
-  public get transactions(): ITransaction[] {
-    return this._transactions;
+    return this._journals;
   }
 
   @Action({ rawError: true })
   public async init() {
-    const transactions = await container
-      .resolve(TransactionRepository)
-      .getAll();
-    this.INIT(transactions);
+    const journals = await container.resolve(JournalRepository).getUsersAll();
+    this.INIT(journals);
   }
 
   @Mutation
-  private INIT(transactions?: ITransaction[]) {
-    while (this._transactions.pop()) {}
-    if (transactions) {
-      this._transactions.push(...transactions);
+  private INIT(journals?: IJournal[]) {
+    while (this._journals.pop()) {}
+    if (journals) {
+      this._journals.push(...journals);
     }
   }
 
   @Action({ rawError: true })
-  public appendNew(payload: {
-    name: string;
-    journals: IJournal[];
-    badget?: IBadgetGroup;
-  }) {
-    this._transactions.push(
-      Transaction.createNew(payload.name, payload.journals, payload.badget)
-    );
+  public appendNew(journals: IJournal[]) {
+    // this._journals.push(
+    //   Transaction.createNew(payload.name, payload.journals, payload.badget)
+    // );
+    this._journals.push(...journals);
   }
 
   @Action({ rawError: true })

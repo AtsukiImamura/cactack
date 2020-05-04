@@ -69,7 +69,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
-import IJournal from "../../model/interface/IJournal";
+import IJournal from "@/model/interface/IJournal";
 
 @Component({})
 export default class JournalLines extends Vue {

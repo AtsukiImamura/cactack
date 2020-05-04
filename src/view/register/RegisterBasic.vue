@@ -38,11 +38,11 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
-import TransactionModule from "../../store/TransactionStore";
+import TransactionModule from "@/store/TransactionStore";
 import DatePicker from "vuejs-datepicker";
 import NumberInput from "@/view/common/NumberInput.vue";
 import BadgetSelector from "@/view/register/BadgetSelector.vue";
-import { IBadgetGroup } from "../../model/interface/IBadget";
+import { IBadgetGroup } from "@/model/interface/IBadget";
 import TransactionNameInput from "@/view/register/TransactionNameInput.vue";
 
 @Component({

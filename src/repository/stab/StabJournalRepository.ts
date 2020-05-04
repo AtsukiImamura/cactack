@@ -23,7 +23,7 @@ export default class StabJournalRepository
     from: IJournalDate,
     to: IJournalDate
   ): Promise<IJournal[]> {
-    return this.getAll().then(journals => {
+    return this.getAll().then((journals) => {
       const targets = [];
       for (const jor of journals) {
         if (jor.accountAt.beforeThan(from) || jor.accountAt.afterThan(to)) {
@@ -42,7 +42,7 @@ export default class StabJournalRepository
     return this.getByAccountedAt(from, to); // TODO: 実装
   }
 
-  public async getByTransactionId(trId: string): Promise<IJournal[]> {
+  public async getUsersAll(): Promise<IJournal[]> {
     return [];
   }
 }

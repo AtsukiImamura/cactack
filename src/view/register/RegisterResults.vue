@@ -13,8 +13,8 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import IJournal from "../../model/interface/IJournal";
-import TransactionModule from "../../store/TransactionStore";
+import IJournal from "@/model/interface/IJournal";
+import TransactionModule from "@/store/TransactionStore";
 import JournalLines from "@/view/register/JournalLines.vue";
 import CommonFrame from "@/view/common/CommonFrame.vue";
 

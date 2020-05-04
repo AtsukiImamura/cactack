@@ -89,18 +89,18 @@
 import { Component, Vue } from "vue-property-decorator";
 import ScrollDownRow from "@/view/common/ScrollDownRow.vue";
 import AppModule from "@/store/ApplicationStore";
-import JournalDate from "../../model/common/JournalDate";
-import IJournalDate from "../../model/interface/IJournalDate";
+import JournalDate from "@/model/common/JournalDate";
+import IJournalDate from "@/model/interface/IJournalDate";
 import JournalLines from "@/view/register/JournalLines.vue";
-import ITransaction from "../../model/interface/ITransaction";
+import ITransaction from "@/model/interface/ITransaction";
 import CommonFrame from "@/view/common/CommonFrame.vue";
 import { container } from "tsyringe";
-import TransactionService from "../../service/TransactionService";
+import TransactionService from "@/service/TransactionService";
 import ProcessButton from "@/view/common/ProcessButton.vue";
-import { IBadgetGroup } from "../../model/interface/IBadget";
-import MonthlySlider, { MonthlySliderItem } from "../common/MonthlySlider.vue";
+import { IBadgetGroup } from "@/model/interface/IBadget";
+import MonthlySlider, { MonthlySliderItem } from "@/common/MonthlySlider.vue";
 import FlowTypeSelector from "@/view/common/FlowTypeSelector.vue";
-import UserAuthService from "../../service/UserAuthService";
+import UserAuthService from "@/service/UserAuthService";
 
 @Component({
   components: {

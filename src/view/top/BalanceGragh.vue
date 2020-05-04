@@ -11,7 +11,7 @@ import {
   IBalanceSheetSummary,
   IBalanceItem,
   IBlanceItemDispInfo
-} from "../interface/IDiffGragh";
+} from "@/view/interface/IDiffGragh";
 import JouranlDetailGragh from "./JouranlDetailGragh.vue";
 
 @Component({ components: { JouranlDetailGragh } })

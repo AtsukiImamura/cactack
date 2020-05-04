@@ -49,7 +49,7 @@
 import { Component, Vue } from "vue-property-decorator";
 import Modal from "@/view/common/Modal.vue";
 import NumberInput from "@/view/common/NumberInput.vue";
-import BadgetModule from "../../store/BadgetStore";
+import BadgetModule from "@/store/BadgetStore";
 
 @Component({ components: { Modal, NumberInput } })
 export default class BadgetAdditionModal extends Vue {

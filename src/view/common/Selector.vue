@@ -4,7 +4,7 @@
       :class="`disp cell ${selectedItem.content ? (selectedItem.itemClass ? selectedItem.itemClass : '' ): ''}`"
       @click="openSelections"
     >
-      <span>{{ selectedItem.content ? selectedItem.content : "-- select --" }}</span>
+      <span>{{ selectedItem.content ? selectedItem.content : "" }}</span>
     </div>
     <div class="bg" v-if="open" @click="closeSelections" />
     <div class="selections" v-show="open">
@@ -91,6 +91,8 @@ export default class Selector extends Vue {
     width: 100%;
     background-color: #ffffff;
     border: 1px solid #c0c0c0;
+    max-height: 400px;
+    overflow-y: scroll;
     .item {
       cursor: pointer;
       &:hover {

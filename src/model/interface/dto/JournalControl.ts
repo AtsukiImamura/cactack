@@ -1,4 +1,4 @@
-import IJournalDate from "../IJournalDate";
+import IJournalDate from "@/model/interface/IJournalDate";
 
 export interface IJournalControl {
   seq: number;

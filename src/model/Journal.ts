@@ -1,107 +1,37 @@
-import IJournal, {
-  // IJournalDetail,
-  IAccountCategory
-} from "@/model/interface/IJournal";
+import IJournal, { IJournalDetail } from "@/model/interface/IJournal";
 import JournalDate from "@/model/common/JournalDate";
 import IJournalDate from "@/model/interface/IJournalDate";
-// import JournalDetail from "@/model/JournalDetail";
-import AccountCategory from "@/model/AccountCategory";
 import { DJournal } from "@/model/interface/DJournal";
 import IdBase from "./IdBase";
+import { IUserCategoryItem } from "./interface/ICategory";
 
 export default class Journal extends IdBase implements IJournal {
   public static simple(
+    userId: string,
     accountAt: IJournalDate,
     executeAt: IJournalDate,
     amount: number,
-    creditType: IAccountCategory,
-    debitType: IAccountCategory
+    creditItem: IUserCategoryItem,
+    debitItem: IUserCategoryItem
   ): IJournal {
     return new Journal(
       "",
+      userId,
       "",
       amount,
+      JournalDate.today(),
       accountAt,
       executeAt,
-      creditType,
-      debitType
+      [{ amount: amount, category: creditItem }],
+      [{ amount: amount, category: debitItem }]
     );
   }
 
-  /**
-   * 作成: 負債を貸方、現金を借方とする仕訳
-   * @param debt
-   */
-  public static debt(amount: number, executeAt?: IJournalDate | string) {
-    return Journal.simple(
-      JournalDate.today(),
-      executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
-      Math.abs(amount),
-      AccountCategory.debt(),
-      AccountCategory.cash()
-    );
-  }
-
-  public static debtCounter(amount: number, executeAt?: IJournalDate | string) {
-    return Journal.simple(
-      JournalDate.today(),
-      executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
-      Math.abs(amount),
-      AccountCategory.cash(),
-      AccountCategory.debt()
-    );
-  }
-
-  // public static receivable(amount: number, executeAt?: IJournalDate | string) {
-  //   return Journal.simple(
-  //     JournalDate.today(),
-  //     executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
-  //     amount,
-  //     AccountCategory.netAssets(),
-  //     AccountCategory.receivable()
-  //   );
-  // }
-
-  public static receivableCounter(
-    amount: number,
-    executeAt?: IJournalDate | string
-  ) {
-    return Journal.simple(
-      JournalDate.today(),
-      executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
-      amount,
-      AccountCategory.receivable(),
-      AccountCategory.netAssets()
-    );
-  }
-
-  public static depreciation(
-    amount: number,
-    executeAt?: IJournalDate | string
-  ) {
-    return Journal.simple(
-      JournalDate.today(),
-      executeAt ? JournalDate.cast(executeAt) : JournalDate.today(),
-      amount,
-      AccountCategory.netAssets(),
-      AccountCategory.durableAsset()
-    );
-  }
-  /**
-   * キャッシュアウトの仕訳を作成
-   * @param amount
-   */
-  public static cashOut(amount: number) {
-    return Journal.simple(
-      JournalDate.today(),
-      JournalDate.today(),
-      -Math.abs(amount),
-      AccountCategory.netAssets(),
-      AccountCategory.cash()
-    );
-  }
-  /** 取引ID */
-  private _transactionId: string;
+  private _userId: string;
+  /** 仕訳タイトル（コメント） */
+  private _title: string;
+  /** 作成日 */
+  private _createdAt: IJournalDate;
   /** 発生日 */
   private _accountAt: IJournalDate;
   /** 執行日 */
@@ -109,9 +39,9 @@ export default class Journal extends IdBase implements IJournal {
 
   private _amount: number;
   /** 貸方（右） */
-  private _credit: IAccountCategory;
+  private _credits: IJournalDetail[] = [];
   /** 借方（左） */
-  private _debit: IAccountCategory;
+  private _debits: IJournalDetail[] = [];
 
   /**
    * 仕訳
@@ -123,36 +53,49 @@ export default class Journal extends IdBase implements IJournal {
    * @param debit
    */
   constructor(
-    transactionId: string,
     id: string,
+    userId: string,
+    title: string,
     amount: number,
+    createdAt: string | IJournalDate,
     accountAt: string | IJournalDate,
     executeAt: string | IJournalDate,
-    credit: IAccountCategory,
-    debit: IAccountCategory
+    credits: IJournalDetail[],
+    debits: IJournalDetail[]
   ) {
-    super();
-    this._transactionId = transactionId;
-    this._id = id;
+    super(id);
+    this._title = title;
+    this._userId = userId;
+    this._createdAt = JournalDate.cast(createdAt);
     this._amount = Math.abs(Number(amount));
-    this._accountAt =
-      typeof accountAt === "string"
-        ? JournalDate.fromToken(accountAt)
-        : accountAt;
-    this._executeAt =
-      typeof executeAt === "string"
-        ? JournalDate.fromToken(executeAt)
-        : executeAt;
-    this._credit = amount >= 0 ? credit : debit;
-    this._debit = amount >= 0 ? debit : credit;
+    this._accountAt = JournalDate.cast(accountAt);
+    this._executeAt = JournalDate.cast(executeAt);
+    this._credits = credits;
+    this._debits = debits;
   }
 
   /**
-   * Getter transactionId
+   * Getter userId
    * @return {string}
    */
-  public get transactionId(): string {
-    return this._transactionId;
+  public get userId(): string {
+    return this._userId;
+  }
+
+  /**
+   * Getter title
+   * @return {string}
+   */
+  public get title(): string {
+    return this._title;
+  }
+
+  /**
+   * Getter createdAt
+   * @return {IJournalDate}
+   */
+  public get createdAt(): IJournalDate {
+    return this._createdAt;
   }
 
   /**
@@ -184,41 +127,20 @@ export default class Journal extends IdBase implements IJournal {
     this._amount = amount;
   }
 
-  public setTransactionId(id: string): void {
-    this._transactionId = id;
-  }
-
-  public counter(executeAt?: IJournalDate | string): IJournal {
-    return Journal.simple(
-      this.accountAt,
-      executeAt ? JournalDate.cast(executeAt) : this.executeAt,
-      this.amount,
-      this.debit,
-      this.credit
-    );
-  }
   /**
-   * Getter credit
-   * @return {IJournalDetail}
+   * Getter credits
+   * @return {IJournalDetail[] }
    */
-  public get credit(): IAccountCategory {
-    return this._credit;
+  public get credits(): IJournalDetail[] {
+    return this._credits;
   }
 
   /**
-   * Getter debit
-   * @return {IJournalDetail}
+   * Getter debits
+   * @return {IJournalDetail[] }
    */
-  public get debit(): IAccountCategory {
-    return this._debit;
-  }
-
-  public set credit(credit: IAccountCategory) {
-    this._credit = credit;
-  }
-
-  public set debit(debit: IAccountCategory) {
-    this._debit = debit;
+  public get debits(): IJournalDetail[] {
+    return this._debits;
   }
 
   /**
@@ -230,13 +152,21 @@ export default class Journal extends IdBase implements IJournal {
 
   public simplify(): DJournal {
     return {
-      transactionId: this.transactionId,
       id: this.id,
+      userId: this.userId,
+      title: this.title,
       amount: this._amount,
+      createdAt: this.createdAt.toString(),
       accountAt: this.accountAt.toString(),
       executeAt: this.executeAt.toString(),
-      credit: this.credit.code,
-      debit: this.debit.code
+      credits: this.credits.map((detail) => ({
+        amount: detail.amount,
+        categoryItemId: detail.category.id,
+      })),
+      debits: this.debits.map((detail) => ({
+        amount: detail.amount,
+        categoryItemId: detail.category.id,
+      })),
     };
   }
 }

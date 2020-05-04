@@ -1,9 +1,9 @@
 <script lang="ts">
 import { Component, Emit, Mixins } from "vue-property-decorator";
 import { SelectionInfo } from "@/view/common/Searcher.vue";
-import SearchInput from "../common/SearchInput.vue";
-import AppModule from "../../store/ApplicationStore";
-import ITransaction from "../../model/interface/ITransaction";
+import SearchInput from "@/common/SearchInput.vue";
+import AppModule from "@/store/ApplicationStore";
+import ITransaction from "@/model/interface/ITransaction";
 
 @Component({})
 export default class TransactionNameInput extends Mixins(SearchInput) {

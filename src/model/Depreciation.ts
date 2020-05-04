@@ -2,9 +2,9 @@ import { IDepreciation, IProperty } from "@/model/interface/IProperty";
 import IJournalDate from "@/model/interface/IJournalDate";
 import IJournal from "@/model/interface/IJournal";
 import JournalDate from "@/model/common/JournalDate";
-import Journal from "@/model/Journal";
+// import Journal from "@/model/Journal";
 import { IBadget } from "@/model/interface/IBadget";
-import AccountCategory from "@/model/AccountCategory";
+// import AccountCategory from "@/model/AccountCategory";
 import { DDepreciation } from "@/model/interface/DProperty";
 
 export default class Depreciation implements IDepreciation {
@@ -113,14 +113,17 @@ export default class Depreciation implements IDepreciation {
    * 呼び出された日を含む月に実行すべき償却の仕訳を作成する
    */
   public createLatestJournal(): IJournal {
-    const amount = this.calcLatestAmount();
-    return Journal.simple(
-      JournalDate.today(),
-      JournalDate.today(),
-      amount,
-      AccountCategory.netAssets(),
-      AccountCategory.durableAsset()
-    );
+    // const amount = this.calcLatestAmount();
+    // return Journal.simple(
+    //   "",
+    //   "",
+    //   JournalDate.today(),
+    //   JournalDate.today(),
+    //   amount,
+    //   AccountCategory.netAssets(),
+    //   AccountCategory.durableAsset()
+    // );
+    return {} as IJournal;
   }
 
   public simplify(): DDepreciation {
@@ -129,7 +132,7 @@ export default class Depreciation implements IDepreciation {
       startAt: this.startAt.toString(),
       propertyId: this._property.id,
       cycle: this.cycle,
-      salvagePrice: this.salvagePrice
+      salvagePrice: this.salvagePrice,
     };
   }
 

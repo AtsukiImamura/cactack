@@ -1,12 +1,11 @@
 import "reflect-metadata";
 import { container } from "tsyringe";
-import StabJournalRepository from "../repository/stab/StabJournalRepository";
-import StabJournalDetailRepository from "../repository/stab/StabJournalDetailRepository";
-import StabPropertyRepository from "../repository/stab/StabPropertyRepository";
-import StabBadgetRepository from "../repository/stab/StabBadgetRepository";
-import StabDepreciationRepository from "../repository/stab/StabDepreciationRepository";
-import StabUserRepository from "../repository/stab/StabUserRepository";
-import StabBadgetGroupRepository from "../repository/stab/StabBadgetGroupRepository";
+import StabJournalRepository from "@/repository/stab/StabJournalRepository";
+import StabPropertyRepository from "@/repository/stab/StabPropertyRepository";
+import StabBadgetRepository from "@/repository/stab/StabBadgetRepository";
+import StabDepreciationRepository from "@/repository/stab/StabDepreciationRepository";
+import StabUserRepository from "@/repository/stab/StabUserRepository";
+import StabBadgetGroupRepository from "@/repository/stab/StabBadgetGroupRepository";
 import config from "config";
 
 import JournalRepository from "@/repository/JournalRepository";
@@ -14,13 +13,11 @@ import PropertyRepository from "@/repository/PropertyRepository";
 import BadgetRepository from "@/repository/BadgetRepository";
 import BadgetGroupRepository from "@/repository/BadgetGroupRepository";
 import DepreciationRepository from "@/repository/DepreciationRepository";
-// import JournalDetailRepository from "@/repository/_JournalDetailRepository";
 import UserRepository from "@/repository/UserRepository";
 import UserCreationMasterRepository from "@/repository/UserCreationMasterRepository";
 
 import * as firebase from "firebase/app";
 import "firebase/firestore";
-import TransactionRepository from "@/repository/TransactionRepository";
 /**
  * DI管理用クラス
  */
@@ -50,9 +47,9 @@ export default class DependencyInjectionConfig {
     container.register("UserRepository", {
       useClass: UserRepository,
     });
-    container.register("TransactionRepository", {
-      useClass: TransactionRepository,
-    });
+    // container.register("TransactionRepository", {
+    //   useClass: TransactionRepository,
+    // });
     container.register("UserCreationMasterRepository", {
       useClass: UserCreationMasterRepository,
     });
@@ -86,9 +83,6 @@ export default class DependencyInjectionConfig {
     });
     container.register("DepreciationRepository", {
       useClass: StabDepreciationRepository,
-    });
-    container.register("JournalDetailRepository", {
-      useClass: StabJournalDetailRepository,
     });
     container.register("UserRepository", {
       useClass: StabUserRepository,

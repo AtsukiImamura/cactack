@@ -3,7 +3,7 @@ import { Component, Mixins } from "vue-property-decorator";
 import TransactionLines from "@/view/register/TransactionLines.vue";
 import { IJournalControl } from "@/model/interface/dto/JournalControl";
 import TransactionModule from "@/store/TransactionStore";
-// import JournalDate from "../../model/common/JournalDate";
+// import JournalDate from "@/model/common/JournalDate";
 
 @Component({})
 export default class DebtLines extends Mixins(TransactionLines) {
