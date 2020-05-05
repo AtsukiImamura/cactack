@@ -32,4 +32,6 @@ export default interface IJournalDate {
   firstDay: IJournalDate;
 
   toDate: () => Date;
+
+  countDayFrom: (date: IJournalDate) => number;
 }

@@ -43,6 +43,7 @@ export default abstract class RepositoryBase<
           return val;
         }
         (val as any)._id = id;
+        this.cache.add(val);
         return val;
       });
   }
@@ -75,6 +76,7 @@ export default abstract class RepositoryBase<
       })
       .then((values) => {
         items.push(...values);
+        this.cache.addAll(items);
         return items;
       });
   }
@@ -183,6 +185,10 @@ export default abstract class RepositoryBase<
       data.id = doc.id;
       journalAggregates.push(this.aggregate(data as S));
     });
-    return Promise.all(journalAggregates);
+
+    return Promise.all(journalAggregates).then((values) => {
+      this.cache.addAll(values);
+      return values;
+    });
   }
 }

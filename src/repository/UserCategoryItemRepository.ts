@@ -16,7 +16,7 @@ export default class UserCategoryItemRepository
     this.dbKey = "userCategoryItem";
     this.cache.addIndex(
       "parentId",
-      (value: IUserCategoryItem) => value.parentId
+      (value: IUserCategoryItem) => value.parent.id
     );
   }
 

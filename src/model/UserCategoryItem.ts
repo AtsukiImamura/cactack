@@ -1,10 +1,19 @@
-import { IUserCategoryItem, DUserCategoryItem } from "./interface/ICategory";
+import {
+  IUserCategoryItem,
+  DUserCategoryItem,
+  IAccountCategory,
+} from "./interface/ICategory";
 import CategoryItemBase from "./CategoryItemBase";
 
 export default class UserCategoryItem extends CategoryItemBase
   implements IUserCategoryItem {
-  constructor(id: string, userId: string, parentId: string, name: string) {
-    super(id, userId, parentId, name);
+  constructor(
+    id: string,
+    userId: string,
+    parent: IAccountCategory,
+    name: string
+  ) {
+    super(id, userId, parent, name);
   }
 
   public simplify(): DUserCategoryItem {
@@ -12,7 +21,7 @@ export default class UserCategoryItem extends CategoryItemBase
       id: this.id,
       userId: this.userId,
       name: this.name,
-      parentId: this.parentId,
+      parentId: this.parent.id,
     };
   }
 }

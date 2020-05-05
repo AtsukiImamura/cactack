@@ -48,7 +48,7 @@ export default class UserCreationFinish extends Vue {
             master.name,
             master.type.code,
             master.items.map(
-              item => new UserCategoryItem("", userId, master.id, item.name)
+              item => new UserCategoryItem("", userId, master, item.name)
             )
           )
       )

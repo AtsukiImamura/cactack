@@ -81,6 +81,11 @@ import Selector from "@/view/common/Selector.vue";
 import { SelectorItem } from "../../../model/interface/dto/Selector";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import QuestionaierBlock from "@/view/auth/creation/components/QuestionaierBlock.vue";
+import { container } from "tsyringe";
+import CategoryService from "../../../service/CategoryService";
+import UserCategory from "../../../model/UserCategory";
+import AccountType from "../../../model/AccountType";
+import UserCategoryItem from "../../../model/UserCategoryItem";
 
 @Component({
   components: { PublicFrame, Step, Selector, ProcessButton, QuestionaierBlock }
@@ -176,10 +181,34 @@ export default class UserCreationCreditMapping extends Vue {
   }
 
   public next(): Promise<void> {
-    return Promise.resolve()
+    console.log(this.creditMappings);
+    return container
+      .resolve(CategoryService)
+      .insertUserCategory(
+        new UserCategory(
+          "",
+          "",
+          "クレジットカード買掛金",
+          AccountType.TYPE_DEBT,
+          this.creditMappings.map(
+            map =>
+              new UserCategoryItem(
+                "",
+                "",
+                new UserCategory(
+                  "",
+                  "",
+                  "クレジット買掛金",
+                  AccountType.TYPE_DEBT,
+                  []
+                ),
+                map.title
+              )
+          )
+        )
+      )
       .then(() => {
-        // TODO: マッピングの登録
-        console.log(this.creditMappings);
+        // TODO: プリペイドのマッピング
       })
       .then(() => {
         this.$router.push("/user/create/property-selection");

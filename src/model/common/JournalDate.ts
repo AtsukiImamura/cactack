@@ -2,6 +2,7 @@ import IJournalDate from "@/model/interface/IJournalDate";
 
 export default class JournalDate implements IJournalDate {
   public static cast(value: string | IJournalDate): IJournalDate {
+    console.log(value);
     return typeof value === "string" ? JournalDate.fromToken(value) : value;
   }
   /**
@@ -48,6 +49,14 @@ export default class JournalDate implements IJournalDate {
     return new JournalDate(token);
   }
 
+  public static min(d1: IJournalDate, d2: IJournalDate): IJournalDate {
+    return d1.beforeThan(d2) ? d1 : d2;
+  }
+
+  public static max(d1: IJournalDate, d2: IJournalDate): IJournalDate {
+    return d1.afterThan(d2) ? d1 : d2;
+  }
+
   private static tokenize(
     year: number | string,
     month: number | string,
@@ -90,6 +99,7 @@ export default class JournalDate implements IJournalDate {
     }
     const tokens = JournalDate.parse(date);
     if (tokens.length < 2) {
+      console.warn("wooops!", date);
       throw new Error(
         "Something has gone wrong with given date string. " + date
       );
@@ -214,5 +224,30 @@ export default class JournalDate implements IJournalDate {
       rawMonth + Math.floor((12 - rawMonth) / 12) * 12,
       this._givenDay
     );
+  }
+
+  public countDayFrom(date: IJournalDate): number {
+    if (date.beforeThan(this)) {
+      return JournalDate.countDayBetween(date, this);
+    } else {
+      return JournalDate.countDayBetween(this, date);
+    }
+  }
+
+  private static countDayBetween(from: IJournalDate, to: IJournalDate): number {
+    if (from.afterThan(to)) {
+      return 0;
+    }
+
+    const getNextDay = (date: IJournalDate) => {
+      return new JournalDate(new Date(date.year, date.month - 1, date.day + 1));
+    };
+    let date = from;
+    let count = 0;
+    while (date.beforeThanOrEqualsTo(to)) {
+      count++;
+      date = getNextDay(date);
+    }
+    return count;
   }
 }

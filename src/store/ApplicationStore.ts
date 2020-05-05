@@ -44,15 +44,6 @@ class AppStore extends VuexModule {
       .resolve(UserCategoryRepository)
       .getUsersAll();
     this.CATEGORIES(new CategoryList(userCategories));
-    // console.log(
-    //   this.categories
-    //     .getAllItems()
-    //     .forEach((item) =>
-    //       console.log(
-    //         `id: ${item.id}  name: ${item.name}  parentId: ${item.parentId}`
-    //       )
-    //     )
-    // );
   }
 
   @Mutation

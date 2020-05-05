@@ -13,10 +13,17 @@ import { ICategoryItem } from "../../../model/interface/ICategory";
 @Component({ components: { CategorySelector } })
 export default class TransferCategorySelector extends Vue {
   public get tabs(): CategorySelectorTab[] {
-    return AppModule.categories.getAllByType().map(info => ({
-      name: info.type.name,
-      sections: info.categories.map(c => ({ name: c.name, items: c.items }))
-    }));
+    return (
+      AppModule.categories
+        .getAllByType()
+        // .filter(info => info.categories.length > 0)
+        .map(info => ({
+          name: info.type.name,
+          sections: info.categories
+            // .filter(c => c.items.length > 0)
+            .map(c => ({ name: c.name, items: c.items }))
+        }))
+    );
   }
 
   @Emit("select")

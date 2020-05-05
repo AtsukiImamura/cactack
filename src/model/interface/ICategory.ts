@@ -33,20 +33,25 @@ export interface IUserCategory
     UserIdentifiable,
     Treatable<DUserCategory> {}
 
-export interface ICategoryItem extends Identifiable {
+interface ICategoryItemBase extends Identifiable {
   name: string;
+}
+export interface ICategoryItem extends ICategoryItemBase {
+  parent: IAccountCategory;
+}
 
+export interface DCategoryItem extends ICategoryItemBase {
   parentId: string;
 }
 
-export interface DCategoryItemMaster extends ICategoryItem, Strable {}
+export interface DCategoryItemMaster extends DCategoryItem, Strable {}
 
 export interface ICategoryItemMaster
   extends ICategoryItem,
     Treatable<DCategoryItemMaster> {}
 
 export interface DUserCategoryItem
-  extends ICategoryItem,
+  extends DCategoryItem,
     Strable,
     UserIdentifiable {}
 

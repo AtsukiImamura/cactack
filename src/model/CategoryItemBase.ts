@@ -1,16 +1,22 @@
 import IdBase from "./IdBase";
+import { IAccountCategory } from "./interface/ICategory";
 
 export default class CategoryItemBase extends IdBase {
-  protected _parentId: string;
+  protected _parent: IAccountCategory;
 
   protected _userId: string;
 
   protected _name: string;
 
-  constructor(id: string, userId: string, parentId: string, name: string) {
+  constructor(
+    id: string,
+    userId: string,
+    parent: IAccountCategory,
+    name: string
+  ) {
     super(id);
     this._userId = userId;
-    this._parentId = parentId;
+    this._parent = parent;
     this._name = name;
   }
 
@@ -22,14 +28,9 @@ export default class CategoryItemBase extends IdBase {
     return this._userId;
   }
 
-  /**
-   * Getter parentId
-   * @return {string}
-   */
-  public get parentId(): string {
-    return this._parentId;
+  public get parent(): IAccountCategory {
+    return this._parent;
   }
-
   /**
    * Getter name
    * @return {string}

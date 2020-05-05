@@ -16,7 +16,7 @@ export default class CategoryItemMasterRepository
     this.dbKey = "categoryItemMaster";
     this.cache.addIndex(
       "parentId",
-      (value: ICategoryItemMaster) => value.parentId
+      (value: ICategoryItemMaster) => value.parent.id
     );
   }
 

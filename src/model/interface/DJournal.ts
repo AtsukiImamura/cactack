@@ -14,8 +14,6 @@ export interface DJournal extends Identifiable, UserIdentifiable, Strable {
 
   debits: DJournalDetail[];
 
-  amount: number;
-
   period?: DJournalPeriodInfo;
 }
 

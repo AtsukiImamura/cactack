@@ -96,7 +96,7 @@ export default class CategorySelector extends Vue {
 .category-selector {
   position: relative;
   .selected-item {
-    width: 100%;
+    width: calc(100% - 16px);
     min-width: 100px;
     border: 1px solid #c0c0c0;
     height: 22px;

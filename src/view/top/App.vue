@@ -17,6 +17,11 @@
         >
           <FlowTypeSelector @select="onlyCashFlow = $event" :cash-only="onlyCashFlow"></FlowTypeSelector>
         </div>
+        <div class="ledgers">
+          <div class="ledger" v-for="(led, index) in ledgers" :key="index">
+            <Ledger :ledger="led"></Ledger>
+          </div>
+        </div>
         <!-- <div class="c">
           <TopDetails :image-path="'image/in.svg'" title="IN" :transactions="inTransactions"></TopDetails>
         </div>
@@ -44,6 +49,9 @@ import UserAuthService from "@/service/UserAuthService";
 import CommonFrame from "@/view/common/CommonFrame.vue";
 import IJournalDate from "@/model/interface/IJournalDate";
 import FlowTypeSelector from "@/view/common/FlowTypeSelector.vue";
+import AccountLedger from "@/model/virtual/AccountLedger";
+import VirtualBook from "@/model/virtual/VirtualBook";
+import Ledger from "@/view/journal/Ledger.vue";
 
 @Component({
   components: {
@@ -51,10 +59,16 @@ import FlowTypeSelector from "@/view/common/FlowTypeSelector.vue";
     NumberIncrementor,
     TopDetails,
     CommonFrame,
-    FlowTypeSelector
+    FlowTypeSelector,
+    Ledger
   }
 })
 export default class App extends Vue {
+  public get ledgers(): AccountLedger[] {
+    const book = new VirtualBook(this.journals);
+    return book.ledgers;
+  }
+
   public mounted(): void {
     if (container.resolve(UserAuthService).userId) {
       AppModule.init().catch(err => console.error(err));
@@ -447,6 +461,21 @@ export default class App extends Vue {
   display: flex;
   flex-wrap: wrap;
   margin: 10px 0px;
+  .ledgers {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    .ledger {
+      margin: 5px 5px;
+      width: calc(33% - 10px);
+      @include responsive-width(
+        calc(50% - 10px),
+        calc(50% - 10px),
+        calc(100% - 10px),
+        calc(100% - 10px)
+      );
+    }
+  }
   .actions {
     width: 100%;
     margin: 5px 10px;

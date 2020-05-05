@@ -6,29 +6,26 @@ import JournalDate from "@/model/common/JournalDate";
 import IJournalDate from "@/model/interface/IJournalDate";
 import { DJournal } from "@/model/interface/DJournal";
 import IdBase from "./IdBase";
-import { IUserCategoryItem } from "./interface/ICategory";
 
 export default class Journal extends IdBase implements IJournal {
-  public static simple(
-    userId: string,
-    accountAt: IJournalDate,
-    executeAt: IJournalDate,
-    amount: number,
-    creditItem: IUserCategoryItem,
-    debitItem: IUserCategoryItem
-  ): IJournal {
-    return new Journal(
-      "",
-      userId,
-      "",
-      amount,
-      JournalDate.today(),
-      accountAt,
-      executeAt,
-      [{ amount: amount, category: creditItem }],
-      [{ amount: amount, category: debitItem }]
-    );
-  }
+  // public static simple(
+  //   userId: string,
+  //   accountAt: IJournalDate,
+  //   executeAt: IJournalDate,
+  //   creditItem: IUserCategoryItem,
+  //   debitItem: IUserCategoryItem
+  // ): IJournal {
+  //   return new Journal(
+  //     "",
+  //     userId,
+  //     "",
+  //     JournalDate.today(),
+  //     accountAt,
+  //     executeAt,
+  //     [{ amount: amount, category: creditItem }],
+  //     [{ amount: amount, category: debitItem }]
+  //   );
+  // }
 
   private _userId: string;
   /** 仕訳タイトル（コメント） */
@@ -38,9 +35,7 @@ export default class Journal extends IdBase implements IJournal {
   /** 発生日 */
   private _accountAt: IJournalDate;
   /** 執行日 */
-  private _executeAt: IJournalDate;
-
-  private _amount: number;
+  private _executeAt: IJournalDate | undefined;
   /** 貸方（右） */
   private _credits: IJournalDetail[] = [];
   /** 借方（左） */
@@ -61,10 +56,9 @@ export default class Journal extends IdBase implements IJournal {
     id: string,
     userId: string,
     title: string,
-    amount: number,
     createdAt: string | IJournalDate,
     accountAt: string | IJournalDate,
-    executeAt: string | IJournalDate,
+    executeAt: string | IJournalDate | undefined,
     credits: IJournalDetail[],
     debits: IJournalDetail[],
     period?: IJournalPeriodInfo
@@ -73,9 +67,8 @@ export default class Journal extends IdBase implements IJournal {
     this._title = title;
     this._userId = userId;
     this._createdAt = JournalDate.cast(createdAt);
-    this._amount = Math.abs(Number(amount));
     this._accountAt = JournalDate.cast(accountAt);
-    this._executeAt = JournalDate.cast(executeAt);
+    this._executeAt = executeAt ? JournalDate.cast(executeAt) : undefined;
     this._credits = credits;
     this._debits = debits;
     period && (this._period = period);
@@ -117,25 +110,16 @@ export default class Journal extends IdBase implements IJournal {
    * Getter executeAt
    * @return {IJournalDate}
    */
-  public get executeAt(): IJournalDate {
-    return this._executeAt;
+  public get executeAt(): IJournalDate | undefined {
+    return this._executeAt ? this._executeAt : undefined;
   }
 
   public get amount(): number {
-    return this._amount;
+    return this._credits.reduce((acc, cur) => (acc += cur.amount), 0);
   }
 
   public get period(): IJournalPeriodInfo | undefined {
     return this._period;
-  }
-
-  /**
-   * set amount.
-   * the amount values of credit and debit in this journal will be changed as well.
-   * @param amount
-   */
-  public setAmount(amount: number) {
-    this._amount = amount;
   }
 
   /**
@@ -166,10 +150,9 @@ export default class Journal extends IdBase implements IJournal {
       id: this.id,
       userId: this.userId,
       title: this.title,
-      amount: this._amount,
       createdAt: this.createdAt.toString(),
       accountAt: this.accountAt.toString(),
-      executeAt: this.executeAt.toString(),
+      executeAt: this.executeAt ? this.executeAt.toString() : "",
       credits: this.credits.map((detail) => ({
         amount: detail.amount,
         categoryItemId: detail.category.id,

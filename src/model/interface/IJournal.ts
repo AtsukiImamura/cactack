@@ -2,18 +2,19 @@ import IJournalDate from "@/model/interface/IJournalDate";
 import Identifiable, { UserIdentifiable } from "@/model/interface/Identifiable";
 import Treatable from "@/model/interface/common/Treatable";
 import { DJournal } from "@/model/interface/DJournal";
-import { IUserCategoryItem, IAccountCategory } from "./ICategory";
+import { IUserCategoryItem, ICategoryItem } from "./ICategory";
 
 export default interface IJournal
   extends Identifiable,
     UserIdentifiable,
-    Treatable<DJournal>,
-    IExecutable {
+    Treatable<DJournal> {
   title: string;
 
   createdAt: IJournalDate;
 
   accountAt: IJournalDate;
+
+  executeAt?: IJournalDate;
 
   credits: IJournalDetail[];
 
@@ -36,9 +37,9 @@ export interface IJournalPeriodInfo {
   // 対象期間のあるもののみ: 終了日
   finishAt: IJournalDate;
 
-  debit: IAccountCategory;
+  debit: ICategoryItem;
 
-  credit: IAccountCategory;
+  credit: ICategoryItem;
 }
 
 export interface IExecutable {
