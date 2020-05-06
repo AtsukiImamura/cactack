@@ -120,7 +120,7 @@ export default class VirtualBook {
       }
       // for debit
       for (const detail of jnl.debits) {
-        const categoryId = detail.category.id;
+        const categoryId = detail.category.parent.id;
         if (!ledgerMap.has(categoryId)) {
           ledgerMap.set(categoryId, new AccountLedger(detail.category.parent));
         }
@@ -134,6 +134,7 @@ export default class VirtualBook {
         });
       }
     }
+    console.log(ledgerMap);
     return Array.from(ledgerMap.values());
   }
 }
