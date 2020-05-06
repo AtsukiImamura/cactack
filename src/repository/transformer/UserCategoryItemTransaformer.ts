@@ -20,7 +20,7 @@ export default class UserCategoryItemTransaformer extends Transformer<
     }
     const data = doc.data()! as DUserCategory;
     const parent = new UserCategory(
-      data.id,
+      doc.id,
       data.userId,
       data.name,
       data.type,

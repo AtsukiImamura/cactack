@@ -22,7 +22,7 @@ export default class CategoryItemMasterTransaformer extends Transformer<
     }
     const data = doc.data()! as DCategoryMaster;
     const parent = {
-      id: data.id,
+      id: doc.id,
       name: data.name,
       type: new AccountType(data.type),
       items: [],

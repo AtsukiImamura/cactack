@@ -53,11 +53,13 @@ export interface ICategoryItemMaster
 export interface DUserCategoryItem
   extends DCategoryItem,
     Strable,
-    UserIdentifiable {}
+    UserIdentifiable {
+  action?: string;
+}
 
 export interface IUserCategoryItem
   extends ICategoryItem,
     UserIdentifiable,
     Treatable<DUserCategoryItem> {
-  actionId?: string;
+  action?: string;
 }
