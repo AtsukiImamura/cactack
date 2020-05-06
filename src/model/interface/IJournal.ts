@@ -23,6 +23,8 @@ export default interface IJournal
   amount: number;
 
   period?: IJournalPeriodInfo;
+
+  isReal: boolean;
 }
 
 export interface IJournalDetail {
