@@ -10,13 +10,16 @@ export default class IdCache<T extends Identifiable> extends RepositoryCache<
   }
 
   public getById(id: string): T | undefined {
+    if (!id) {
+      return undefined;
+    }
     const values = this.get("id", id);
     if (!values) {
       return values;
     }
-    if (values.length > 1) {
-      throw new Error("ID duplication has been detected.");
-    }
+    // if (values.length > 1) {
+    //   throw new Error("ID duplication has been detected.");
+    // }
     return values.shift();
   }
 }

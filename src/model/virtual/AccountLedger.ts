@@ -1,8 +1,8 @@
-import { IAccountCategory } from "../interface/ICategory";
+import { IAccountCategory, ICategoryItem } from "../interface/ICategory";
 import IJournalDate from "../interface/IJournalDate";
 
 export interface ILedgerDetail {
-  category: IAccountCategory;
+  category: IAccountCategory | ICategoryItem;
 
   amount: number;
 
@@ -10,11 +10,28 @@ export interface ILedgerDetail {
 }
 
 export default class AccountLedger {
-  private _category: IAccountCategory;
+  private _category: IAccountCategory | ICategoryItem;
 
   private _debits: ILedgerDetail[] = [];
 
   private _credits: ILedgerDetail[] = [];
+
+  private _children: Map<string, AccountLedger> = new Map<
+    string,
+    AccountLedger
+  >();
+
+  public get hasChild(): boolean {
+    return this._children.size > 0;
+  }
+
+  /**
+   * Getter children
+   * @return {AccountLedger[] }
+   */
+  public get children(): AccountLedger[] {
+    return Array.from(this._children.values());
+  }
 
   /**
    * Getter debits
@@ -36,7 +53,7 @@ export default class AccountLedger {
     return this.category.name;
   }
 
-  public get category(): IAccountCategory {
+  public get category(): IAccountCategory | ICategoryItem {
     return this._category;
   }
 
@@ -50,6 +67,10 @@ export default class AccountLedger {
 
   public get amount(): number {
     const diff = this.creditAmount - this.debitAmount;
+    if (!this.category.type) {
+      console.log(this.category);
+      return 0;
+    }
     if (this.category.type.isCredit) {
       return diff;
     } else {
@@ -57,8 +78,16 @@ export default class AccountLedger {
     }
   }
 
-  constructor(category: IAccountCategory) {
+  constructor(
+    category: IAccountCategory | ICategoryItem,
+    children?: AccountLedger[]
+  ) {
     this._category = category;
+    if (children) {
+      for (const child of children) {
+        this._children.set(child.category.id, child);
+      }
+    }
   }
 
   public addDebit(detail: ILedgerDetail) {
@@ -67,5 +96,47 @@ export default class AccountLedger {
 
   public addCredit(detail: ILedgerDetail) {
     this._credits.push(detail);
+  }
+
+  public addChildCredit(item: ICategoryItem, detail: ILedgerDetail) {
+    if (!this._children.has(item.id)) {
+      this._children.set(item.id, new AccountLedger(item));
+    }
+    this._children.get(item.id)!.addCredit(detail);
+  }
+
+  public addChildDebit(item: ICategoryItem, detail: ILedgerDetail) {
+    if (!this._children.has(item.id)) {
+      this._children.set(item.id, new AccountLedger(item));
+    }
+    this._children.get(item.id)!.addDebit(detail);
+  }
+
+  public getAmountPerDay(): Map<string, number> {
+    const amountPerDay = [...this.debits, ...this.credits].reduce(
+      (acc, cur) => {
+        acc.set(cur.accountAt.toString(), 0);
+        return acc;
+      },
+      new Map<string, number>()
+    );
+    // 詳細情報を日ごとにまとめる
+    for (const detail of this.credits) {
+      const date = detail.accountAt.toString();
+      amountPerDay.set(
+        date,
+        amountPerDay.get(date)! +
+          (this.category.type.isCredit ? 1 : -1) * detail.amount
+      );
+    }
+    for (const detail of this.debits) {
+      const date = detail.accountAt.toString();
+      amountPerDay.set(
+        date,
+        amountPerDay.get(date)! +
+          (this.category.type.isDebit ? 1 : -1) * detail.amount
+      );
+    }
+    return amountPerDay;
   }
 }

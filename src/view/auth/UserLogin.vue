@@ -36,14 +36,16 @@ import { container } from "tsyringe";
 import UserAuthService from "@/service/UserAuthService";
 import AuthFrame from "@/view/auth/AuthFrame.vue";
 import ErrorMessage from "@/model/error/ErrorMessage";
-import BadgetModule from "@/store/BadgetStore";
 import ProcessButton from "@/view/common/ProcessButton.vue";
+import AppModule from "../../store/ApplicationStore";
 
 @Component({ components: { AuthFrame, ProcessButton } })
 export default class UserLogin extends Vue {
-  public email: string = ""; // ohmoon.au@gmail.com
+  // public email: string = "i@hoge.com";
+  // public password: string = "hogehoge";
 
-  public password: string = ""; // hogehoge123
+  public email: string = "";
+  public password: string = "";
 
   public message: string = "";
 
@@ -52,10 +54,13 @@ export default class UserLogin extends Vue {
   }
 
   public mounted(): void {
-    // this.signIn();
+    if (this.email && this.password) {
+      this.signIn();
+    }
+    // container.resolve(CategoryItemMasterRepository).insertAll();
   }
 
-  public signIn(): Promise<void> {
+  public async signIn(): Promise<void> {
     if (!this.email) {
       this.message = "メールアドレスを入力して下さい";
       return Promise.reject();
@@ -64,17 +69,17 @@ export default class UserLogin extends Vue {
       this.message = "パスワードを入力して下さい";
       return Promise.reject();
     }
-    return container
-      .resolve(UserAuthService)
-      .signIn(this.email, this.password)
-      .then(() => BadgetModule.init())
-      .then(() => {
-        this.$router.push("/");
-      })
-      .catch(err => {
-        const message = new ErrorMessage(err.code);
-        this.message = message.value;
-      });
+
+    try {
+      await container
+        .resolve(UserAuthService)
+        .signIn(this.email, this.password);
+      await AppModule.init();
+      this.$router.push("/");
+    } catch (err) {
+      const message = new ErrorMessage(err.code);
+      this.message = message.value;
+    }
   }
 }
 </script>

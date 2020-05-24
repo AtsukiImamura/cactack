@@ -1,5 +1,5 @@
 import SettlementAction from "./SettlementAction";
-import IJournal from "../../interface/IJournal";
+import IJournal from "@/model/interface/IJournal";
 
 export default class DepositSettlementAction extends SettlementAction {
   public static readonly COMMAND_NAME = "DEPOSIT";

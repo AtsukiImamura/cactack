@@ -45,4 +45,8 @@ export default class StabJournalRepository
   public async getUsersAll(): Promise<IJournal[]> {
     return [];
   }
+
+  public async getByAncestorId(id: string) {
+    return [];
+  }
 }

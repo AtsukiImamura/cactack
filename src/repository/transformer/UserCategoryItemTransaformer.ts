@@ -2,10 +2,13 @@ import Transformer from "@/repository/transformer/Transformer";
 import {
   DUserCategoryItem,
   IUserCategoryItem,
-  DUserCategory,
+  // IAccountCategory,
 } from "@/model/interface/ICategory";
+// import { container } from "tsyringe";
+// import UserCategoryRepository from "../UserCategoryRepository";
 import UserCategoryItem from "@/model/UserCategoryItem";
-import * as firebase from "firebase/app";
+import UserCategoryRepository from "../UserCategoryRepository";
+import { container } from "tsyringe";
 import UserCategory from "@/model/UserCategory";
 
 export default class UserCategoryItemTransaformer extends Transformer<
@@ -13,19 +16,28 @@ export default class UserCategoryItemTransaformer extends Transformer<
   IUserCategoryItem
 > {
   public async aggregate(item: DUserCategoryItem): Promise<IUserCategoryItem> {
-    const ref = firebase.firestore().collection("userCategory");
-    const doc = await ref.doc(item.parentId).get();
-    if (!doc.exists) {
+    const categoryData = await container
+      .resolve(UserCategoryRepository)
+      .getData(item.parentId);
+    if (!categoryData) {
       throw new Error("parent not found.");
     }
-    const data = doc.data()! as DUserCategory;
-    const parent = new UserCategory(
-      doc.id,
-      data.userId,
-      data.name,
-      data.type,
-      []
+    // return category.addItem(item.name) as IUserCategoryItem;
+    return new UserCategoryItem(
+      item.id,
+      item.userId,
+      // { id: item.parentId } as IAccountCategory,
+      new UserCategory(
+        categoryData.id,
+        categoryData.userId,
+        categoryData.name,
+        categoryData.type,
+        [],
+        undefined
+      ),
+      item.name,
+      item.deletedAt ? item.deletedAt : undefined,
+      item.action
     );
-    return new UserCategoryItem(item.id, item.userId, parent, item.name);
   }
 }

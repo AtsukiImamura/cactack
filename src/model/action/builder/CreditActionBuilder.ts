@@ -5,7 +5,10 @@ import CreditCardSettlementAction from "../settlement/CreditCardSettlementAction
 
 export default class CreditActionBuilder {
   public static begin(command: string): CreditActionBuilder {
-    const args = command.split(" ").map((c) => c.trim());
+    const args = command
+      .split(" ")
+      .map((c) => c.trim())
+      .slice(1);
     if (args.length !== 4) {
       throw new Error("length of command must be 4, but got " + args.length);
     }

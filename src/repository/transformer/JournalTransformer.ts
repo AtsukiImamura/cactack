@@ -27,7 +27,7 @@ export default class JournalTransformer extends Transformer<
         throw new Error("category item not found.");
       }
     }
-    return new Journal(
+    const created = new Journal(
       journal.id,
       journal.userId,
       journal.title,
@@ -45,6 +45,8 @@ export default class JournalTransformer extends Transformer<
           }
         : undefined
     );
+    created.ancestorId = journal.ancestorId ? journal.ancestorId : "";
+    return created;
   }
 
   private async toJournalDetails(
@@ -58,7 +60,12 @@ export default class JournalTransformer extends Transformer<
       if (!item) {
         continue;
       }
-      results.push({ amount: detail.amount, category: item });
+      results.push({
+        hash: detail.hash ? detail.hash : "",
+        amount: detail.amount,
+        category: item,
+        action: detail.action,
+      });
     }
     return results;
   }

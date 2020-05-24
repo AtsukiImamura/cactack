@@ -6,25 +6,57 @@ import {
   Mutation,
 } from "vuex-module-decorators";
 import store from ".";
-import IJournal from "@/model/interface/IJournal";
+import IJournal, { IJournalDetail } from "@/model/interface/IJournal";
 import IJournalDate from "@/model/interface/IJournalDate";
 import { container } from "tsyringe";
 import JournalRepository from "@/repository/JournalRepository";
 import CategoryList from "@/model/category/CategoryList";
 import UserCategoryRepository from "@/repository/UserCategoryRepository";
+import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
+import { IAccountCategory } from "@/model/interface/ICategory";
+import JournalDate from "@/model/common/JournalDate";
 
 @Module({ dynamic: true, store, name: "app", namespaced: true })
 class AppStore extends VuexModule {
   private _journals: IJournal[] = [];
 
-  private _categories: CategoryList = new CategoryList();
+  private _categories: IAccountCategory[] = []; //CategoryList = new CategoryList();
+
+  private _periodBeginWith: IJournalDate = JournalDate.today().getPreviousMonth();
+
+  private _periodEndWith: IJournalDate = JournalDate.today();
+
+  /**
+   * Getter periodBeginWith
+   * @return {IJournalDate }
+   */
+  public get periodBeginWith(): IJournalDate {
+    return this._periodBeginWith;
+  }
+
+  @Mutation
+  public setPeriodBeginWith(date: IJournalDate) {
+    this._periodBeginWith = date;
+  }
+  /**
+   * Getter periodEndWith
+   * @return {IJournalDate }
+   */
+  public get periodEndWith(): IJournalDate {
+    return this._periodEndWith;
+  }
+
+  @Mutation
+  public setPeriodEndWith(date: IJournalDate) {
+    this._periodEndWith = date;
+  }
 
   /**
    * Getter categories
    * @return {CategoryList }
    */
   public get categories(): CategoryList {
-    return this._categories;
+    return new CategoryList(this._categories);
   }
 
   /**
@@ -35,15 +67,26 @@ class AppStore extends VuexModule {
     return this._journals;
   }
 
+  public get jounalDetails(): IJournalDetail[] {
+    return this.journals.reduce(
+      (acc, cur) => [...acc, ...cur.credits, ...cur.debits],
+      []
+    );
+  }
+
   @Action({ rawError: true })
   public async init() {
-    const journals = await container.resolve(JournalRepository).getUsersAll();
-    this.INIT(journals);
+    // キャッシュ用
+    await container.resolve(UserCategoryItemRepository).getUsersAll();
 
     const userCategories = await container
       .resolve(UserCategoryRepository)
       .getUsersAll();
-    this.CATEGORIES(new CategoryList(userCategories));
+    this.CATEGORIES(userCategories);
+    // userCategories.forEach((c) => console.log(c.type.code, c.type.name, c));
+
+    const journals = await container.resolve(JournalRepository).getUsersAll();
+    this.INIT(journals);
   }
 
   @Mutation
@@ -55,8 +98,9 @@ class AppStore extends VuexModule {
   }
 
   @Mutation
-  private CATEGORIES(list: CategoryList) {
-    this._categories = list;
+  private CATEGORIES(list: IAccountCategory[]) {
+    while (this._categories.pop()) {}
+    this._categories.push(...list);
   }
 
   @Action({ rawError: true })

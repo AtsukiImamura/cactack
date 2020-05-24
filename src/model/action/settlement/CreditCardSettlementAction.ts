@@ -1,5 +1,5 @@
 import SettlementAction from "./SettlementAction";
-import IJournal from "../../interface/IJournal";
+import IJournal from "@/model/interface/IJournal";
 import ReserveSettlementAction from "./ReserveSettlementAction";
 
 export default class CreditCardSettlementAction extends SettlementAction {

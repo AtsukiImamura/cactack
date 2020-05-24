@@ -1,5 +1,5 @@
 <template>
-  <div class="ledger-box">
+  <div class="ledger-box" :style="style">
     <div class="content h">
       <h3>{{ ledger.name }}</h3>
       <h4 class="amount">{{ ledger.amount }}</h4>
@@ -18,9 +18,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
-import AccountLedger, {
-  ILedgerDetail
-} from "../../model/virtual/AccountLedger";
+import AccountLedger, { ILedgerDetail } from "@/model/virtual/AccountLedger";
 
 @Component({})
 export default class Ledger extends Vue {
@@ -28,6 +26,18 @@ export default class Ledger extends Vue {
 
   public get detailsList(): ILedgerDetail[][] {
     return [this.ledger.debits, this.ledger.credits];
+  }
+
+  public get style() {
+    // return {
+    //   height: `${Math.max(
+    //     this.ledger.debits.length,
+    //     this.ledger.credits.length
+    //   ) *
+    //     29 +
+    //     50}px`,
+    // };
+    return {};
   }
 }
 </script>

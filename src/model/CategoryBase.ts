@@ -1,9 +1,10 @@
-import { ICategoryItem } from "./interface/ICategory";
+import { ICategoryItem, IAccountCategory } from "./interface/ICategory";
 import IdBase from "./IdBase";
 import IAccountType from "./interface/IType";
 import AccountType from "./AccountType";
 
-export default class CategoryBase extends IdBase {
+export default abstract class CategoryBase extends IdBase
+  implements IAccountCategory {
   private _name: string;
 
   private _type: IAccountType;
@@ -41,4 +42,12 @@ export default class CategoryBase extends IdBase {
   public get items(): ICategoryItem[] {
     return this._items;
   }
+
+  public addItem(name: string): ICategoryItem {
+    const item = this.createItem(name);
+    this._items.push(item);
+    return item;
+  }
+
+  protected abstract createItem(name: string): ICategoryItem;
 }

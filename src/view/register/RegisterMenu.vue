@@ -3,12 +3,26 @@
     <div class="register-menu">
       <div class="menu-contents">
         <div class="c frequently-used">
-          <div class="title">
+          <!-- <div class="title">
             <span>テンプレート</span>
-          </div>
+          </div>-->
           <div class="items">
-            <router-link tag="input" type="button" class="item" to="/journalize/out" value="出金"></router-link>
-            <router-link tag="input" type="button" class="item" to="/journalize/in" value="入金"></router-link>
+            <router-link
+              tag="input"
+              type="button"
+              class="item"
+              :disabled="true"
+              to="/journalize/out"
+              value="出金"
+            ></router-link>
+            <router-link
+              tag="input"
+              type="button"
+              class="item"
+              :disabled="true"
+              to="/journalize/in"
+              value="入金"
+            ></router-link>
             <router-link
               tag="input"
               type="button"
@@ -23,7 +37,7 @@
             <span>カスタムテンプレート</span>
           </div>
           <div class="items">
-            <span>振替で登録したユーザー定義テンプレートがここに表示されます</span>
+            <span class="empty-message">（ver2.0から導入予定）振替で登録したユーザー定義テンプレートがここに表示されます</span>
           </div>
         </div>
       </div>
@@ -64,8 +78,12 @@ export default class RegisterMenu extends Vue {}
     .items {
       display: flex;
       flex-wrap: wrap;
+      justify-content: space-between;
+      .empty-message {
+        margin-left: 10px;
+      }
       .item {
-        margin: 10px 1%;
+        // margin: 10px 1%;
         padding: 10px;
         cursor: pointer;
         text-align: center;
@@ -79,19 +97,21 @@ export default class RegisterMenu extends Vue {}
 
     &.frequently-used {
       .item {
-        width: calc(48% - 20px);
+        width: calc(50% - 20px);
         display: inline-block;
         position: relative;
         text-decoration: none;
         text-align: center;
         overflow: hidden;
         background: linear-gradient(#ffda75 0%, #ffb702 100%);
-        @include xs {
-          width: calc(100% - 10px);
-        }
         color: #ffffff;
         font-size: 28px;
         border: none;
+        margin-top: 15px;
+        @include xs {
+          width: calc(100% - 10px);
+          margin-top: 10px;
+        }
         &:hover {
           transition-delay: 0.08s;
           transition-duration: 0.25s;
@@ -101,7 +121,10 @@ export default class RegisterMenu extends Vue {}
           background: linear-gradient(#fff4d9 0%, #ffe298 100%);
         }
         &.full-width {
-          width: calc(96% - 20px);
+          width: 100%;
+          @include xs {
+            width: calc(100% - 10px);
+          }
         }
       }
     }

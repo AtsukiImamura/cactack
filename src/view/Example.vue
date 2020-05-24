@@ -7,5 +7,4 @@ import { Component, Vue } from "vue-property-decorator";
 export default class Example extends Vue {}
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

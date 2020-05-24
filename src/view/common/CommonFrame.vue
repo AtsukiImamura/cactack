@@ -17,5 +17,4 @@ import AppMenu from "@/view/common/AppMenu.vue";
 export default class CommonFrame extends Vue {}
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

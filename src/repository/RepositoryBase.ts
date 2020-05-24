@@ -6,6 +6,10 @@ import Treatable from "@/model/interface/common/Treatable";
 import * as firebase from "firebase/app";
 import "firebase/firestore";
 import IdCache from "./cache/IdCache";
+import ILogicalDeletable, {
+  DLogicalDeletable,
+} from "@/model/interface/common/LogicalDeletable";
+import JournalDate from "@/model/common/JournalDate";
 
 export default abstract class RepositoryBase<
   S extends Strable & Identifiable,
@@ -13,7 +17,7 @@ export default abstract class RepositoryBase<
 > implements IBaseRepository<T> {
   protected dbKey: string = "";
 
-  protected cache: IdCache<T> = new IdCache<T>();
+  protected readonly cache: IdCache<S> = new IdCache<S>();
 
   public abstract aggregate(value: S): Promise<T>;
 
@@ -21,34 +25,38 @@ export default abstract class RepositoryBase<
     return firebase.firestore().collection(this.dbKey);
   }
 
-  public getById(id: string): Promise<T | undefined> {
+  public async getData(id: string, cache = true): Promise<S | undefined> {
     const item = this.cache.getById(id);
     if (item) {
-      return Promise.resolve(item);
+      return item;
     }
-    return this.ref
-      .doc(id)
-      .get()
-      .then((doc) => {
-        if (doc.exists) {
-          const data = doc.data() as S;
-          data.id = doc.id;
-          return this.aggregate(data);
-        } else {
-          return undefined;
-        }
-      })
-      .then((val) => {
-        if (!val) {
-          return val;
-        }
-        (val as any)._id = id;
-        this.cache.add(val);
-        return val;
-      });
+    const doc = await this.ref.doc(id).get();
+    if (!doc.exists) {
+      return undefined;
+    }
+
+    const data = doc.data() as S;
+    data.id = doc.id;
+    if (cache) {
+      this.cache.add(data);
+    }
+    return data;
   }
 
-  public getByIds(ids: string[]): Promise<T[]> {
+  public async getById(id: string): Promise<T | undefined> {
+    const data = await this.getData(id);
+    if (!data) {
+      return undefined;
+    }
+    const val = await this.aggregate(data);
+    if (!val) {
+      return val;
+    }
+    (val as any)._id = id;
+    return val;
+  }
+
+  public async getByIds(ids: string[]): Promise<T[]> {
     const idNeedSearch: string[] = [];
     const items: T[] = [];
 
@@ -56,29 +64,47 @@ export default abstract class RepositoryBase<
     for (const id of ids) {
       const item = this.cache.getById(id);
       if (item) {
-        items.push(item);
+        items.push(await this.aggregate(item));
       } else {
         idNeedSearch.push(id);
       }
     }
-    return Promise.all(idNeedSearch.map((id) => this.ref.doc(id).get()))
-      .then((docs) => {
-        return Promise.all(
-          docs
-            .filter((doc) => doc.exists)
-            .map((doc) => {
-              const data = doc.data() as S;
-              data.id = doc.id;
-              return data;
-            })
-            .map((data) => this.aggregate(data))
-        );
-      })
-      .then((values) => {
-        items.push(...values);
-        this.cache.addAll(items);
-        return items;
-      });
+
+    const docs = await Promise.all(
+      idNeedSearch.map((id) => this.ref.doc(id).get())
+    );
+    const values = await Promise.all(
+      docs
+        .filter((doc) => doc.exists)
+        .map((doc) => {
+          const data = doc.data() as S;
+          data.id = doc.id;
+          this.cache.add(data);
+          return data;
+        })
+        .map((data) => this.aggregate(data))
+    );
+    items.push(...values);
+    return items;
+
+    // return Promise.all(idNeedSearch.map((id) => this.ref.doc(id).get()))
+    //   .then((docs) => {
+    //     return Promise.all(
+    //       docs
+    //         .filter((doc) => doc.exists)
+    //         .map((doc) => {
+    //           const data = doc.data() as S;
+    //           data.id = doc.id;
+    //           return data;
+    //         })
+    //         .map((data) => this.aggregate(data))
+    //     );
+    //   })
+    //   .then((values) => {
+    //     items.push(...values);
+    //     this.cache.addAll(items);
+    //     return items;
+    //   });
   }
 
   public async insert(value: T): Promise<T> {
@@ -90,9 +116,12 @@ export default abstract class RepositoryBase<
       }
       (simplyfied as any).userId = currentUser.uid;
     }
+
+    simplyfied.id = "";
     const docRef = await this.ref.add(simplyfied);
     value.id = docRef.id;
-    this.cache.add(value);
+
+    this.cache.remove(value.simplify());
     return value;
     // return (await this.getById(docRef.id)) as T;
   }
@@ -124,37 +153,47 @@ export default abstract class RepositoryBase<
 
   public async update(value: T): Promise<T> {
     await this.ref.doc(value.id).set(value.simplify());
-    this.cache.add(value);
+    this.cache.remove(value.simplify());
     return value;
   }
 
   public async batchUpdate(values: T[]): Promise<T[]> {
-    return Promise.all(values.map((val) => this.ref.doc(val.id).set(val))).then(
-      () => {
-        this.cache.addAll(values);
-        return values;
-      }
-    );
+    return Promise.all(
+      values.map((val) => {
+        this.cache.add(val.simplify());
+        return this.ref.doc(val.id).set(val.simplify());
+      })
+    ).then(() => {
+      return values;
+    });
   }
 
   public delete(value: T): Promise<void> {
     return this.ref
       .doc(value.id)
       .delete()
-      .then(() => this.cache.remove(value));
+      .then(() => this.cache.remove(value.simplify()));
+  }
+
+  public async logicalDelete(value: T & ILogicalDeletable) {
+    const data = value.simplify() as S & DLogicalDeletable;
+    data.deletedAt = JournalDate.today().toString();
+    await this.ref.doc(value.id).set(data);
+    this.cache.remove(value.simplify());
+    return value;
   }
 
   // 実質使えん気がする
   public async getAll(): Promise<T[]> {
     return this.ref.get().then((value) => {
-      const aggregates: Promise<T>[] = [];
+      const aggregations: Promise<T>[] = [];
       value.forEach((doc) => {
         const val = doc.data() as S;
         val.id = doc.id;
-        aggregates.push(this.aggregate(val));
+        this.cache.add(val);
+        aggregations.push(this.aggregate(val));
       });
-      return Promise.all(aggregates).then((values) => {
-        this.cache.addAll(values);
+      return Promise.all(aggregations).then((values) => {
         return values;
       });
     });
@@ -172,22 +211,30 @@ export default abstract class RepositoryBase<
     return Promise.resolve();
   }
 
-  protected async getByKey(index: string, key: string): Promise<T[]> {
+  protected async getByKey(
+    index: string,
+    key: string,
+    cache = true
+  ): Promise<T[]> {
     const cacheItems = this.cache.get(index, key);
-    if (cacheItems && cacheItems.length > 0) {
-      return cacheItems;
+    if (cache && cacheItems && cacheItems.length > 0) {
+      return await Promise.all(cacheItems.map((item) => this.aggregate(item)));
     }
 
+    // console.log(`getByKey index:${index} key:${key}`);
     const docs = await this.ref.where(index, "==", key).get();
-    const journalAggregates: Promise<T>[] = [];
+    const aggregations: Promise<T>[] = [];
     docs.forEach((doc) => {
-      const data = doc.data();
+      const data = doc.data() as S;
       data.id = doc.id;
-      journalAggregates.push(this.aggregate(data as S));
+      if (cache) {
+        this.cache.add(data);
+      }
+      // console.log(data);
+      aggregations.push(this.aggregate(data));
     });
 
-    return Promise.all(journalAggregates).then((values) => {
-      this.cache.addAll(values);
+    return Promise.all(aggregations).then((values) => {
       return values;
     });
   }

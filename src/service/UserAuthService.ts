@@ -54,16 +54,20 @@ export default class UserAuthService {
   }
 
   public get userId(): string {
-    const user = firebase.auth().currentUser;
-    return user ? user.uid : "";
+    const fbUser = this.getFirebaseUser();
+    return fbUser ? fbUser.uid : "";
   }
 
   public async getUser(): Promise<IUser | undefined> {
-    const fbUser = firebase.auth().currentUser;
+    const fbUser = this.getFirebaseUser();
     if (!fbUser) {
       return undefined;
     }
     return container.resolve(UserRepository).getByUserId(fbUser.uid);
+  }
+
+  public getFirebaseUser(): firebase.User | null {
+    return firebase.auth().currentUser;
   }
 
   public async finishTopIntroduction(): Promise<void> {

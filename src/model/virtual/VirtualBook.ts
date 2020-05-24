@@ -2,69 +2,44 @@ import IJournal from "../interface/IJournal";
 import AccountLedger from "./AccountLedger";
 import JournalDate from "../common/JournalDate";
 import Journal from "../Journal";
-import { IUserCategoryItem } from "../interface/ICategory";
+import { IUserCategoryItem, ICategoryItem } from "../interface/ICategory";
 import UserCategory from "../UserCategory";
-import Balance from "./Balance";
+import Balance, { IBalanceItem } from "./Balance";
+import IJournalDate from "../interface/IJournalDate";
+import SettlementActionFactory from "../action/settlement/SettlementActionFactory";
+import UserCategoryItem from "../UserCategoryItem";
 
 export default class VirtualBook {
   private journals: IJournal[] = [];
 
-  /**
-   * 勘定元帳リスト
-   */
-  public get ledgers(): AccountLedger[] {
-    return this.createLedgers(this.journals);
+  private periodStartAt: IJournalDate = JournalDate.today();
+
+  private periodFinishAt: IJournalDate = JournalDate.today();
+
+  public async getVirtualLedgers() {
+    return this.createLedgers(await this.getVirtualJournals());
   }
 
-  /** 期首貸借対照表 */
-  public get balanceOfBeginning(): Balance {
-    return new Balance();
-  }
-
-  /** 期末貸借対照表 */
-  public get balanceOfEnding(): Balance {
-    return new Balance();
-  }
-
-  /**
-   * 期首から期末にかけての資産変動要因を取り出す。
-   * = 仮想科目の勘定元帳だけを取り出す
-   *  */
-  public get diffFactors(): AccountLedger[] {
-    return this.createLedgers(this.journals).filter(
-      (led) => led.category.type.isVirtual
-    );
-  }
-
-  constructor(
-    journals: IJournal[],
-    periodStartAt?: JournalDate,
-    periodFinishAt?: JournalDate
-  ) {
-    this.journals = journals;
-    if (!periodStartAt || !periodFinishAt) {
-      return;
-    }
-    // 発生日が含まれるものは全て入れる
-    this.journals = journals.filter(
+  private getDateValidated(from: IJournalDate, to: IJournalDate) {
+    const virtualJournals = this.journals.filter(
       (jnl) =>
-        jnl.accountAt.afterThanOrEqualsTo(periodStartAt) &&
-        jnl.accountAt.beforeThanOrEqualsTo(periodFinishAt)
+        jnl.accountAt.afterThanOrEqualsTo(from) &&
+        jnl.accountAt.beforeThanOrEqualsTo(to)
     );
     // 有効期間のあるものを処理
-    for (const jnl of journals) {
+    for (const jnl of virtualJournals) {
       if (
         !jnl.period ||
-        jnl.period.finishAt.beforeThan(periodStartAt) ||
-        jnl.period.startAt.afterThan(periodFinishAt)
+        jnl.period.finishAt.beforeThan(from) ||
+        jnl.period.startAt.afterThan(to)
       ) {
         continue;
       }
       // この仮想帳簿で対象とする期間の長さ
       const targetDayCount = JournalDate.max(
-        periodStartAt,
+        from,
         jnl.period.startAt
-      ).countDayFrom(JournalDate.min(periodFinishAt, jnl.period.finishAt));
+      ).countDayFrom(JournalDate.min(to, jnl.period.finishAt));
       // 仕訳が対象とする期間の長さ
       const jnlPeriodCount = jnl.period.startAt.countDayFrom(
         jnl.period.finishAt
@@ -72,29 +47,104 @@ export default class VirtualBook {
       // 日割りの金額
       const amount = Math.floor(jnl.amount * (targetDayCount / jnlPeriodCount));
 
-      this.journals.push(
-        new Journal(
-          "",
-          "",
-          "",
-          JournalDate.today(),
-          JournalDate.min(periodFinishAt, jnl.period.finishAt),
-          JournalDate.min(periodFinishAt, jnl.period.finishAt),
-          [
-            {
-              amount: amount,
-              category: jnl.period.credit as IUserCategoryItem,
-            },
-          ],
-          [
-            {
-              amount: amount,
-              category: jnl.period.debit as IUserCategoryItem,
-            },
-          ]
-        )
+      const virtual = new Journal(
+        "",
+        "",
+        "",
+        JournalDate.today(),
+        JournalDate.min(to, jnl.period.finishAt),
+        // JournalDate.min(to, jnl.period.finishAt),
+        undefined,
+        [
+          {
+            hash: "",
+            amount: amount,
+            category: jnl.period.credit as IUserCategoryItem,
+          },
+        ],
+        [
+          {
+            hash: "",
+            amount: amount,
+            category: jnl.period.debit as IUserCategoryItem,
+          },
+        ]
       );
+      virtual.ancestorId = jnl.id;
+      virtualJournals.push(virtual);
     }
+    return virtualJournals;
+  }
+
+  public async getVirtualJournals(
+    periodFrom = this.periodStartAt,
+    periodTo = this.periodFinishAt
+  ) {
+    const virtualJournals = this.getDateValidated(periodFrom, periodTo);
+    for (const jnl of this.journals) {
+      for (const dtl of [...jnl.credits, ...jnl.debits]) {
+        if (!dtl.action) {
+          continue;
+        }
+        const settledJournals = (
+          await SettlementActionFactory.parse(dtl.action).execute(jnl)
+        ).map((v) => {
+          v.id = jnl.id;
+          return v;
+        });
+
+        virtualJournals.push(
+          ...settledJournals.filter(
+            (jnl) =>
+              jnl.accountAt.afterThanOrEqualsTo(periodFrom) &&
+              jnl.accountAt.beforeThanOrEqualsTo(periodTo)
+          )
+        );
+      }
+    }
+    return virtualJournals;
+  }
+
+  /** 期首貸借対照表 */
+  public async generateBalanceOfBeginning(): Promise<Balance> {
+    return new Balance(
+      (
+        await this.getVirtualJournals(
+          JournalDate.byDay(1970, 1, 1),
+          this.periodStartAt
+        )
+      ).filter((jnl) => jnl.accountAt.beforeThan(this.periodStartAt))
+    );
+  }
+
+  /** 期末貸借対照表 */
+  public async generateBalanceOfEnding(): Promise<Balance> {
+    return new Balance(
+      (
+        await this.getVirtualJournals(JournalDate.byDay(1970, 1, 1))
+      ).filter((jnl) => jnl.accountAt.beforeThanOrEqualsTo(this.periodFinishAt))
+    );
+  }
+
+  /**
+   * 期首から期末にかけての資産変動要因を取り出す。
+   * = 仮想科目の勘定元帳だけを取り出す
+   *  */
+  public async generateDiffFactors(): Promise<IBalanceItem[]> {
+    const balance = new Balance(await this.getVirtualJournals());
+    return balance.virtualSummary;
+  }
+
+  constructor(
+    journals: IJournal[],
+    periodStartAt?: IJournalDate,
+    periodFinishAt?: IJournalDate
+  ) {
+    this.journals = journals;
+    this.periodStartAt = periodStartAt
+      ? periodStartAt
+      : JournalDate.byDay(1, 1, 1);
+    this.periodFinishAt = periodFinishAt ? periodFinishAt : JournalDate.today();
   }
 
   private createLedgers(journals: IJournal[]): AccountLedger[] {
@@ -109,14 +159,28 @@ export default class VirtualBook {
         if (!ledgerMap.has(categoryId)) {
           ledgerMap.set(categoryId, new AccountLedger(detail.category.parent));
         }
-        ledgerMap.get(categoryId)?.addCredit({
+        const ledgerDetail = {
           category:
             jnl.debits.length > 1
-              ? new UserCategory("", "", "諸口", -1, []) // TODO: 決め打ち => staticメソッドで作成？
-              : jnl.debits[0].category.parent,
+              ? new UserCategoryItem(
+                  "",
+                  jnl.userId,
+                  new UserCategory("", "", "諸口", -1, [], undefined),
+                  "諸口",
+                  undefined
+                ) // TODO: 決め打ち => staticメソッドで作成？
+              : jnl.debits[0].category,
           amount: detail.amount,
           accountAt: jnl.accountAt,
+        };
+        ledgerMap.get(categoryId)!.addCredit({
+          category: (ledgerDetail.category as ICategoryItem).parent,
+          amount: ledgerDetail.amount,
+          accountAt: ledgerDetail.accountAt,
         });
+        ledgerMap
+          .get(categoryId)!
+          .addChildCredit(detail.category, ledgerDetail);
       }
       // for debit
       for (const detail of jnl.debits) {
@@ -124,17 +188,29 @@ export default class VirtualBook {
         if (!ledgerMap.has(categoryId)) {
           ledgerMap.set(categoryId, new AccountLedger(detail.category.parent));
         }
-        ledgerMap.get(categoryId)?.addDebit({
+        const ledgerDetail = {
           category:
             jnl.credits.length > 1
-              ? new UserCategory("", "", "諸口", -1, [])
-              : jnl.credits[0].category.parent,
+              ? // ? new UserCategory("", "", "諸口", -1, [], undefined)
+                new UserCategoryItem(
+                  "",
+                  jnl.userId,
+                  new UserCategory("", "", "諸口", -1, [], undefined),
+                  "諸口",
+                  undefined
+                )
+              : jnl.credits[0].category,
           amount: detail.amount,
           accountAt: jnl.accountAt,
+        };
+        ledgerMap.get(categoryId)?.addDebit({
+          category: (ledgerDetail.category as ICategoryItem).parent,
+          amount: ledgerDetail.amount,
+          accountAt: ledgerDetail.accountAt,
         });
+        ledgerMap.get(categoryId)?.addChildDebit(detail.category, ledgerDetail);
       }
     }
-    console.log(ledgerMap);
     return Array.from(ledgerMap.values());
   }
 }

@@ -64,6 +64,9 @@ export default class BalanceInfoList extends Vue {
     margin: 5px 0px;
     .cell {
       margin: 3px 6px;
+      @include sm {
+        margin: 3px 1px;
+      }
       &.name {
         width: 60%;
       }
@@ -71,16 +74,26 @@ export default class BalanceInfoList extends Vue {
         width: calc(38% - 52px);
         margin-right: 20px;
         position: relative;
+        @include sm {
+          width: calc(38% - 42px);
+          margin-right: 13px;
+        }
         &:after {
           content: "円";
           right: -20px;
           top: 5px;
           position: absolute;
+          @include sm {
+            right: -10px;
+          }
         }
       }
     }
     .delete {
       margin-left: 12px;
+      @include sm {
+        margin-left: 3px;
+      }
       .delete-button {
         width: 18px;
         @include round-delete-button;

@@ -20,7 +20,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, "./dist"),
     filename: `${fileName}.js`,
-    chunkFilename: `[name].bundle.js`
+    chunkFilename: `[name].bundle.js`,
   },
   module: {
     rules: [
@@ -28,12 +28,12 @@ module.exports = {
         test: /\.ts$/,
         loader: "ts-loader",
         options: {
-          appendTsSuffixTo: [/\.vue$/]
-        }
+          appendTsSuffixTo: [/\.vue$/],
+        },
       },
       {
         test: /\.vue/,
-        loader: "vue-loader"
+        loader: "vue-loader",
       },
       // {
       //   test: /\.js/,
@@ -45,7 +45,7 @@ module.exports = {
       // },
       {
         test: /\.css/,
-        use: ["vue-style-loader", "css-loader"]
+        use: ["vue-style-loader", "css-loader"],
       },
       {
         test: /\.scss/,
@@ -54,35 +54,35 @@ module.exports = {
           {
             loader: "vue-style-loader",
             options: {
-              sourceMap: true
-            }
+              sourceMap: true,
+            },
           },
           {
             loader: "css-loader",
             options: {
               url: false,
-              sourceMap: true
+              sourceMap: true,
               //   minimize: true
-            }
+            },
           },
           {
             loader: "sass-loader",
             options: {
-              sourceMap: true
-            }
+              sourceMap: true,
+            },
           },
           {
             loader: "sass-resources-loader",
             options: {
               resources: [
-                path.resolve(__dirname, "./src/resources/sass/common.scss")
-              ]
-            }
-          }
+                path.resolve(__dirname, "./src/resources/sass/common.scss"),
+              ],
+            },
+          },
         ],
-        exclude: /node_modules/
-      }
-    ]
+        exclude: /node_modules/,
+      },
+    ],
   },
 
   //   externals: ["axios"],
@@ -91,8 +91,8 @@ module.exports = {
     alias: {
       vue$: "vue/dist/vue.esm.js",
       config$: path.resolve(`src/env/${target}.ts`),
-      "@": path.resolve(__dirname, "./src")
-    }
+      "@": path.resolve(__dirname, "./src"),
+    },
     // root: [path.resolve("./src")]
   },
 
@@ -100,11 +100,11 @@ module.exports = {
     new VueLoaderplugin(),
     new webpack.ProvidePlugin({
       // other modules
-      introJs: ["intro.js"]
-    })
+      introJs: ["intro.js"],
+    }),
   ],
   node: {
     fs: "empty",
-    net: "empty"
-  }
+    net: "empty",
+  },
 };

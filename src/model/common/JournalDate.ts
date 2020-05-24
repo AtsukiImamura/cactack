@@ -2,7 +2,6 @@ import IJournalDate from "@/model/interface/IJournalDate";
 
 export default class JournalDate implements IJournalDate {
   public static cast(value: string | IJournalDate): IJournalDate {
-    console.log(value);
     return typeof value === "string" ? JournalDate.fromToken(value) : value;
   }
   /**
@@ -99,7 +98,6 @@ export default class JournalDate implements IJournalDate {
     }
     const tokens = JournalDate.parse(date);
     if (tokens.length < 2) {
-      console.warn("wooops!", date);
       throw new Error(
         "Something has gone wrong with given date string. " + date
       );
@@ -192,6 +190,15 @@ export default class JournalDate implements IJournalDate {
     return this.getAfterMonthOf(1);
   }
 
+  public getNextDay(): IJournalDate {
+    const candidate = JournalDate.byDay(this.year, this.month, this.day + 1);
+    if (candidate.equalsTo(this)) {
+      return candidate.getNextMonth().firstDay;
+    } else {
+      return candidate;
+    }
+  }
+
   public getAfterMonthOf(val: number) {
     const rawMonth = (this.month + val) % 12;
     return JournalDate.byDay(
@@ -224,6 +231,14 @@ export default class JournalDate implements IJournalDate {
       rawMonth + Math.floor((12 - rawMonth) / 12) * 12,
       this._givenDay
     );
+  }
+
+  public setDate(date: Date): IJournalDate {
+    const d = JournalDate.byDate(date);
+    this._day = d.day;
+    this._month = d.month;
+    this._year = d.year;
+    return this;
   }
 
   public countDayFrom(date: IJournalDate): number {

@@ -30,6 +30,8 @@ export default class Selector extends Vue {
 
   @Prop() default?: SelectorItem;
 
+  @Prop({ default: () => false }) disabled!: boolean;
+
   public selectedItem: SelectorItem = { content: "", seq: 0 };
 
   public open = false;
@@ -47,6 +49,7 @@ export default class Selector extends Vue {
 
   public openSelections(e?: Event): void {
     if (e) e.stopPropagation();
+    if (this.disabled) return;
     this.open = true;
   }
 

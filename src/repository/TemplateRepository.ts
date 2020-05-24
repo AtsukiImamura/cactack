@@ -25,13 +25,13 @@ export default class TemplateRepository
       .where("userId", "==", container.resolve(UserAuthService).userId)
       .get()
       .then((value) => {
-        const aggregates: Promise<ITemplate>[] = [];
+        const aggregations: Promise<ITemplate>[] = [];
         value.forEach((doc) => {
           const data = doc.data() as DTemplate;
           data.id = doc.id;
-          aggregates.push(this.aggregate(data));
+          aggregations.push(this.aggregate(data));
         });
-        return Promise.all(aggregates);
+        return Promise.all(aggregations);
       });
   }
 }

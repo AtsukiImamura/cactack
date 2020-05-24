@@ -2,17 +2,26 @@
   <router-link
     :to="url"
     class="menu-item"
-    :class="{highlight: needHighlight, disabled: disabled}"
+    :class="{ highlight: needHighlight, disabled: disabled }"
     :image-path="imagePath"
     tag="div"
   >
-    <img class="icon" :src="needHighlight ? hilightImagePath : imagePath" />
-    <span class="title">{{ title }}</span>
+    <img
+      ref="icon"
+      class="icon"
+      :src="
+        needHighlight || (disabled && hilightImagePath)
+          ? hilightImagePath
+          : imagePath
+      "
+    />
+    <span class="title" :style="{ color: fontColor }">{{ title }}</span>
   </router-link>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
+import Color from "color";
 
 @Component({})
 export default class MenuItem extends Vue {
@@ -22,14 +31,29 @@ export default class MenuItem extends Vue {
 
   @Prop() imagePath!: string;
 
-  @Prop() hilightImagePath!: string;
+  @Prop({ default: () => "" }) hilightImagePath!: string;
 
   @Prop() url!: string;
 
   @Prop({ default: () => false }) disabled?: boolean;
 
+  @Prop({ default: () => "#ffc400" }) color!: string;
+
+  public get fontColor(): string {
+    return this.needHighlight
+      ? "#ffffff"
+      : this.disabled
+      ? Color(this.color)
+          .lighten(0.7)
+          .toString()
+      : this.color;
+  }
+
   public get needHighlight(): boolean {
-    const match = location.hash.substr(1).match(this.regex ? this.regex : "");
+    if (!this.regex) {
+      return false;
+    }
+    const match = location.hash.substr(1).match(this.regex);
     if (!match) {
       return false;
     }
@@ -41,12 +65,11 @@ export default class MenuItem extends Vue {
 <style lang="scss" scoped>
 .menu-item {
   width: calc(100% - 23px);
-  padding: 18px 8px 10px 15px;
-  text-align: center;
+  padding: 10px 8px 8px 15px;
   display: flex;
   cursor: pointer;
   position: relative;
-  $icon-size: 32px;
+  $icon-size: 30px;
   @include sm {
     height: calc(100% - 28px);
     width: calc(100% - 4px);
@@ -61,6 +84,7 @@ export default class MenuItem extends Vue {
     padding: 6px 8px 5px 6px;
   }
   &.disabled {
+    cursor: not-allowed;
     .title {
       color: $color-main-skeleton;
     }
@@ -78,7 +102,8 @@ export default class MenuItem extends Vue {
   }
   .title {
     display: block;
-    text-align: center;
+    // text-align: center;
+    padding: 1px 0px 0px 30px;
     width: calc(100% - #{$icon-size} - 2px);
     font-size: 1.1rem;
     color: $color-main;

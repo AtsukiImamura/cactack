@@ -11,7 +11,7 @@ export default abstract class UserIdentifiedRepositoryBase<
 > extends RepositoryBase<S, T> {
   constructor() {
     super();
-    this.cache.addIndex("userId", (value: T) => value.userId);
+    this.cache.addIndex("userId", (value: S) => value.userId);
   }
 
   public async getUsersAll(): Promise<T[]> {
@@ -19,6 +19,6 @@ export default abstract class UserIdentifiedRepositoryBase<
     if (!userId) {
       return [];
     }
-    return this.getByKey("userId", userId);
+    return this.getByKey("userId", userId, true);
   }
 }

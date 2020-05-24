@@ -1,49 +1,75 @@
 <template>
   <CommonFrame>
     <div class="top">
+      <TopNoticeModal ref="topNoticeModal" :num="1"></TopNoticeModal>
       <div class="h">
-        <div class="gragh" v-intro="'今月の資産変動を表示しています。左が月初、右が月末です。'" v-intro-step="1">
+        <div class="date-config">
+          <div class="attr begin">
+            <DatePicker
+              format="yyyy/MM/dd"
+              :value="periodBeginWith.toDate()"
+              @selected="
+                periodBeginWith = periodBeginWith.setDate($event);
+                updateLedgers();
+              "
+            ></DatePicker>
+          </div>
+          <div class="attr end">
+            <DatePicker
+              format="yyyy/MM/dd"
+              :value="periodEndWith.toDate()"
+              @selected="
+                periodEndWith = periodEndWith.setDate($event);
+                updateLedgers();
+              "
+            ></DatePicker>
+          </div>
+        </div>
+        <div
+          class="gragh"
+          v-intro="'今月の資産変動を表示しています。左が月初、右が月末です。'"
+          v-intro-step="1"
+          :key="
+            `${
+              journals.length
+            }${periodBeginWith.toString()}${periodEndWith.toString()}`
+          "
+        >
           <div class="loading" v-if="loading">
             <div class="loading-linear"></div>
           </div>
-          <CactackBalance :option="diffGraghOption" v-if="!loading"></CactackBalance>
+          <BalanceDiffGraph v-if="!loading" :book="book"></BalanceDiffGraph>
         </div>
       </div>
-      <div class="details">
+      <div
+        class="details"
+        :key="
+          `${ledgerKey}${
+            journals.length
+          }${periodBeginWith.toString()}${periodEndWith.toString()}`
+        "
+      >
         <div
-          class="actions"
-          v-intro="'フロータイプの切り替えができます。今月現金をどれだけ消費するのか確認してみましょう。'"
-          v-intro-step="2"
+          class="app-ledgers"
+          v-masonry="`app-ledgers`"
+          transition-duration="0.2s"
+          item-selector=".ledger"
         >
-          <FlowTypeSelector @select="onlyCashFlow = $event" :cash-only="onlyCashFlow"></FlowTypeSelector>
-        </div>
-        <div class="ledgers">
-          <div class="ledger" v-for="(led, index) in ledgers" :key="index">
+          <div v-masonry-tile class="ledger" v-for="(led, index) in ledgers" :key="index">
             <Ledger :ledger="led"></Ledger>
           </div>
         </div>
-        <!-- <div class="c">
-          <TopDetails :image-path="'image/in.svg'" title="IN" :transactions="inTransactions"></TopDetails>
-        </div>
-        <div class="c" v-intro="'支出を表示しています。詳細は「フロー」ページで確認できます。'" v-intro-step="3">
-          <TopDetails :image-path="'image/out.svg'" title="OUT" :transactions="outTransactions"></TopDetails>
-        </div>-->
       </div>
     </div>
   </CommonFrame>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 import { IDiffGraghOption } from "@/view/interface/IDiffGragh";
-import TopDetails from "@/view/top/TopDetails.vue";
-import CactackBalance from "vue-balance";
-import JournalDate from "@/model/common/JournalDate";
 import IJournal from "@/model/interface/IJournal";
 import AppModule from "@/store/ApplicationStore";
 import { container } from "tsyringe";
-import DiffGraphUtil from "@/view/util/DiffGraphUtil";
-// import AccountCategory from "@/model/AccountCategory";
 import NumberIncrementor from "@/view/common/NumberIncrementor.vue";
 import UserAuthService from "@/service/UserAuthService";
 import CommonFrame from "@/view/common/CommonFrame.vue";
@@ -51,130 +77,77 @@ import IJournalDate from "@/model/interface/IJournalDate";
 import FlowTypeSelector from "@/view/common/FlowTypeSelector.vue";
 import AccountLedger from "@/model/virtual/AccountLedger";
 import VirtualBook from "@/model/virtual/VirtualBook";
-import Ledger from "@/view/journal/Ledger.vue";
+import Ledger from "@/view/ledger/Ledger.vue";
+import LedgerSummary from "@/view/ledger/LedgerSummary.vue";
+import hash from "object-hash";
+import DatePicker from "vuejs-datepicker";
+import BalanceDiffGraph from "@/view/balance/BalanceDiffGraph.vue";
+import TopNoticeModal from "./TopNoticeModal.vue";
 
 @Component({
   components: {
-    CactackBalance,
     NumberIncrementor,
-    TopDetails,
     CommonFrame,
     FlowTypeSelector,
-    Ledger
+    Ledger,
+    LedgerSummary,
+    DatePicker,
+    BalanceDiffGraph,
+    TopNoticeModal
   }
 })
 export default class App extends Vue {
-  public get ledgers(): AccountLedger[] {
-    const book = new VirtualBook(this.journals);
-    return book.ledgers;
+  public ledgers: AccountLedger[] = [];
+
+  public book: VirtualBook = new VirtualBook([]);
+
+  public get periodBeginWith(): IJournalDate {
+    return AppModule.periodBeginWith;
+  }
+  public set periodBeginWith(date: IJournalDate) {
+    AppModule.setPeriodBeginWith(date);
   }
 
-  public mounted(): void {
-    if (container.resolve(UserAuthService).userId) {
-      AppModule.init().catch(err => console.error(err));
+  public get periodEndWith(): IJournalDate {
+    return AppModule.periodEndWith;
+  }
+  public set periodEndWith(date: IJournalDate) {
+    AppModule.setPeriodEndWith(date);
+  }
+
+  public diffGraghOption: IDiffGraghOption = {
+    left: { credit: [], debit: [] },
+    right: { credit: [], debit: [] },
+    diffs: [],
+    displayOptions: {
+      displayItemName: true,
+      displayItemAmount: true,
+      diffBorderColor: "#ffffff",
+      diffColor: "#ffffff",
+      balanceBorderColor: "#ffffff"
     }
-    // if (document.body.clientWidth <= 760) {
-    //   return;
-    // }
-    container
-      .resolve(UserAuthService)
-      .getUser()
-      .then(user => {
-        if (!user || user.introTopFinished) {
-          return;
-        }
-        let intro = (this as any).$intro().start();
-        if (document.body.clientWidth <= 760) {
-          intro = intro.nextStep();
-        }
-        intro.onexit(() => {
-          container.resolve(UserAuthService).finishTopIntroduction();
-        }); // FIXME: 型
-      });
+  };
+
+  public get ledgerKey(): string {
+    return hash(this.ledgers);
   }
 
-  public date: IJournalDate = JournalDate.today();
-
-  public onlyCashFlow: boolean = false;
-
-  public onMonthScrolled(e: Event) {
-    const src = e.srcElement as HTMLElement;
-    const scrollLeft = src.scrollLeft;
-    const width = src.clientWidth;
-    if (scrollLeft > width) {
-      this.date = this.date.getNextMonth();
-    }
-    if (scrollLeft < width * 0.1) {
-      this.date = this.date.getPreviousMonth();
-    }
-  }
-
-  // public get monthlyInfoList(): {
-  //   month: number;
-  //   prev: number;
-  //   value: number;
-  // }[] {
-  //   return [
-  //     { month: this.date.getPreviousMonth().month, prev: 0, value: 0 },
-  //     {
-  //       month: this.date.month,
-  //       prev: this.totalAmountOfPreviousMonth,
-  //       value: this.totalAmountOfThisMonth
-  //     },
-  //     { month: this.date.getNextMonth().month, prev: 0, value: 0 }
-  //   ];
-  // }
-
-  // @Watch("monthlyInfoList")
-  // public onMonthlyInfoChanged(): void {
-  //   setTimeout(() => {
-  //     const elem = this.$refs.monthlyList as HTMLDivElement;
-  //     if (!elem) {
-  //       return;
-  //     }
-  //     if (document.body.clientWidth > 768) {
-  //       return;
-  //     }
-  //     elem.scrollLeft = elem.clientWidth * 0.55 + 20 + 5;
-  //   }, 10);
-  // }
-
-  public get month(): number {
-    return this.date.month;
-  }
-
-  public get journals(): IJournal[] {
-    return AppModule.journals;
-  }
-
-  // public get inTransactions(): TopDetailTransactionDto[] {
-  //   return this.toDetailDto(AppModule.transactions).filter(tr => tr.amount > 0);
-  // }
-
-  // public get outTransactions(): TopDetailTransactionDto[] {
-  //   return this.toDetailDto(AppModule.transactions).filter(tr => tr.amount < 0);
-  // }
-
-  // private toDetailDto(transactions: ITransaction[]): TopDetailTransactionDto[] {
-  //   return transactions.map(tr => ({
-  //     name: tr.name,
-  //     createdAt: tr.createdAt.toString(),
-  //     badget: tr.badget ? tr.badget.name : "",
-  //     amount: this.onlyCashFlow
-  //       ? tr.getMonthlyCashFlowOf(this.date)
-  //       : tr.getMonthlyAmountOf(this.date)
-  //   }));
-  // }
-
-  public get diffGraghOption(): IDiffGraghOption {
-    return {
-      left: container
-        .resolve(DiffGraphUtil)
-        .calcBalance(this.journals, this.date.firstDay),
-      right: container
-        .resolve(DiffGraphUtil)
-        .calcBalance(this.journals, this.date.getNextMonth().firstDay),
-      diffs: [],
+  @Watch("journals")
+  public async updateLedgers() {
+    const book = new VirtualBook(
+      this.journals,
+      this.periodBeginWith,
+      this.periodEndWith
+    );
+    this.book = book;
+    this.ledgers = await book.getVirtualLedgers();
+    this.diffGraghOption = {
+      left: (await book.generateBalanceOfBeginning()).summary,
+      right: (await book.generateBalanceOfEnding()).summary,
+      diffs: (await book.generateDiffFactors()).map(diff => ({
+        name: diff.item.name,
+        amount: diff.amount
+      })),
       displayOptions: {
         displayItemName: true,
         displayItemAmount: true,
@@ -185,249 +158,79 @@ export default class App extends Vue {
     };
   }
 
-  // public get totalAmountOfPreviousMonth(): number {
-  //   const summary = container
-  //     .resolve(DiffGraphUtil)
-  //     .calcBalance(this.journals, this.date.firstDay);
-  //   for (const item of [...summary.credit, ...summary.debit]) {
-  //     if (
-  //       !this.onlyCashFlow &&
-  //       item.name === AccountCategory.netAssets().name
-  //     ) {
-  //       return item.amount;
-  //     }
-  //     if (this.onlyCashFlow && item.name === AccountCategory.cash().name) {
-  //       return item.amount;
-  //     }
-  //   }
-  //   return 0;
-  // }
+  public async mounted() {
+    await AppModule.init();
+    await this.updateLedgers();
 
-  // public get totalAmountOfThisMonth(): number {
-  //   const summary = container
-  //     .resolve(DiffGraphUtil)
-  //     .calcBalance(this.journals, this.date.getNextMonth().firstDay);
-  //   for (const item of [...summary.credit, ...summary.debit]) {
-  //     if (
-  //       !this.onlyCashFlow &&
-  //       item.name === AccountCategory.netAssets().name
-  //     ) {
-  //       return item.amount;
-  //     }
-  //     if (this.onlyCashFlow && item.name === AccountCategory.cash().name) {
-  //       return item.amount;
-  //     }
-  //   }
-  //   return 0;
-  // }
+    // (this.$refs.topNoticeModal as TopNoticeModal).open();
+
+    if (document.body.clientWidth <= 760) {
+      return;
+    }
+    const user = await container.resolve(UserAuthService).getUser();
+    if (!user || user.introTopFinished) {
+      return;
+    }
+    let intro = (this as any).$intro().start();
+    if (document.body.clientWidth <= 760) {
+      intro = intro.nextStep();
+    }
+    intro.onexit(() => {
+      container.resolve(UserAuthService).finishTopIntroduction();
+    }); // FIXME: 型
+  }
+
+  public get journals(): IJournal[] {
+    return AppModule.journals;
+  }
 
   public get loading(): boolean {
     return this.journals.length === 0;
-  }
-
-  public prev(): void {
-    this.date = this.date.getPreviousMonth();
-  }
-
-  public next(): void {
-    this.date = this.date.getNextMonth();
   }
 }
 </script>
 
 <style lang="scss" scoped>
 .h {
-  display: flex;
-  flex-wrap: wrap;
   height: 55vh;
-  background-color: #606060;
-  padding: 20px 10px;
+  // background-color: #606060;
+  padding: 0px;
   @include sm {
     height: 110px;
     background-color: #ffffff;
   }
 
-  .month-move {
-    background-color: transparent;
-    transition-duration: 0.3s;
-    transition-delay: 0.12s;
-    @include sm {
-      display: none;
-    }
-  }
-  &:hover {
-    .month-move {
-      display: block;
-      position: absolute;
-      width: 45px;
-      height: 100%;
-      background-color: rgba(40, 40, 40, 0.12);
-      top: 0px;
-      z-index: 10;
-      cursor: pointer;
-      transition-timing-function: ease-in-out;
-      transition-duration: 0.3s;
-      @include sm {
-        display: none;
-      }
+  .date-config {
+    width: 100%;
+    padding: 8px 10px;
+    display: flex;
+    border-bottom: 1px solid #c0c0c0;
+    box-shadow: 1px 1px 2px 2px rgba(120, 120, 120, 0.25);
+    .attr {
+      position: relative;
+      margin: 30px 0px 0px 0px;
       &:after {
         content: "";
-        width: 0px;
-        height: 0px;
-        top: 45%;
-        border-top: 22px solid transparent;
-        border-bottom: 22px solid transparent;
-        z-index: 11;
         position: absolute;
-      }
-      &.prev {
+        top: -20px;
         left: 0px;
+      }
+      &.begin {
         &:after {
-          left: 4px;
-          border-right: 30px solid rgba(40, 40, 40, 0.3);
+          content: "期首";
         }
       }
-      &.next {
-        right: 0px;
+      &.end {
         &:after {
-          right: 4px;
-          border-left: 30px solid rgba(40, 40, 40, 0.3);
-        }
-      }
-    }
-  }
-  position: relative;
-  .month-list-wrap {
-    display: flex;
-    width: 220px;
-    overflow: hidden;
-    justify-content: center;
-    @include md {
-      height: 120px;
-      width: 100%;
-    }
-    @include sm {
-      height: 100%;
-    }
-    .month-list {
-      display: flex;
-      width: auto;
-      overflow: hidden;
-      justify-content: center;
-      width: 170%;
-      height: calc(100% + 17px);
-      @include sm {
-        overflow-x: scroll;
-        justify-content: flex-start;
-      }
-      .monthly {
-        min-width: 220px;
-        @include md {
-          display: flex;
-          min-width: 100%;
-        }
-        @include sm {
-          width: 70%;
-          min-width: 70%;
-          background-color: #ffffff;
-          border-radius: 5px;
-          box-shadow: 1.5px 1.5px 3px 3px rgba(120, 120, 120, 0.3);
-          margin: 0px 10px 20px;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        * {
-          color: #ffffff;
-          @include sm {
-            color: #404040;
-          }
-        }
-
-        .month-name {
-          @include md {
-            width: 150px;
-          }
-          @include sm {
-            width: 35%;
-          }
-          h2 {
-            font-size: 108px;
-            margin: 10px 5px;
-            display: inline;
-            @include md {
-              display: inline-block;
-              height: 100px;
-              margin-top: -20px;
-            }
-            @include sm {
-              margin-top: 0px;
-              font-size: 4rem;
-              margin-left: 15px;
-            }
-          }
-          h3 {
-            display: inline;
-            font-size: 30px;
-            margin: 10px 5px;
-          }
-        }
-        .money-change {
-          width: 100%;
-          @include md {
-            width: calc(100% - 160px);
-          }
-          @include xs {
-            width: 60%;
-          }
-          margin-top: -20px;
-          .m {
-            display: flex;
-            &.prev-month {
-              font-size: 30px;
-            }
-            &.this-month {
-              margin-left: 32px;
-              * {
-                font-size: 40px;
-              }
-              word-wrap: normal;
-            }
-            @include sm {
-              display: block;
-              &.prev-month {
-                font-size: 1rem;
-              }
-              &.this-month {
-                margin-left: 0px;
-                * {
-                  font-size: 1.5rem;
-                }
-                word-wrap: normal;
-              }
-            }
-          }
-        }
-        .money-changes-xs {
-          display: none;
-          @include xs {
-            width: 100%;
-            display: flex;
-            overflow-x: scroll;
-            justify-content: center;
-          }
-          .money-change {
-            width: 80%;
-            margin: 0px 12px;
-            box-shadow: 1.5px 1.5px 3px 3px rgba(120, 120, 120, 0.3);
-            background: #ffffff;
-          }
+          content: "期末";
         }
       }
     }
   }
   .gragh {
-    width: calc(100% - 230px);
+    width: 100%;
+    height: calc(100% - 90px);
+    margin: 15px 0px 0px 0px;
     @include responsive-width(70%, 100%, 0%, 0%);
     @include md {
       height: calc(100% - 120px);
@@ -435,17 +238,8 @@ export default class App extends Vue {
     @include sm {
       display: none;
     }
-    border-bottom: 1px solid #ffffff;
     position: relative;
     &:after {
-      @keyframes disp {
-        0% {
-          height: 100%;
-        }
-        100% {
-          height: 0%;
-        }
-      }
       content: "";
       position: absolute;
       width: 100%;
@@ -453,24 +247,34 @@ export default class App extends Vue {
       z-index: 2;
       top: 0;
       left: 0;
-      animation: disp 700ms 0ms ease-in-out running forwards;
+    }
+  }
+}
+
+.results {
+  .ledgers {
+    display: flex;
+    flex-wrap: wrap;
+    .ledger {
+      width: calc(33% - 10px);
+      margin: 10px 10px 10px 0px;
     }
   }
 }
 .details {
-  display: flex;
-  flex-wrap: wrap;
+  // display: flex;
+  // flex-wrap: wrap;
   margin: 10px 0px;
-  .ledgers {
-    width: 100%;
+  .app-ledgers {
+    // width: 100%;
     display: flex;
     flex-wrap: wrap;
     .ledger {
       margin: 5px 5px;
-      width: calc(33% - 10px);
+      width: calc(50% - 10px);
       @include responsive-width(
         calc(50% - 10px),
-        calc(50% - 10px),
+        calc(100% - 10px),
         calc(100% - 10px),
         calc(100% - 10px)
       );

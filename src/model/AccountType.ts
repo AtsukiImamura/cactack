@@ -1,6 +1,15 @@
 import IAccountType from "./interface/IType";
 
 export default class AccountType implements IAccountType {
+  public static all(): IAccountType[] {
+    return [
+      new AccountType(AccountType.TYPE_ASSET),
+      new AccountType(AccountType.TYPE_DEBT),
+      new AccountType(AccountType.TYPE_NET_ASSET),
+      new AccountType(AccountType.TYPE_SPENDING),
+      new AccountType(AccountType.TYPE_INCOME),
+    ];
+  }
   /** 負債 */
   public static readonly TYPE_DEBT = 10;
   /** 純資産 */
@@ -32,7 +41,7 @@ export default class AccountType implements IAccountType {
         this._name = "費用";
         break;
       case AccountType.TYPE_INCOME:
-        this._name = "収入";
+        this._name = "収益";
         break;
     }
   }
@@ -62,7 +71,8 @@ export default class AccountType implements IAccountType {
   public get isCredit(): boolean {
     return (
       this.code === AccountType.TYPE_DEBT ||
-      this.code === AccountType.TYPE_NET_ASSET
+      this.code === AccountType.TYPE_NET_ASSET ||
+      this.code == AccountType.TYPE_INCOME
     );
   }
 

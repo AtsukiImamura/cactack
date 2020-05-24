@@ -6,6 +6,7 @@ import JournalDate from "@/model/common/JournalDate";
 import IJournalDate from "@/model/interface/IJournalDate";
 import { DJournal } from "@/model/interface/DJournal";
 import IdBase from "./IdBase";
+import hash from "object-hash";
 
 export default abstract class JournalBase extends IdBase implements IJournal {
   // public static simple(
@@ -43,14 +44,19 @@ export default abstract class JournalBase extends IdBase implements IJournal {
 
   private _period?: IJournalPeriodInfo;
 
+  private _ancestorId?: string;
+
   /**
    * 仕訳
-   * @param transactionId
    * @param id
+   * @param userId
+   * @param title
+   * @param createdAt
    * @param accountAt
    * @param executeAt
-   * @param credit
-   * @param debit
+   * @param credits
+   * @param debits
+   * @param period
    */
   constructor(
     id: string,
@@ -69,9 +75,19 @@ export default abstract class JournalBase extends IdBase implements IJournal {
     this._createdAt = JournalDate.cast(createdAt);
     this._accountAt = JournalDate.cast(accountAt);
     this._executeAt = executeAt ? JournalDate.cast(executeAt) : undefined;
-    this._credits = credits;
-    this._debits = debits;
+    this._credits = this.setHashIfNot(credits);
+    this._debits = this.setHashIfNot(debits);
     period && (this._period = period);
+  }
+
+  private setHashIfNot(details: IJournalDetail[]) {
+    return details.map((d) => {
+      if (d.hash) {
+        return d;
+      }
+      d.hash = `${hash(d)}${hash(new Date())}`;
+      return d;
+    });
   }
 
   /**
@@ -126,11 +142,36 @@ export default abstract class JournalBase extends IdBase implements IJournal {
     return true;
   }
 
+  public get isValid(): boolean {
+    if (this.credits.length === 0 || this.debits.length === 0) {
+      return false;
+    }
+    if (
+      [...this.credits, ...this.debits].filter((d) => d.amount <= 0).length > 0
+    ) {
+      return false;
+    }
+    if (
+      this.credits.reduce((acc, cur) => (acc += cur.amount), 0) !==
+      this.debits.reduce((acc, cur) => (acc += cur.amount), 0)
+    ) {
+      return false;
+    }
+    return true;
+  }
+
   /**
    * Getter credits
    * @return {IJournalDetail[] }
    */
   public get credits(): IJournalDetail[] {
+    // return this._credits.map(d => {
+    //   if(!d.category.action){
+    //     return d;
+    //   }
+    //   d.action =
+    //   return d;
+    // })
     return this._credits;
   }
 
@@ -140,6 +181,29 @@ export default abstract class JournalBase extends IdBase implements IJournal {
    */
   public get debits(): IJournalDetail[] {
     return this._debits;
+  }
+
+  public get balanceItems(): IJournalDetail[] {
+    return [
+      ...this.credits.map((detail) => ({
+        hash: detail.hash,
+        category: detail.category,
+        amount: (detail.category.type.isCredit ? 1 : -1) * detail.amount,
+      })),
+      ...this.debits.map((detail) => ({
+        hash: detail.hash,
+        category: detail.category,
+        amount: (detail.category.type.isDebit ? 1 : -1) * detail.amount,
+      })),
+    ];
+  }
+
+  public get ancestorId(): string | undefined {
+    return this._ancestorId;
+  }
+
+  public set ancestorId(id: string | undefined) {
+    this._ancestorId = id;
   }
 
   /**
@@ -160,10 +224,12 @@ export default abstract class JournalBase extends IdBase implements IJournal {
       credits: this.credits.map((detail) => ({
         amount: detail.amount,
         categoryItemId: detail.category.id,
+        action: detail.action ? detail.action : "",
       })),
       debits: this.debits.map((detail) => ({
         amount: detail.amount,
         categoryItemId: detail.category.id,
+        action: detail.action ? detail.action : "",
       })),
     } as DJournal;
     if (this.period) {
@@ -173,6 +239,9 @@ export default abstract class JournalBase extends IdBase implements IJournal {
         debitCategoryItemId: this.period.debit.id,
         creditCategoryItemId: this.period.credit.id,
       };
+    }
+    if (this.ancestorId) {
+      djournal.ancestorId = this.ancestorId;
     }
     return djournal;
   }

@@ -18,7 +18,7 @@ export default class BadgetRepository extends RepositoryBase<DBadget, IBadget>
   }
 
   public async getByGroupId(groupId: string): Promise<IBadget[]> {
-    const badgetAggregates: Promise<IBadget>[] = [];
+    const badgetAggregations: Promise<IBadget>[] = [];
     await this.ref
       .where("groupId", "==", groupId)
       .get()
@@ -26,9 +26,9 @@ export default class BadgetRepository extends RepositoryBase<DBadget, IBadget>
         docs.forEach((doc) => {
           const data = doc.data();
           data.id = doc.id;
-          badgetAggregates.push(this.aggregate(data as DBadget));
+          badgetAggregations.push(this.aggregate(data as DBadget));
         });
       });
-    return Promise.all(badgetAggregates);
+    return Promise.all(badgetAggregations);
   }
 }

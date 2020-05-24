@@ -79,7 +79,7 @@ export default class Step extends Vue {
       border-left: $height / 2 solid $color-main-skeleton;
       right: -$height / 2;
       top: 0px;
-      z-index: 10;
+      z-index: 2;
     }
     .i {
       display: block;

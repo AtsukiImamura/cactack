@@ -20,12 +20,12 @@ export default class BadgetGroupRepository
 
   public async getByUserId(userId: string): Promise<IBadgetGroup[]> {
     const docs = await this.ref.where("userId", "==", userId).get();
-    const groupAggregates: Promise<IBadgetGroup>[] = [];
+    const groupAggregations: Promise<IBadgetGroup>[] = [];
     docs.forEach((doc) => {
       const data = doc.data();
       data.id = doc.id;
-      groupAggregates.push(this.aggregate(data as DBadgetGroup));
+      groupAggregations.push(this.aggregate(data as DBadgetGroup));
     });
-    return Promise.all(groupAggregates);
+    return Promise.all(groupAggregations);
   }
 }

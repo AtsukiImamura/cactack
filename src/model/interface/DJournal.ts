@@ -15,12 +15,18 @@ export interface DJournal extends Identifiable, UserIdentifiable, Strable {
   debits: DJournalDetail[];
 
   period?: DJournalPeriodInfo;
+
+  ancestorId?: string;
 }
 
 export interface DJournalDetail extends Strable {
+  hash?: string;
+
   amount: number;
 
   categoryItemId: string;
+
+  action?: string;
 }
 
 export interface DJournalPeriodInfo {

@@ -4,14 +4,14 @@
       <span>{{ selectedItem.name }}</span>
     </div>
     <div v-if="open" class="bg" @click="open = false"></div>
-    <div v-if="open" class="selector" :style="{'max-width': `${selectorMaxWidth}px`}">
+    <div v-if="open" class="selector" :style="{ 'max-width': `${selectorMaxWidth}px` }">
       <div class="tabs">
         <div
           class="tab"
           v-for="(tab, index) in tabs"
           :key="index"
           @click="tabIndex = index"
-          :class="{'selected': index === tabIndex}"
+          :class="{ selected: index === tabIndex }"
         >
           <span>{{ tab.name }}</span>
         </div>
@@ -39,10 +39,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, Emit } from "vue-property-decorator";
-import {
-  ICategoryItem,
-  IAccountCategory
-} from "../../../model/interface/ICategory";
+import { ICategoryItem } from "@/model/interface/ICategory";
 
 export interface CategorySelectorTab {
   name: string;
@@ -59,11 +56,13 @@ interface CategorySelectorSection {
 export default class CategorySelector extends Vue {
   @Prop({ default: () => [] }) tabs!: CategorySelectorTab[];
 
+  @Prop() item?: ICategoryItem;
+
   public tabIndex: number = 0;
 
   public open: boolean = false;
 
-  public selectedItem: IAccountCategory | {} = {};
+  public selectedItem: ICategoryItem | {} = {};
 
   public selectorMaxWidth: number = 0;
 
@@ -74,6 +73,9 @@ export default class CategorySelector extends Vue {
         : document.body.clientWidth * 0.6,
       800
     );
+    if (this.item) {
+      this.selectedItem = this.item;
+    }
   }
 
   public get sections(): CategorySelectorSection[] {
@@ -151,8 +153,8 @@ export default class CategorySelector extends Vue {
       display: flex;
       flex-wrap: wrap;
       .section {
-        margin: 10px 5px;
-        padding: 5px;
+        margin: 2px 5px;
+        padding: 3px;
         width: calc(48% - 10px);
         // margin-right: 4%;
         .title {

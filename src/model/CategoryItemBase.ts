@@ -1,5 +1,6 @@
 import IdBase from "./IdBase";
 import { IAccountCategory } from "./interface/ICategory";
+import IAccountType from "./interface/IType";
 
 export default class CategoryItemBase extends IdBase {
   protected _parent: IAccountCategory;
@@ -7,6 +8,10 @@ export default class CategoryItemBase extends IdBase {
   protected _userId: string;
 
   protected _name: string;
+
+  public get type(): IAccountType {
+    return this.parent.type;
+  }
 
   constructor(
     id: string,

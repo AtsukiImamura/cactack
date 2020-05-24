@@ -82,13 +82,7 @@
             class="btn cancel-btn"
             value="戻る"
           ></router-link>
-          <router-link
-            to="/user/create/finish"
-            tag="input"
-            type="button"
-            class="btn ok-btn"
-            value="次へ"
-          ></router-link>
+          <ProcessButton value="次へ" :click="next" :disabled="false"></ProcessButton>
         </div>
       </div>
     </div>
@@ -100,9 +94,17 @@ import { Component, Vue } from "vue-property-decorator";
 import PublicFrame from "@/view/common/PublicFrame.vue";
 import Step from "@/view/common/Step.vue";
 import QuestionaierBlock from "@/view/auth/creation/components/QuestionaierBlock.vue";
-import UserCreationMaster from "../../../model/UserCreationMaster";
+import UserCreationMaster from "@/model/UserCreationMaster";
 import UserCreationModule from "../../../store/UserCreationStore";
 import NumberInput from "@/view/common/NumberInput.vue";
+import ProcessButton from "@/view/common/ProcessButton.vue";
+import { container } from "tsyringe";
+import UserCategoryRepository from "../../../repository/UserCategoryRepository";
+import UserCategory from "@/model/UserCategory";
+import UserAuthService from "../../../service/UserAuthService";
+import AccountType from "@/model/AccountType";
+import UserCategoryItemRepository from "../../../repository/UserCategoryItemRepository";
+import UserCategoryItem from "@/model/UserCategoryItem";
 
 interface IUserAccount {
   name: string;
@@ -111,7 +113,13 @@ interface IUserAccount {
 }
 
 @Component({
-  components: { PublicFrame, Step, QuestionaierBlock, NumberInput }
+  components: {
+    PublicFrame,
+    Step,
+    QuestionaierBlock,
+    NumberInput,
+    ProcessButton
+  }
 })
 export default class UserCreationSteadyInOut extends Vue {
   public userAccounts: IUserAccount[] = [];
@@ -161,6 +169,66 @@ export default class UserCreationSteadyInOut extends Vue {
   public removeUserAccount(account: IUserAccount) {
     const index = this.userAccounts.indexOf(account);
     index < 0 || this.userAccounts.splice(index, 1);
+  }
+
+  public async next(): Promise<void> {
+    const userId = container.resolve(UserAuthService).userId;
+    if (!userId) {
+      throw new Error("user not found.");
+    }
+    // 収入
+    {
+      const category = await container
+        .resolve(UserCategoryRepository)
+        .insert(
+          new UserCategory(
+            "",
+            userId,
+            "収入",
+            AccountType.TYPE_INCOME,
+            [],
+            undefined
+          )
+        );
+      for (const account of this.userAccounts.filter(
+        ac =>
+          ac.type === UserCreationMaster.TYPE_INCOME ||
+          ac.type === UserCreationMaster.TYPE_STEADY_INCOME
+      )) {
+        await container
+          .resolve(UserCategoryItemRepository)
+          .insert(
+            new UserCategoryItem("", userId, category, account.name, undefined)
+          );
+      }
+    }
+    // 費用
+    {
+      const category = await container
+        .resolve(UserCategoryRepository)
+        .insert(
+          new UserCategory(
+            "",
+            userId,
+            "費用",
+            AccountType.TYPE_SPENDING,
+            [],
+            undefined
+          )
+        );
+      for (const account of this.userAccounts.filter(
+        ac =>
+          ac.type === UserCreationMaster.TYPE_SPENDING ||
+          ac.type === UserCreationMaster.TYPE_STEADY_SPENDING
+      )) {
+        await container
+          .resolve(UserCategoryItemRepository)
+          .insert(
+            new UserCategoryItem("", userId, category, account.name, undefined)
+          );
+      }
+    }
+    this.$router.push("/user/create/finish");
   }
 }
 </script>

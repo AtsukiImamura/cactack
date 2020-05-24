@@ -2,12 +2,12 @@
   <div class="public">
     <div class="header">
       <div class="left">
-        <div class="title">
+        <router-link tag="div" class="title" :to="topLink">
           <h1>Cactack</h1>
-        </div>
+        </router-link>
       </div>
       <div class="right">
-        <router-link class="login-btn" to="/auth/login">ログイン</router-link>
+        <router-link class="login-btn" to="/auth/login" v-if="!isLoggedIn">ログイン</router-link>
       </div>
     </div>
     <slot></slot>
@@ -16,9 +16,19 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import { container } from "tsyringe";
+import UserAuthService from "../../service/UserAuthService";
 
 @Component({})
-export default class PublicFrame extends Vue {}
+export default class PublicFrame extends Vue {
+  public get isLoggedIn(): boolean {
+    return !!container.resolve(UserAuthService).userId;
+  }
+
+  public get topLink(): string {
+    return this.isLoggedIn ? "/" : "/top";
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -33,8 +43,10 @@ export default class PublicFrame extends Vue {}
     box-shadow: 1px 1px 1px 1px rgba(40, 40, 40, 0.3);
     display: flex;
     justify-content: space-between;
+    z-index: 3;
     .left {
       .title {
+        cursor: pointer;
         h1 {
           margin: 5px;
           padding: 0;

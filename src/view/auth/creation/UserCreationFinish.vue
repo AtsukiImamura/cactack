@@ -5,7 +5,13 @@
         <h2>お疲れさまでした！</h2>
         <p>これでアプリが使えます。</p>
         <p>まずは仕訳をしてみましょう！</p>
-        <div class="balances"></div>
+        <div class="proceetings">
+          <div
+            :class="`pro-info ${info.cls ? info.cls : 'success'}`"
+            v-for="(info, index) in pros"
+            :key="index"
+          >{{ info.disp}}</div>
+        </div>
         <div class="action">
           <!-- <router-link to="/" tag="input" type="button" class="btn ok-btn" value="アプリへ"></router-link> -->
           <ProcessButton value="アプリへ" :click="next" :disabled="false"></ProcessButton>
@@ -22,39 +28,64 @@ import PublicFrame from "@/view/common/PublicFrame.vue";
 import { container } from "tsyringe";
 import CategoryMasterRepository from "@/repository/CategoryMasterRepository";
 import CategoryService from "@/service/CategoryService";
-import UserCategory from "../../../model/UserCategory";
-import UserAuthService from "../../../service/UserAuthService";
-import UserCategoryItem from "../../../model/UserCategoryItem";
-// import CategoryMasterRepository from "@/repository/CategoryMasterRepository";
+import UserCategory from "@/model/UserCategory";
+import UserAuthService from "@/service/UserAuthService";
+import UserCategoryItem from "@/model/UserCategoryItem";
+// import UserCreationModule from "../../../store/UserCreationStore";
+import { IUserCategory } from "../../../model/interface/ICategory";
 
 @Component({ components: { PublicFrame, ProcessButton } })
 export default class UserCreationFinish extends Vue {
+  public pros: { disp: string; cls?: string }[] = [];
+
   public async next(): Promise<void> {
+    // await UserCreationModule.init();
+    // this.pros.push({
+    //   disp: "所持資産データの保存が完了しました。"
+    // });
     const userId = container.resolve(UserAuthService).userId;
     if (!userId) {
+      this.pros.push({
+        disp: "ユーザーデータの取得に失敗しました",
+        cls: "error"
+      });
       return Promise.reject();
     }
-    console.log(`userId: ${userId}`);
-    const categoryMasters = await container
-      .resolve(CategoryMasterRepository)
-      .getAll();
-    console.log(`masters: OK`);
-    await container.resolve(CategoryService).insertUserCategories(
-      categoryMasters.map(
-        master =>
-          new UserCategory(
-            "",
-            userId,
-            master.name,
-            master.type.code,
-            master.items.map(
-              item => new UserCategoryItem("", userId, master, item.name)
+    try {
+      const categoryMasters = await container
+        .resolve(CategoryMasterRepository)
+        .getAll();
+      this.pros.push({
+        disp: "デフォルト勘定科目データの読み込みが完了しました。"
+      });
+      await container.resolve(CategoryService).insertUserCategories(
+        categoryMasters.map(
+          master =>
+            new UserCategory(
+              "",
+              userId,
+              master.name,
+              master.type.code,
+              master.items.map(
+                item =>
+                  new UserCategoryItem("", userId, master, item.name, undefined)
+              ),
+              undefined
             )
-          )
-      )
-    );
-    console.log(`insertion: OK`);
-    this.$router.push("/");
+        ),
+        (category: IUserCategory) =>
+          this.pros.push({
+            disp: `勘定科目「${category.name}」が作成されました`
+          })
+      );
+    } catch (e) {
+      this.pros.push({
+        disp: "勘定科目データの生成と保存に失敗しました",
+        cls: "error"
+      });
+    }
+
+    this.$router.push("/category/list");
   }
 }
 </script>
@@ -66,6 +97,9 @@ export default class UserCreationFinish extends Vue {
   justify-content: center;
   .main {
     width: 70%;
+    @include sm {
+      width: 95%;
+    }
     h2 {
       font-size: 2rem;
     }
@@ -98,6 +132,25 @@ export default class UserCreationFinish extends Vue {
               }
             }
           }
+        }
+      }
+    }
+    .proceetings {
+      margin: 10px 0px;
+      .pro-info {
+        width: calc(100% - 10px);
+        padding: 4px 5px;
+        border: 1px solid transparent;
+        margin: 4px 0px;
+        &.success {
+          border-color: #009726;
+          color: #009726;
+          background-color: #dbffe4;
+        }
+        &.error {
+          border-color: #b92500;
+          color: #b92500;
+          background-color: #ffdfd7;
         }
       }
     }

@@ -24,13 +24,13 @@
 //       .where("userId", "==", container.resolve(UserAuthService).userId)
 //       .get()
 //       .then((value) => {
-//         const aggregates: Promise<ITransaction>[] = [];
+//         const aggregations: Promise<ITransaction>[] = [];
 //         value.forEach((doc) => {
 //           const data = doc.data() as DTransaction;
 //           data.id = doc.id;
-//           aggregates.push(this.aggregate(data));
+//           aggregations.push(this.aggregate(data));
 //         });
-//         return Promise.all(aggregates);
+//         return Promise.all(aggregations);
 //       });
 //   }
 // }

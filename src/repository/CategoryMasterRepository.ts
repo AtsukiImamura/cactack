@@ -10,6 +10,7 @@ import ICategoryMasterRepository from "./interface/ICategoryMasterRepository";
 import CategoryMasterTransaformer from "./transformer/CategoryMasterTransaformer";
 import AccountType from "@/model/AccountType";
 import CategoryItemMasterRepository from "./CategoryItemMasterRepository";
+import CategoryMaster from "@/model/CategoryMaster";
 
 @singleton()
 export default class CategoryMasterRepository
@@ -22,6 +23,27 @@ export default class CategoryMasterRepository
 
   public async aggregate(item: DCategoryMaster): Promise<ICategoryMaster> {
     return container.resolve(CategoryMasterTransaformer).aggregate(item);
+  }
+
+  public async getByIdWithoutItems(
+    id: string
+  ): Promise<ICategoryMaster | undefined> {
+    const item = this.cache.getById(id);
+    if (item) {
+      return await this.aggregate(item);
+    }
+    return this.ref
+      .doc(id)
+      .get()
+      .then((doc) => {
+        if (!doc.exists) {
+          return undefined;
+        }
+        const data = doc.data() as DCategoryMaster;
+        data.id = doc.id;
+        this.cache.add(data);
+        return new CategoryMaster(doc.id, data.name, data.type, []);
+      });
   }
 
   public async insertAll(): Promise<void> {
@@ -112,7 +134,6 @@ export default class CategoryMasterRepository
       },
     ];
     for (const data of list) {
-      console.log(data.name);
       const inserted = await this.insert({
         simplify: () =>
           ({ name: data.name, type: data.type } as DCategoryMaster),

@@ -1,5 +1,7 @@
 import IBaseRepository from "@/repository/interface/IBaseRepository";
-import { ICategoryMaster } from "@/model/interface/ICategory";
+import { ICategoryMaster, IAccountCategory } from "@/model/interface/ICategory";
 
 export default interface ICategoryMasterRepository
-  extends IBaseRepository<ICategoryMaster> {}
+  extends IBaseRepository<ICategoryMaster> {
+  getByIdWithoutItems: (id: string) => Promise<IAccountCategory | undefined>;
+}

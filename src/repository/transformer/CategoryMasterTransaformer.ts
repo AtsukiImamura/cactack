@@ -1,22 +1,38 @@
 import Transformer from "@/repository/transformer/Transformer";
 import { DCategoryMaster, ICategoryMaster } from "@/model/interface/ICategory";
-import AccountType from "@/model/AccountType";
 import { container } from "tsyringe";
 import CategoryItemMasterRepository from "../CategoryItemMasterRepository";
+import AccountType from "@/model/AccountType";
 
 export default class CategoryMasterTransaformer extends Transformer<
   DCategoryMaster,
   ICategoryMaster
 > {
-  public async aggregate(master: DCategoryMaster): Promise<ICategoryMaster> {
-    return {
-      id: master.id,
-      name: master.name,
-      type: new AccountType(master.type),
-      items: await container
+  public async aggregate(category: DCategoryMaster): Promise<ICategoryMaster> {
+    const master: ICategoryMaster = ({
+      id: category.id,
+      name: category.name,
+      type: new AccountType(category.type),
+      items: [],
+    } as any) as ICategoryMaster;
+    const items = (
+      await container
         .resolve(CategoryItemMasterRepository)
-        .getByParentId(master.id),
-      simplify: () => master,
-    };
+        .getByParentId(category.id)
+    ).map((item) => {
+      item.parent = master;
+      return item;
+    });
+    container.resolve(CategoryItemMasterRepository).addToCache(
+      items.map((item) => ({
+        id: item.id,
+        parentId: item.parent.id,
+        name: item.name,
+        type: item.type.code,
+      }))
+    );
+
+    master.items = items;
+    return master;
   }
 }

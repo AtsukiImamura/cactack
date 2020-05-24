@@ -12,4 +12,6 @@ export default interface IJournalRepository
     from: IJournalDate,
     to: IJournalDate
   ) => Promise<IJournal[]>;
+
+  getByAncestorId: (id: string) => Promise<IJournal[]>;
 }

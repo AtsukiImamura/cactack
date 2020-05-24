@@ -24,14 +24,26 @@ export default interface IJournal
 
   period?: IJournalPeriodInfo;
 
+  ancestorId?: string;
+
   isReal: boolean;
+  /** 貸借対照表などで使えるように借方・貸方を考慮した値を持つ詳細項目 */
+  balanceItems: IJournalDetail[];
+
+  isValid: boolean;
 }
 
 export interface IJournalDetail {
+  hash: string;
+
   category: IUserCategoryItem;
 
   amount: number;
+
+  action?: string;
 }
+
+// export interface I
 
 export interface IJournalPeriodInfo {
   // 対象期間のあるもののみ: 開始日

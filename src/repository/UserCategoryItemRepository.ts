@@ -6,6 +6,7 @@ import {
 import IUserCategoryItemRepository from "./interface/IUserCategoryItemRepository";
 import UserCategoryItemTransaformer from "./transformer/UserCategoryItemTransaformer";
 import UserIdentifiedRepositoryBase from "./UserIdentifiedRepositoryBase";
+import UserCategoryRepository from "./UserCategoryRepository";
 
 @singleton()
 export default class UserCategoryItemRepository
@@ -16,12 +17,38 @@ export default class UserCategoryItemRepository
     this.dbKey = "userCategoryItem";
     this.cache.addIndex(
       "parentId",
-      (value: IUserCategoryItem) => value.parent.id
+      (value: DUserCategoryItem) => value.parentId
     );
   }
 
   public async aggregate(item: DUserCategoryItem): Promise<IUserCategoryItem> {
     return container.resolve(UserCategoryItemTransaformer).aggregate(item);
+  }
+
+  public async getById(id: string): Promise<IUserCategoryItem | undefined> {
+    const cacheItem = this.cache.getById(id);
+    if (cacheItem) {
+      return await this.aggregate(cacheItem);
+    }
+    const doc = await this.ref.doc(id).get();
+    if (!doc.exists) {
+      return undefined;
+    }
+
+    const data = doc.data() as DUserCategoryItem;
+    data.id = doc.id;
+    this.cache.add(data);
+    const category = await container
+      .resolve(UserCategoryRepository)
+      .getById(data.parentId);
+    if (!category) {
+      return undefined;
+    }
+
+    const item = category.items.filter((item) => item.id === id).shift() as
+      | IUserCategoryItem
+      | undefined;
+    return item;
   }
 
   public async getByParentId(parentId: string): Promise<IUserCategoryItem[]> {
@@ -30,13 +57,17 @@ export default class UserCategoryItemRepository
     //   return items;
     // }
     // const docs = await this.ref.where("parentId", "==", parentId).get();
-    // const categoryAggregates: Promise<IUserCategoryItem>[] = [];
+    // const categoryAggregations: Promise<IUserCategoryItem>[] = [];
     // docs.forEach((doc) => {
     //   const data = doc.data();
     //   data.id = doc.id;
-    //   categoryAggregates.push(this.aggregate(data as DUserCategoryItem));
+    //   categoryAggregations.push(this.aggregate(data as DUserCategoryItem));
     // });
-    // return Promise.all(categoryAggregates);
-    return this.getByKey("parentId", parentId);
+    // return Promise.all(categoryAggregations);
+    return await this.getByKey("parentId", parentId, false);
+  }
+
+  public addToCache(items: IUserCategoryItem[]) {
+    this.cache.addAll(items.map((item) => item.simplify()));
   }
 }

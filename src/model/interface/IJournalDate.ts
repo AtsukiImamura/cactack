@@ -19,6 +19,8 @@ export default interface IJournalDate {
 
   getNextMonth: () => IJournalDate;
 
+  getNextDay: () => IJournalDate;
+
   getAfterMonthOf: (val: number) => IJournalDate;
 
   getPreviousMonth: () => IJournalDate;
@@ -34,4 +36,6 @@ export default interface IJournalDate {
   toDate: () => Date;
 
   countDayFrom: (date: IJournalDate) => number;
+
+  setDate: (date: Date) => IJournalDate;
 }

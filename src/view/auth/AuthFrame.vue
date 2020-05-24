@@ -64,23 +64,23 @@ export default class AuthFrame extends Vue {}
         input {
           padding: 6px 8px;
         }
-        .btn {
-          width: 100%;
-          padding: 8px 0px;
-          text-align: center;
-          border-radius: 3px;
-          background: linear-gradient(to bottom, #ffdb79, #ffbe09);
-          border: none;
-          cursor: pointer;
-          color: #ffffff;
-          transition-duration: 0.3s;
-          transition-delay: 0.12s;
-          &:hover {
-            background: linear-gradient(to bottom, #ffd667, #ffbb01);
-            transition-duration: 0.3s;
-            transition-delay: 0.12s;
-          }
-        }
+        // .btn {
+        //   width: 100%;
+        //   padding: 8px 0px;
+        //   text-align: center;
+        //   border-radius: 3px;
+        //   background: linear-gradient(to bottom, #ffdb79, #ffbe09);
+        //   border: none;
+        //   cursor: pointer;
+        //   color: #ffffff;
+        //   transition-duration: 0.3s;
+        //   transition-delay: 0.12s;
+        //   &:hover {
+        //     background: linear-gradient(to bottom, #ffd667, #ffbb01);
+        //     transition-duration: 0.3s;
+        //     transition-delay: 0.12s;
+        //   }
+        // }
         &.message {
           * {
             color: #f00000;

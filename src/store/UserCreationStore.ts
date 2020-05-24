@@ -3,7 +3,7 @@ import store from ".";
 import IUserCreationMaster from "@/model/interface/IUserCreationMaster";
 import { container } from "tsyringe";
 import IUserCreationMasterRepository from "@/repository/interface/IUserCreationMasterRepository";
-import { IUserCategory } from "@/model/interface/ICategory";
+import { IUserCategory, IUserCategoryItem } from "@/model/interface/ICategory";
 import UserCategoryRepository from "@/repository/UserCategoryRepository";
 import UserCategory from "@/model/UserCategory";
 import UserAuthService from "@/service/UserAuthService";
@@ -11,6 +11,9 @@ import UserCreationMaster from "@/model/UserCreationMaster";
 import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
 import UserCategoryItem from "@/model/UserCategoryItem";
 import AccountType from "@/model/AccountType";
+import JournalRepository from "@/repository/JournalRepository";
+import Journal from "@/model/Journal";
+import JournalDate from "@/model/common/JournalDate";
 
 export interface IBalanceInfo {
   name: string;
@@ -51,6 +54,24 @@ class UserCreationStore extends VuexModule {
     if (!userId) {
       return;
     }
+
+    const initIncome = await container
+      .resolve(UserCategoryRepository)
+      .insert(
+        new UserCategory(
+          "",
+          userId,
+          "初期残高",
+          AccountType.TYPE_INCOME,
+          [],
+          undefined
+        )
+      );
+    const initDebitItem = initIncome.addItem("初期残高") as IUserCategoryItem;
+    const initIncomeItem = await container
+      .resolve(UserCategoryItemRepository)
+      .insert(initDebitItem);
+
     const insertCategory = async (
       title: string,
       type: number,
@@ -58,21 +79,48 @@ class UserCreationStore extends VuexModule {
     ) => {
       const inserted = await container
         .resolve(UserCategoryRepository)
-        .insert(new UserCategory("", userId, title, accountType, []));
+        .insert(
+          new UserCategory("", userId, title, accountType, [], undefined)
+        );
+      const userCategoryItems: IUserCategoryItem[] = [];
+      for (const balance of info[type]) {
+        const item = await container
+          .resolve(UserCategoryItemRepository)
+          .insert(
+            new UserCategoryItem("", userId, inserted, balance.name, undefined)
+          );
+        await container
+          .resolve(JournalRepository)
+          .insert(
+            new Journal(
+              "",
+              "",
+              `${item.name} 初期残高`,
+              JournalDate.today(),
+              JournalDate.today(),
+              JournalDate.today(),
+              [{ hash: "", category: initIncomeItem, amount: balance.amount }],
+              [{ hash: "", category: item, amount: balance.amount }]
+            )
+          );
+        userCategoryItems.push(item);
+      }
       this.userBalanceInfoMap[type] = new UserCategory(
         inserted.id,
         userId,
         title,
         accountType,
-        await container
-          .resolve(UserCategoryItemRepository)
-          .batchInsert(
-            info[type].map(
-              (m) => new UserCategoryItem("", userId, inserted, m.name)
-            )
-          )
+        userCategoryItems,
+        // await container
+        //   .resolve(UserCategoryItemRepository)
+        //   .batchInsert(
+        //     info[type].map(
+        //       (m) => new UserCategoryItem("", userId, inserted, m.name)
+        //     )
+        //   )
+        undefined
       );
-      console.log(this.userBalanceInfoMap);
+      // console.log(this.userBalanceInfoMap);
     };
     if (info[UserCreationMaster.TYPE_CASH_STRAGE]) {
       await insertCategory(
@@ -90,59 +138,11 @@ class UserCreationStore extends VuexModule {
     }
     if (info[UserCreationMaster.TYPE_BANK]) {
       await insertCategory(
-        "銀行口座",
+        "預金",
         UserCreationMaster.TYPE_BANK,
         AccountType.TYPE_ASSET
       );
     }
-  }
-
-  public toUserCategory(): void {
-    // if (info[UserCreationMaster.TYPE_BANK]) {
-    //   this.userCategories.push({
-    //     id: "",
-    //     userId: "",
-    //     name: "現金",
-    //     home: 0,
-    //     isReal: true,
-    //     items: info[UserCreationMaster.TYPE_CASH_STRAGE].map((m) => ({
-    //       id: "",
-    //       parentId: "",
-    //       name: m.name,
-    //     })),
-    //     simplify: () => ({} as DUserCategory),
-    //   });
-    // }
-    // if (info[UserCreationMaster.TYPE_BANK]) {
-    //   this.userCategories.push({
-    //     id: "",
-    //     userId: "",
-    //     name: "銀行口座",
-    //     home: 0,
-    //     isReal: true,
-    //     items: info[UserCreationMaster.TYPE_BANK].map((m) => ({
-    //       id: "",
-    //       parentId: "",
-    //       name: m.name,
-    //     })),
-    //     simplify: () => ({} as DUserCategory),
-    //   });
-    // }
-    // if (info[UserCreationMaster.TYPE_PREPAID]) {
-    //   this.userCategories.push({
-    //     id: "",
-    //     userId: "",
-    //     name: "プリペイド",
-    //     home: 0,
-    //     isReal: true,
-    //     items: info[UserCreationMaster.TYPE_PREPAID].map((m) => ({
-    //       id: "",
-    //       parentId: "",
-    //       name: m.name,
-    //     })),
-    //     simplify: () => ({} as DUserCategory),
-    //   });
-    // }
   }
 }
 

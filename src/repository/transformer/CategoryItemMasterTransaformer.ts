@@ -2,10 +2,10 @@ import Transformer from "@/repository/transformer/Transformer";
 import {
   DCategoryItemMaster,
   ICategoryItemMaster,
-  DCategoryMaster,
   ICategoryMaster,
 } from "@/model/interface/ICategory";
-import * as firebase from "firebase/app";
+import { container } from "tsyringe";
+import CategoryMasterRepository from "../CategoryMasterRepository";
 import AccountType from "@/model/AccountType";
 
 export default class CategoryItemMasterTransaformer extends Transformer<
@@ -13,26 +13,24 @@ export default class CategoryItemMasterTransaformer extends Transformer<
   ICategoryItemMaster
 > {
   public async aggregate(
-    master: DCategoryItemMaster
+    item: DCategoryItemMaster
   ): Promise<ICategoryItemMaster> {
-    const ref = firebase.firestore().collection("categoryMaster");
-    const doc = await ref.doc(master.parentId).get();
-    if (!doc.exists) {
+    const categoryData = await container
+      .resolve(CategoryMasterRepository)
+      .getData(item.parentId);
+    if (!categoryData) {
       throw new Error("parent not found.");
     }
-    const data = doc.data()! as DCategoryMaster;
-    const parent = {
-      id: doc.id,
-      name: data.name,
-      type: new AccountType(data.type),
-      items: [],
-      simplify: () => data,
-    } as ICategoryMaster;
-    return {
-      id: master.id,
-      parent: parent,
-      name: master.name,
-      simplify: () => master,
-    } as ICategoryItemMaster;
+    return ({
+      id: item.id,
+      parent: ({
+        id: categoryData.id,
+        name: categoryData.name,
+        type: new AccountType(categoryData.type),
+        items: [],
+      } as any) as ICategoryMaster,
+      name: item.name,
+      type: new AccountType(categoryData.type),
+    } as any) as ICategoryItemMaster;
   }
 }

@@ -7,6 +7,11 @@ import { container } from "tsyringe";
 import UserAuthService from "@/service/UserAuthService";
 import "intro.js/introjs.css";
 import VueIntro from "vue-introjs";
+import { VueMasonryPlugin } from "vue-masonry";
+import VuePaginate from "vue-paginate";
+
+Vue.use(VuePaginate as any);
+Vue.use(VueMasonryPlugin as any);
 Vue.use(VueIntro as any); // TODO: typeほしい。。。
 
 DependencyInjectionConfig.run();
@@ -113,6 +118,13 @@ const router = new Router({
           /* webpackChunkName: "register" */ "@/view/register/RegisterMenu.vue"
         ),
     },
+    {
+      path: "/journal",
+      component: () =>
+        import(
+          /* webpackChunkName: "register" */ "@/view/journal/Journals.vue"
+        ),
+    },
     // {
     //   path: "/journalize/purchase",
     //   component: () =>
@@ -146,12 +158,34 @@ const router = new Router({
           /* webpackChunkName: "register" */ "@/view/register/Manually.vue"
         ),
     },
-    // {
-    //   path: "/transaction/:transactionId/:method",
-    //   component: () =>
-    //     import(/* webpackChunkName: "top" */ "@/view/register/Manually.vue"),
-    // },
-
+    {
+      path: "/journalize/edit/:journalId",
+      component: () =>
+        import(
+          /* webpackChunkName: "register" */ "@/view/register/Manually.vue"
+        ),
+    },
+    {
+      path: "/journalize/copy/:journalId",
+      component: () =>
+        import(
+          /* webpackChunkName: "register" */ "@/view/register/Manually.vue"
+        ),
+    },
+    {
+      path: "/ledger/general",
+      component: () =>
+        import(
+          /* webpackChunkName: "register" */ "@/view/ledger/GeneralLedger.vue"
+        ),
+    },
+    {
+      path: "/ledger/detail/:categoryItemId",
+      component: () =>
+        import(
+          /* webpackChunkName: "register" */ "@/view/ledger/LedgerDetail.vue"
+        ),
+    },
     {
       path: "/auth/login",
       component: () =>
@@ -169,22 +203,37 @@ const router = new Router({
     //       /* webpackChunkName: "badget" */ "@/view/badget/BadgetDetail.vue"
     //     ),
     // },
-    // {
-    //   path: "/user/init",
-    //   component: () =>
-    //     import(
-    //       /* webpackChunkName: "badget" */ "@/view/auth/Initialization.vue"
-    //     ),
-    // },
+    {
+      path: "/category/list",
+      component: () =>
+        import(
+          /* webpackChunkName: "badget" */ "@/view/category/CategoryList.vue"
+        ),
+    },
+    {
+      path: "/balance",
+      component: () =>
+        import(
+          /* webpackChunkName: "badget" */ "@/view/balance/BalanceView.vue"
+        ),
+    },
+    {
+      path: "/notice",
+      component: () =>
+        import(/* webpackChunkName: "badget" */ "@/view/notice/Notices.vue"),
+    },
+    {
+      path: "/config",
+      component: () =>
+        import(/* webpackChunkName: "badget" */ "@/view/config/Configs.vue"),
+    },
   ],
 });
 router.beforeEach((to, from, next) => {
   if (
-    // !to.path.startsWith("/user") && // TODO: 本番でははずす
     !to.path.startsWith("/auth") &&
     !to.path.startsWith("/top") &&
     !to.path.startsWith("/user") &&
-    !to.path.startsWith("/journalize") &&
     !container.resolve(UserAuthService).userId
   ) {
     next("/auth/login");

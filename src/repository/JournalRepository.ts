@@ -12,6 +12,9 @@ export default class JournalRepository
   implements IJournalRepository {
   constructor() {
     super();
+    this.cache.addIndex("ancestorId", (journal: DJournal) =>
+      journal.ancestorId ? journal.ancestorId : undefined
+    );
     this.dbKey = "journals";
   }
 
@@ -40,5 +43,9 @@ export default class JournalRepository
     to: IJournalDate
   ): Promise<IJournal[]> {
     return this.getByAccountedAt(from, to); // TODO: 実装
+  }
+
+  public async getByAncestorId(id: string): Promise<IJournal[]> {
+    return await this.getByKey("ancestorId", id);
   }
 }

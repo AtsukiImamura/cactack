@@ -2,6 +2,9 @@ import Identifiable, { UserIdentifiable } from "./Identifiable";
 import Strable from "./common/Strable";
 import Treatable from "./common/Treatable";
 import IAccountType from "./IType";
+import ILogicalDeletable, {
+  DLogicalDeletable,
+} from "./common/LogicalDeletable";
 
 interface ICategoryBase extends Identifiable {
   name: string;
@@ -11,6 +14,8 @@ export interface IAccountCategory extends ICategoryBase {
   type: IAccountType;
 
   items: ICategoryItem[];
+
+  addItem: (name: string) => ICategoryItem;
 }
 
 export interface DCategoryMaster extends ICategoryBase, Strable {
@@ -23,6 +28,7 @@ export interface ICategoryMaster
 
 export interface DUserCategory
   extends ICategoryBase,
+    DLogicalDeletable,
     Strable,
     UserIdentifiable {
   type: number;
@@ -31,13 +37,18 @@ export interface DUserCategory
 export interface IUserCategory
   extends IAccountCategory,
     UserIdentifiable,
-    Treatable<DUserCategory> {}
+    Treatable<DUserCategory>,
+    ILogicalDeletable {}
 
 interface ICategoryItemBase extends Identifiable {
   name: string;
 }
 export interface ICategoryItem extends ICategoryItemBase {
   parent: IAccountCategory;
+
+  type: IAccountType;
+
+  // setParent: (parent: IAccountCategory) => void;
 }
 
 export interface DCategoryItem extends ICategoryItemBase {
@@ -53,13 +64,15 @@ export interface ICategoryItemMaster
 export interface DUserCategoryItem
   extends DCategoryItem,
     Strable,
-    UserIdentifiable {
+    UserIdentifiable,
+    DLogicalDeletable {
   action?: string;
 }
 
 export interface IUserCategoryItem
   extends ICategoryItem,
     UserIdentifiable,
-    Treatable<DUserCategoryItem> {
+    Treatable<DUserCategoryItem>,
+    ILogicalDeletable {
   action?: string;
 }

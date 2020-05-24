@@ -7,13 +7,6 @@
         <p>分からない部分や今埋めるのが難しい項目は飛ばしても構いません。</p>
         <p>では、始めましょう！</p>
         <div class="action">
-          <!-- <router-link
-            to="/user/create/cash"
-            tag="input"
-            type="button"
-            class="btn ok-btn"
-            value="始める"
-          ></router-link>-->
           <ProcessButton value="始める" :click="next" :disabled="!canNext"></ProcessButton>
         </div>
       </div>
@@ -52,6 +45,9 @@ export default class UserCreationTop extends Vue {
   justify-content: center;
   .main {
     width: 70%;
+    @include sm {
+      width: 95%;
+    }
     h2 {
       font-size: 2rem;
     }

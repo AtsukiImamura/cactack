@@ -2,9 +2,9 @@
   <PublicFrame>
     <div class="top">
       <div class="main">
-        <Step :last="6" :current="2"></Step>
+        <Step :last="3" :current="2"></Step>
         <h2>残高</h2>
-        <p>持っているお金を管理することは帳簿記入の第一歩です。</p>
+        <p>アプリを始めた今日の時点であなたが持っている資産の残高を記入しましょう。項目の名前を変えたり、追加したりすることもできます。</p>
         <div class="balances">
           <QuestionaierBlock title="現金">
             <div class="list">
@@ -12,6 +12,14 @@
             </div>
           </QuestionaierBlock>
           <QuestionaierBlock title="銀行口座">
+            <div class="hint">
+              <p>※ヒント 同じ銀行で2つ以上口座を持つまでいる場合は分けて登録することをお勧めします。</p>
+              <p>例 〇〇銀行で☆☆支店の普通預金口座と、××支店の口座を持つ場合</p>
+              <ul>
+                <li>〇〇銀行☆☆支店 ¥¥円</li>
+                <li>〇〇銀行××支店 ¥¥¥¥円</li>
+              </ul>
+            </div>
             <div class="list">
               <BalanceInfoList :masters="banks" @commit="commitBalanceInfo" :category="1"></BalanceInfoList>
             </div>
@@ -23,13 +31,6 @@
           </QuestionaierBlock>
         </div>
         <div class="action">
-          <!-- <router-link
-            to="/user/create/cash"
-            tag="input"
-            type="button"
-            class="btn cancel-btn"
-            value="戻る"
-          ></router-link>-->
           <ProcessButton value="次へ" :click="next" :disabled="false"></ProcessButton>
         </div>
       </div>
@@ -97,18 +98,9 @@ export default class UserCreationBalance extends Vue {
 
   public commitBalanceInfo(infoList: IBalanceInfo[], type: number) {
     this.targetBalanceInfoMap[type] = infoList;
-    console.log(this.targetBalanceInfoMap);
   }
 
   public next(): Promise<void> {
-    // this.targetBalanceInfoMap[
-    //   UserCreationMaster.TYPE_CREDIT_CARD
-    // ] = UserCreationModule.selectedCreationMasters
-    //   .filter(m => m.type === UserCreationMaster.TYPE_CREDIT_CARD)
-    //   .map(m => ({
-    //     name: m.title,
-    //     amount: 0
-    //   }));
     return UserCreationModule.commitBalance(this.targetBalanceInfoMap).then(
       () => {
         this.$router.push("/user/create/credit-mapping");
@@ -125,6 +117,9 @@ export default class UserCreationBalance extends Vue {
   justify-content: center;
   .main {
     width: 70%;
+    @include sm {
+      width: 95%;
+    }
     h2 {
       font-size: 2rem;
     }

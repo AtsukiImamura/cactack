@@ -1,11 +1,12 @@
 import SettlementAction from "./SettlementAction";
-import IJournal from "../../interface/IJournal";
+import IJournal from "@/model/interface/IJournal";
 import { isNumber } from "util";
 import { container } from "tsyringe";
 import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
-import IJournalDate from "../../interface/IJournalDate";
+import IJournalDate from "@/model/interface/IJournalDate";
 import JournalDate from "../../common/JournalDate";
 import VirtualJournal from "../../VirtualJournal";
+import JournalRepository from "@/repository/JournalRepository";
 
 export default class ReserveSettlementAction extends SettlementAction {
   public static readonly COMMAND_NAME = "RESERVE";
@@ -43,7 +44,17 @@ export default class ReserveSettlementAction extends SettlementAction {
     }
   }
 
-  public async execute(): Promise<IJournal[]> {
+  public async execute(ancestor?: IJournal): Promise<IJournal[]> {
+    if (
+      ancestor &&
+      (
+        await container
+          .resolve(JournalRepository)
+          .getByAncestorId(ancestor ? ancestor.id : "")
+      ).length > 0
+    ) {
+      return [];
+    }
     const debitCategoryItem = await container
       .resolve(UserCategoryItemRepository)
       .getById(this.debitCategoryItemId);
@@ -58,14 +69,14 @@ export default class ReserveSettlementAction extends SettlementAction {
       throw new Error("user category item of credit not found.");
     }
 
-    return [
-      new VirtualJournal(
-        this.title,
-        this.date,
-        [{ amount: this.amount, category: creditCategoryItem }],
-        [{ amount: this.amount, category: debitCategoryItem }]
-      ),
-    ];
+    const journal = new VirtualJournal(
+      this.title,
+      this.date,
+      [{ hash: "", amount: this.amount, category: creditCategoryItem }],
+      [{ hash: "", amount: this.amount, category: debitCategoryItem }]
+    );
+    journal.ancestorId = ancestor ? ancestor.id : "";
+    return [journal];
   }
 
   public toCommand(): string {
