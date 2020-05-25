@@ -26,6 +26,10 @@
         <span>ユーザー登録は</span>
         <router-link to="/auth/create">こちら</router-link>
       </div>
+      <div class="new-user" v-if="needEmailVerification">
+        <span>メールアドレスを</span>
+        <ProcessButton value="検証" :click="verifyEmail"></ProcessButton>
+      </div>
     </div>
   </AuthFrame>
 </template>
@@ -38,6 +42,7 @@ import AuthFrame from "@/view/auth/AuthFrame.vue";
 import ErrorMessage from "@/model/error/ErrorMessage";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import AppModule from "@/store/ApplicationStore";
+import EmailVerificationError from "@/model/error/custome/EmailVerificationError";
 
 @Component({ components: { AuthFrame, ProcessButton } })
 export default class UserLogin extends Vue {
@@ -49,6 +54,8 @@ export default class UserLogin extends Vue {
 
   public message: string = "";
 
+  public needEmailVerification: boolean = false;
+
   public get canLogin(): boolean {
     return this.email !== "" && this.password !== "";
   }
@@ -58,6 +65,21 @@ export default class UserLogin extends Vue {
       this.signIn();
     }
     // container.resolve(CategoryItemMasterRepository).insertAll();
+  }
+
+  public async verifyEmail() {
+    const user = container.resolve(UserAuthService).getFirebaseUser();
+    if (!user) {
+      return;
+    }
+    try {
+      await user.sendEmailVerification();
+      this.$router.push("/auth/email-verification");
+    } catch (e) {
+      if (e.code === "auth/too-many-requests") {
+        this.message = "メールアドレス検証用メールは既に送られているようです。";
+      }
+    }
   }
 
   public async signIn(): Promise<void> {
@@ -76,8 +98,8 @@ export default class UserLogin extends Vue {
         .signIn(this.email, this.password);
       const user = container.resolve(UserAuthService).getFirebaseUser();
       if (!user!.emailVerified) {
-        // const err =  new Error();
-        // err.co
+        this.needEmailVerification = true;
+        throw new EmailVerificationError();
       }
       await AppModule.init();
       this.$router.push("/");

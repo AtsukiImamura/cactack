@@ -6,6 +6,8 @@ export default class ErrorMessage {
 
   public static readonly FB_RESOURCE_EXHAUSTED = "resource-exhausted";
 
+  public static readonly EMAIL_NOT_VERIFIED = "email-not-verified";
+
   private _errorCode: string;
 
   /**
@@ -16,12 +18,12 @@ export default class ErrorMessage {
     switch (this._errorCode) {
       case ErrorMessage.FB_NETWORK_ERROR:
         return "ネットワークエラーが発生しました";
-
       case ErrorMessage.FB_WRONG_PASSWORD:
         return "メールアドレスまたはパスワードが間違っています";
-
       case ErrorMessage.FB_RESOURCE_EXHAUSTED:
         return "アプリが一時停止しています。しばらくお待ちください。";
+      case ErrorMessage.EMAIL_NOT_VERIFIED:
+        return "メールアドレスが認証されていません。";
       default:
         return "エラーが発生しました";
     }

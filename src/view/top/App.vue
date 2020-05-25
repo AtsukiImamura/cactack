@@ -185,7 +185,7 @@ export default class App extends Vue {
   }
 
   public get loading(): boolean {
-    return this.journals.length === 0;
+    return this.journals.length > 0 && this.ledgers.length === 0;
   }
 }
 </script>
