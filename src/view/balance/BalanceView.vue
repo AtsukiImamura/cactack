@@ -39,9 +39,9 @@ import { Component, Vue, Watch } from "vue-property-decorator";
 import CommonFrame from "@/view/common/CommonFrame.vue";
 import IJournalDate from "@/model/interface/IJournalDate";
 import JournalDate from "@/model/common/JournalDate";
-import VirtualBook from "../../model/virtual/VirtualBook";
-import AppModule from "../../store/ApplicationStore";
-import Balance, { IBalanceItem } from "../../model/virtual/Balance";
+import VirtualBook from "@/model/virtual/VirtualBook";
+import AppModule from "@/store/ApplicationStore";
+import Balance, { IBalanceItem } from "@/model/virtual/Balance";
 import DatePicker from "vuejs-datepicker";
 import BalanceSide from "@/view/balance/BalanceSide.vue";
 
@@ -49,8 +49,8 @@ import BalanceSide from "@/view/balance/BalanceSide.vue";
   components: {
     CommonFrame,
     DatePicker,
-    BalanceSide
-  }
+    BalanceSide,
+  },
 })
 export default class BalanceView extends Vue {
   public date: IJournalDate = JournalDate.today();

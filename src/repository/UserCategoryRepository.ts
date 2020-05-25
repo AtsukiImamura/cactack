@@ -13,6 +13,18 @@ export default class UserCategoryRepository
   constructor() {
     super();
     this.dbKey = "userCategory";
+
+    const userId = container.resolve(UserAuthService).userId;
+    if (!userId) {
+      return;
+    }
+    // 暖気
+    (async () => {
+      const docs = await this.ref.where("userId", "==", userId).get();
+      docs.forEach((doc) => {
+        this.cache.add(doc.data() as DUserCategory);
+      });
+    })();
   }
 
   public async aggregate(item: DUserCategory): Promise<IUserCategory> {

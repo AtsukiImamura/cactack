@@ -31,9 +31,7 @@
       </div>
       <div class="message">
         <span :style="{ color: topMesasge.fontColor }">
-          {{
-          topMesasge.value
-          }}
+          {{ topMesasge.value }}
         </span>
       </div>
       <div class="results" :key="categories.length" v-if="!deletePage">
@@ -49,9 +47,12 @@
             <div class="actions">
               <div
                 class="ac dangerous"
-                v-if="category.items.filter(i => !i.deletedAt).length === 0"
+                v-if="category.items.filter((i) => !i.deletedAt).length === 0"
               >
-                <div class="delete-button" @click="deleteCateogry(category)"></div>
+                <div
+                  class="delete-button"
+                  @click="deleteCateogry(category)"
+                ></div>
               </div>
               <div class="ac nomal">
                 <CategoryUpdate :category="category"></CategoryUpdate>
@@ -82,7 +83,10 @@
                           <ItemUpdate :item="item"></ItemUpdate>
                         </div>
                         <div class="ac dangerous">
-                          <ItemDelete :item="item" @complete="onItemDeleted"></ItemDelete>
+                          <ItemDelete
+                            :item="item"
+                            @complete="onItemDeleted"
+                          ></ItemDelete>
                         </div>
                       </HiddenActions>
                     </div>
@@ -96,7 +100,10 @@
           </div>
         </div>
         <div class="add-category">
-          <CategoryAdd :key="`${accountTypeCode}${categories.length}`" :type="type"></CategoryAdd>
+          <CategoryAdd
+            :key="`${accountTypeCode}${categories.length}`"
+            :type="type"
+          ></CategoryAdd>
         </div>
       </div>
       <div class="gabages" :key="categories.length" v-if="deletePage">
@@ -137,10 +144,10 @@ import AccountType from "@/model/AccountType";
 import {
   IAccountCategory,
   ICategoryItem,
-  IUserCategoryItem
+  IUserCategoryItem,
 } from "@/model/interface/ICategory";
 import HiddenActions from "@/view/common/HiddenActions.vue";
-import AppModule from "../../store/ApplicationStore";
+import AppModule from "@/store/ApplicationStore";
 import IAccountType from "@/model/interface/IType";
 import CategoryAdd from "@/view/category/CategoryAdd.vue";
 import CategoryUpdate from "@/view/category/CategoryUpdate.vue";
@@ -149,11 +156,11 @@ import ItemAdd from "@/view/category/ItemAdd.vue";
 import ItemUpdate from "@/view/category/ItemUpdate.vue";
 import ItemDelete from "@/view/category/ItemDelete.vue";
 import { container } from "tsyringe";
-import UserCategoryRepository from "../../repository/UserCategoryRepository";
-import UserCategory from "../../model/UserCategory";
+import UserCategoryRepository from "@/repository/UserCategoryRepository";
+import UserCategory from "@/model/UserCategory";
 import draggable from "vuedraggable";
-import UserCategoryItemRepository from "../../repository/UserCategoryItemRepository";
-import UserCategoryItem from "../../model/UserCategoryItem";
+import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
+import UserCategoryItem from "@/model/UserCategoryItem";
 import TemporalMessage from "@/view/common/model/TemporalMessage";
 
 @Component({
@@ -165,8 +172,8 @@ import TemporalMessage from "@/view/common/model/TemporalMessage";
     ItemAdd,
     ItemUpdate,
     ItemDelete,
-    draggable
-  }
+    draggable,
+  },
 })
 export default class CategoryList extends Vue {
   public topMesasge: TemporalMessage = new TemporalMessage(
@@ -179,7 +186,7 @@ export default class CategoryList extends Vue {
       animation: 0,
       group: "description",
       disabled: false,
-      ghostClass: "ghost"
+      ghostClass: "ghost",
     };
   }
 
@@ -197,14 +204,14 @@ export default class CategoryList extends Vue {
   public get categories(): IAccountCategory[] {
     return AppModule.categories
       .getAll()
-      .filter(c => c.type.code === this.accountTypeCode);
+      .filter((c) => c.type.code === this.accountTypeCode);
   }
 
   public get deletedItems(): ICategoryItem[] {
     return AppModule.categories
       .getAll()
       .reduce((acc, cur) => [...acc, ...cur.items], [])
-      .filter(item => (item as IUserCategoryItem).isDeleted);
+      .filter((item) => (item as IUserCategoryItem).isDeleted);
   }
 
   public async deleteCateogry(category: UserCategory) {

@@ -10,7 +10,11 @@
         </div>
       </div>
       <div class="items">
-        <div class="item row" v-for="(child, childIndex) in smr.children" :key="childIndex">
+        <div
+          class="item row"
+          v-for="(child, childIndex) in smr.children"
+          :key="childIndex"
+        >
           <div class="cell name">
             <span>{{ child.item.name }}</span>
           </div>
@@ -23,7 +27,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
-import { IBalanceItem } from "../../model/virtual/Balance";
+import { IBalanceItem } from "@/model/virtual/Balance";
 
 @Component({})
 export default class BalanceSide extends Vue {

@@ -34,8 +34,16 @@
           transition-duration="0.1s"
           item-selector=".ledger"
         >
-          <div v-masonry-tile class="ledger" v-for="(led, index) in ledgers" :key="index">
-            <LedgerSummary :ledger="led" @detail="toLedgerDetail"></LedgerSummary>
+          <div
+            v-masonry-tile
+            class="ledger"
+            v-for="(led, index) in ledgers"
+            :key="index"
+          >
+            <LedgerSummary
+              :ledger="led"
+              @detail="toLedgerDetail"
+            ></LedgerSummary>
           </div>
         </div>
       </div>
@@ -52,15 +60,15 @@ import VirtualBook from "@/model/virtual/VirtualBook";
 import DatePicker from "vuejs-datepicker";
 import IJournalDate from "@/model/interface/IJournalDate";
 import hash from "object-hash";
-import AppModule from "../../store/ApplicationStore";
-import IJournal from "../../model/interface/IJournal";
+import AppModule from "@/store/ApplicationStore";
+import IJournal from "@/model/interface/IJournal";
 
 @Component({
   components: {
     CommonFrame,
     LedgerSummary,
-    DatePicker
-  }
+    DatePicker,
+  },
 })
 export default class GeneralLedger extends Vue {
   public get periodBeginWith(): IJournalDate {

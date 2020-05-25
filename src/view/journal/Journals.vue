@@ -30,13 +30,22 @@
         <div class="filters">
           <div class="filter item">
             <div class="selector">
-              <TransferCategorySelector @select="addFilter"></TransferCategorySelector>
+              <TransferCategorySelector
+                @select="addFilter"
+              ></TransferCategorySelector>
             </div>
             <div class="filter-items">
-              <div class="f-item" v-for="(filter, index) in filterItems" :key="index">
+              <div
+                class="f-item"
+                v-for="(filter, index) in filterItems"
+                :key="index"
+              >
                 <span class="name">{{ filter.name }}</span>
                 <div class="delete">
-                  <span class="delete-button enabled" @click="removeFilter(filter)"></span>
+                  <span
+                    class="delete-button enabled"
+                    @click="removeFilter(filter)"
+                  ></span>
                 </div>
               </div>
             </div>
@@ -130,8 +139,15 @@
           :container="this"
           :key="journalUpdateKey"
         >
-          <div class="jnl" v-for="(jnl, index) in paginated('journals')" :key="index + 1">
-            <div class="cell reality" :class="{ virtual: !jnl.executeAt }"></div>
+          <div
+            class="jnl"
+            v-for="(jnl, index) in paginated('journals')"
+            :key="index + 1"
+          >
+            <div
+              class="cell reality"
+              :class="{ virtual: !jnl.executeAt }"
+            ></div>
             <div class="cell check" v-if="false">
               <input type="checkbox" v-model="selectedJournals" :value="jnl" />
             </div>
@@ -141,13 +157,21 @@
               </div>
             </div>
             <div class="cell details debits">
-              <div class="detail" v-for="(detail, dIndex) in jnl.debits" :key="-dIndex">
+              <div
+                class="detail"
+                v-for="(detail, dIndex) in jnl.debits"
+                :key="-dIndex"
+              >
                 <div class="cell category">{{ detail.category.name }}</div>
                 <div class="cell amount">{{ detail.amount }}</div>
               </div>
             </div>
             <div class="cell details credits">
-              <div class="detail" v-for="(detail, dIndex) in jnl.credits" :key="-dIndex">
+              <div
+                class="detail"
+                v-for="(detail, dIndex) in jnl.credits"
+                :key="-dIndex"
+              >
                 <div class="cell category">{{ detail.category.name }}</div>
                 <div class="cell amount">{{ detail.amount }}</div>
               </div>
@@ -178,12 +202,12 @@ import CommonFrame from "@/view/common/CommonFrame.vue";
 import DatePicker from "vuejs-datepicker";
 import IJournal from "@/model/interface/IJournal";
 import IJournalDate from "@/model/interface/IJournalDate";
-import AppModule from "../../store/ApplicationStore";
+import AppModule from "@/store/ApplicationStore";
 import HiddenActions from "@/view/common/HiddenActions.vue";
-import VirtualBook from "../../model/virtual/VirtualBook";
+import VirtualBook from "@/model/virtual/VirtualBook";
 import JournalDelete from "@/view/journal/JournalDelete.vue";
 import TransferCategorySelector from "@/view/register/components/TransferCategorySelector.vue";
-import { ICategoryItem } from "../../model/interface/ICategory";
+import { ICategoryItem } from "@/model/interface/ICategory";
 
 @Component({
   components: {
@@ -191,8 +215,8 @@ import { ICategoryItem } from "../../model/interface/ICategory";
     DatePicker,
     HiddenActions,
     JournalDelete,
-    TransferCategorySelector
-  }
+    TransferCategorySelector,
+  },
 })
 export default class Journals extends Vue {
   public journalUpdateKey: number = 0;
@@ -227,7 +251,7 @@ export default class Journals extends Vue {
   private filterItems: ICategoryItem[] = [];
 
   public addFilter(item: ICategoryItem) {
-    if (this.filterItems.map(item => item.id).includes(item.id)) {
+    if (this.filterItems.map((item) => item.id).includes(item.id)) {
       return;
     }
     this.filterItems.push(item);
@@ -245,13 +269,13 @@ export default class Journals extends Vue {
 
   public get journals(): IJournal[] {
     const res = this.virtualJournals
-      .filter(jnl => {
+      .filter((jnl) => {
         if (this.filterItems.length === 0) {
           return true;
         }
-        const filterItemIds = this.filterItems.map(item => item.id);
+        const filterItemIds = this.filterItems.map((item) => item.id);
         return (
-          [...jnl.credits, ...jnl.debits].filter(d =>
+          [...jnl.credits, ...jnl.debits].filter((d) =>
             filterItemIds.includes(d.category.id)
           ).length > 0
         );

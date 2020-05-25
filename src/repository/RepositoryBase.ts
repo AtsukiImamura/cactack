@@ -221,7 +221,6 @@ export default abstract class RepositoryBase<
       return await Promise.all(cacheItems.map((item) => this.aggregate(item)));
     }
 
-    // console.log(`getByKey index:${index} key:${key}`);
     const docs = await this.ref.where(index, "==", key).get();
     const aggregations: Promise<T>[] = [];
     docs.forEach((doc) => {

@@ -4,8 +4,8 @@ import CategoryEditor from "./CategoryEditor.vue";
 import { container } from "tsyringe";
 import UserAuthService from "../../service/UserAuthService";
 import CategoryService from "../../service/CategoryService";
-import UserCategory from "../../model/UserCategory";
-import AppModule from "../../store/ApplicationStore";
+import UserCategory from "@/model/UserCategory";
+import AppModule from "@/store/ApplicationStore";
 
 @Component({})
 export default class CategoryAdd extends Mixins(CategoryEditor) {

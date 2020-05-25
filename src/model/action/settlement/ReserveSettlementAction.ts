@@ -21,6 +21,46 @@ export default class ReserveSettlementAction extends SettlementAction {
 
   private title: string = "";
 
+  /**
+   * Getter $date
+   * @return {IJournalDate}
+   */
+  public get $date(): IJournalDate {
+    return this.date;
+  }
+
+  /**
+   * Getter $amount
+   * @return {number}
+   */
+  public get $amount(): number {
+    return this.amount;
+  }
+
+  /**
+   * Getter $debitCategoryItemId
+   * @return {string}
+   */
+  public get $debitCategoryItemId(): string {
+    return this.debitCategoryItemId;
+  }
+
+  /**
+   * Getter $creditCategoryItemId
+   * @return {string}
+   */
+  public get $creditCategoryItemId(): string {
+    return this.creditCategoryItemId;
+  }
+
+  /**
+   * Getter $title
+   * @return {string }
+   */
+  public get $title(): string {
+    return this.title;
+  }
+
   constructor(args: string[]) {
     super();
     if (args.length < 4) {

@@ -1,28 +1,33 @@
-import ErrorCode from "@/model/error/ErrorCode";
 export default class ErrorMessage {
-  private _errorCode: ErrorCode;
+  /** firebase: ネットワーク系 */
+  public static readonly FB_NETWORK_ERROR = "auth/network-request-failed";
 
-  private _message: string = "";
+  public static readonly FB_WRONG_PASSWORD = "auth/wrong-password";
+
+  public static readonly FB_RESOURCE_EXHAUSTED = "resource-exhausted";
+
+  private _errorCode: string;
 
   /**
    * Getter message
    * @return {string }
    */
   public get value(): string {
-    return this._message;
+    switch (this._errorCode) {
+      case ErrorMessage.FB_NETWORK_ERROR:
+        return "ネットワークエラーが発生しました";
+
+      case ErrorMessage.FB_WRONG_PASSWORD:
+        return "メールアドレスまたはパスワードが間違っています";
+
+      case ErrorMessage.FB_RESOURCE_EXHAUSTED:
+        return "アプリが一時停止しています。しばらくお待ちください。";
+      default:
+        return "エラーが発生しました";
+    }
   }
 
   constructor(errorCode: string) {
-    this._errorCode = new ErrorCode(errorCode);
-    console.log(errorCode);
-    if (this._errorCode.isNetworkError) {
-      this._message = "ネットワークエラーが発生しました";
-      return;
-    }
-    if (this._errorCode.isWrongPassword) {
-      this._message = "メールアドレスまたはパスワードが間違っています";
-      return;
-    }
-    this._message = "エラーが発生しました";
+    this._errorCode = errorCode;
   }
 }

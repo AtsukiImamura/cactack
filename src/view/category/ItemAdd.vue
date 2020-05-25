@@ -2,10 +2,10 @@
 import { Component, Mixins } from "vue-property-decorator";
 import { container } from "tsyringe";
 import UserAuthService from "../../service/UserAuthService";
-import AppModule from "../../store/ApplicationStore";
-import UserCategoryItem from "../../model/UserCategoryItem";
+import AppModule from "@/store/ApplicationStore";
+import UserCategoryItem from "@/model/UserCategoryItem";
 import ItemEditor from "./ItemEditor.vue";
-import UserCategoryItemRepository from "../../repository/UserCategoryItemRepository";
+import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
 
 @Component({})
 export default class ItemAdd extends Mixins(ItemEditor) {
@@ -17,7 +17,7 @@ export default class ItemAdd extends Mixins(ItemEditor) {
     height: "22px",
     display: "block",
     cursor: "pointer",
-    margin: "0px 0px 0px 4px"
+    margin: "0px 0px 0px 4px",
   };
 
   public async execute(): Promise<void> {
@@ -32,7 +32,14 @@ export default class ItemAdd extends Mixins(ItemEditor) {
     await container
       .resolve(UserCategoryItemRepository)
       .insert(
-        new UserCategoryItem("", userId, this.parent, this.name, undefined)
+        new UserCategoryItem(
+          "",
+          userId,
+          this.parent,
+          this.name,
+          undefined,
+          this.command
+        )
       );
     await AppModule.init();
   }

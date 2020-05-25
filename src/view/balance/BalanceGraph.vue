@@ -29,8 +29,8 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
-import Balance, { IBalanceItem } from "../../model/virtual/Balance";
-import AccountType from "../../model/AccountType";
+import Balance, { IBalanceItem } from "@/model/virtual/Balance";
+import AccountType from "@/model/AccountType";
 
 interface BalanceGraphItem {
   topPercent: number;
@@ -64,17 +64,17 @@ export default class BalanceGraph extends Vue {
     const creditSide = [];
     creditSide.push(
       ...balance.creditSide
-        .filter(d => d.item.type.code === AccountType.TYPE_DEBT)
+        .filter((d) => d.item.type.code === AccountType.TYPE_DEBT)
         .sort((a, b) => b.amount - a.amount)
     );
     creditSide.push(
       ...balance.creditSide
-        .filter(d => d.item.type.code === AccountType.TYPE_NET_ASSET)
+        .filter((d) => d.item.type.code === AccountType.TYPE_NET_ASSET)
         .sort((a, b) => b.amount - a.amount)
     );
     return [
       balance.debitSide.sort((a, b) => b.amount - a.amount),
-      creditSide
+      creditSide,
     ].reduce((acc, balanceItems) => {
       const graphItems: BalanceGraphItem[] = [];
       let currentAmount = 0;
@@ -85,7 +85,7 @@ export default class BalanceGraph extends Vue {
               totalHeight) *
             100,
           heightPercent: (Math.abs(item.amount) / totalHeight) * 100,
-          item: item
+          item: item,
         });
         currentAmount += item.amount;
       }

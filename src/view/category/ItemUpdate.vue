@@ -2,14 +2,24 @@
 import { Component, Mixins } from "vue-property-decorator";
 import ItemEditor from "./ItemEditor.vue";
 import { container } from "tsyringe";
-import UserCategoryItemRepository from "../../repository/UserCategoryItemRepository";
-import UserCategoryItem from "../../model/UserCategoryItem";
+import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
+import UserCategoryItem from "@/model/UserCategoryItem";
 import UserAuthService from "../../service/UserAuthService";
-import AppModule from "../../store/ApplicationStore";
+import AppModule from "@/store/ApplicationStore";
 
 @Component({})
 export default class ItemUpdate extends Mixins(ItemEditor) {
   protected dispStr: string = "編集";
+
+  protected get itemAction(): string | undefined {
+    if (this.actionType === "none") {
+      return "";
+    }
+    if (this.command) {
+      return this.command;
+    }
+    return this.item!.action;
+  }
 
   public async execute(): Promise<void> {
     return this.updateItem();
@@ -32,7 +42,7 @@ export default class ItemUpdate extends Mixins(ItemEditor) {
           userId,
           this.item.parent,
           this.name,
-          undefined
+          this.itemAction
         )
       );
     await AppModule.init();

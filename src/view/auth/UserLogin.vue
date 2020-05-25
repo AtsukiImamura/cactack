@@ -37,7 +37,7 @@ import UserAuthService from "@/service/UserAuthService";
 import AuthFrame from "@/view/auth/AuthFrame.vue";
 import ErrorMessage from "@/model/error/ErrorMessage";
 import ProcessButton from "@/view/common/ProcessButton.vue";
-import AppModule from "../../store/ApplicationStore";
+import AppModule from "@/store/ApplicationStore";
 
 @Component({ components: { AuthFrame, ProcessButton } })
 export default class UserLogin extends Vue {

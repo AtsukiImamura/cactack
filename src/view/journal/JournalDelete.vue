@@ -39,10 +39,10 @@
 import { Component, Vue, Prop } from "vue-property-decorator";
 import OpenableModal from "@/view/common/OpenableModal.vue";
 import ProcessButton from "@/view/common/ProcessButton.vue";
-import IJournal from "../../model/interface/IJournal";
-import AppModule from "../../store/ApplicationStore";
+import IJournal from "@/model/interface/IJournal";
+import AppModule from "@/store/ApplicationStore";
 import { container } from "tsyringe";
-import JournalRepository from "../../repository/JournalRepository";
+import JournalRepository from "@/repository/JournalRepository";
 
 @Component({ components: { OpenableModal, ProcessButton } })
 export default class JournalDelete extends Vue {

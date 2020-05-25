@@ -1,7 +1,11 @@
 <template>
   <OpenableModal
     ref="modal"
-    :option="{ height: 240, enableHeader: true, enableFooter: true }"
+    :option="{
+      height: 310,
+      enableHeader: true,
+      enableFooter: true,
+    }"
   >
     <slot>
       <span :style="dispStyle">{{ dispStr }}</span>
@@ -14,7 +18,25 @@
         <input type="text" v-model="name" />
       </div>
       <div class="attr tags"></div>
-      <div class="attr actions"></div>
+      <div class="attr actions">
+        <div class="title"><h3>ひもづけ</h3></div>
+        <div class="selections">
+          <div class="selection">
+            <input type="radio" value="none" v-model="actionType" />
+            <label>なし</label>
+          </div>
+          <div class="selection">
+            <input type="radio" value="credit" v-model="actionType" />
+            <label>クレジットカード</label>
+          </div>
+        </div>
+        <CreditCardTemplateSelector
+          :command="item ? (item.action ? item.action : undefined) : undefined"
+          @commit="command = $event"
+          @delete="removeCreditCard(index)"
+          v-if="actionType === 'credit'"
+        ></CreditCardTemplateSelector>
+      </div>
     </template>
     <template #f>
       <div class="actions">
@@ -31,14 +53,25 @@
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
 import OpenableModal from "@/view/common/OpenableModal.vue";
-import { ICategoryItem, IAccountCategory } from "@/model/interface/ICategory";
+import {
+  IAccountCategory,
+  IUserCategoryItem,
+} from "@/model/interface/ICategory";
 import Selector from "@/view/common/Selector.vue";
 import ProcessButton from "@/view/common/ProcessButton.vue";
+import CreditCardTemplateSelector from "@/view/common/action/CreditCardTemplateSelector.vue";
 
-@Component({ components: { OpenableModal, Selector, ProcessButton } })
+@Component({
+  components: {
+    OpenableModal,
+    Selector,
+    ProcessButton,
+    CreditCardTemplateSelector,
+  },
+})
 export default class ItemEditor extends Vue {
   @Prop()
-  protected item?: ICategoryItem;
+  protected item?: IUserCategoryItem;
 
   @Prop()
   protected category?: IAccountCategory;
@@ -47,6 +80,10 @@ export default class ItemEditor extends Vue {
   protected dispStyle: any = {};
 
   public name: string = "";
+
+  public command: string = "";
+
+  public actionType: "none" | "credit" = "none";
 
   // public tags: ITag[] = [];
 
@@ -67,6 +104,10 @@ export default class ItemEditor extends Vue {
       return;
     }
     this.name = this.item.name;
+    // TODO: クレジット以外もつくったら対応
+    if (this.item.action) {
+      this.actionType = "credit";
+    }
   }
 
   public get isNew(): boolean {
@@ -110,6 +151,17 @@ export default class ItemEditor extends Vue {
   &.name {
     &:after {
       content: "名称";
+    }
+  }
+}
+.actions {
+  .selections {
+    display: flex;
+    .selection {
+      width: 30%;
+      min-width: 120px;
+      display: flex;
+      margin: 4px 6px;
     }
   }
 }

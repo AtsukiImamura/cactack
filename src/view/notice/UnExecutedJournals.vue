@@ -3,16 +3,22 @@
     <div class="journal" v-for="(jnl, index) in journals" :key="index">
       <div class="message">
         <span>
-          {{
-          jnl.accountAt.toString()
-          }}に執行予定の仕訳を確定させてください。
+          {{ jnl.accountAt.toString() }}に執行予定の仕訳を確定させてください。
         </span>
       </div>
       <div class="content">
         <!-- <span>{{ jnl }}</span> -->
         <div class="disp" v-if="!handling.id || handling.id !== jnl.id">
-          <div class="side" v-for="(details, side) in [jnl.debits, jnl.credits]" :key="side">
-            <div class="detail" v-for="(detail, dIndex) in details" :key="dIndex">
+          <div
+            class="side"
+            v-for="(details, side) in [jnl.debits, jnl.credits]"
+            :key="side"
+          >
+            <div
+              class="detail"
+              v-for="(detail, dIndex) in details"
+              :key="dIndex"
+            >
               <div class="attr name">
                 <span>{{ detail.category.name }}</span>
               </div>
@@ -27,10 +33,18 @@
         </div>
         <div class="actions">
           <div class="action">
-            <ProcessButton value="編集" :click="edit(jnl)" :disabled="handling.id === jnl.id"></ProcessButton>
+            <ProcessButton
+              value="編集"
+              :click="edit(jnl)"
+              :disabled="handling.id === jnl.id"
+            ></ProcessButton>
           </div>
           <div class="action">
-            <ProcessButton value="確定" :click="settle(jnl)" :disabled="false"></ProcessButton>
+            <ProcessButton
+              value="確定"
+              :click="settle(jnl)"
+              :disabled="false"
+            ></ProcessButton>
           </div>
         </div>
       </div>
@@ -40,12 +54,12 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
-import IJournal from "../../model/interface/IJournal";
+import IJournal from "@/model/interface/IJournal";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import { container } from "tsyringe";
-import JournalRepository from "../../repository/JournalRepository";
-import Journal from "../../model/Journal";
-import AppModule from "../../store/ApplicationStore";
+import JournalRepository from "@/repository/JournalRepository";
+import Journal from "@/model/Journal";
+import AppModule from "@/store/ApplicationStore";
 import JournalEditor from "@/view/register/JournalEditor.vue";
 
 @Component({ components: { ProcessButton, JournalEditor } })
@@ -53,7 +67,7 @@ export default class UnExecutedJournals extends Vue {
   @Prop() journals!: IJournal[];
 
   public get targets(): IJournal[] {
-    return this.journals.map(jnl =>
+    return this.journals.map((jnl) =>
       this.handling && jnl.id === (this.handling as IJournal).id
         ? (this.handling as IJournal)
         : jnl
@@ -94,11 +108,11 @@ export default class UnExecutedJournals extends Vue {
           relatedJournal.accountAt,
           relatedJournal.executeAt,
           // FIXME: 本来は必要な補助科目の分に対してだけクリアする必要がある
-          relatedJournal.credits.map(d => {
+          relatedJournal.credits.map((d) => {
             d.action = "";
             return d;
           }),
-          relatedJournal.debits.map(d => {
+          relatedJournal.debits.map((d) => {
             d.action = "";
             return d;
           }),

@@ -71,7 +71,7 @@ export default class CategorySelector extends Vue {
       document.body.clientWidth < 500
         ? document.body.clientWidth
         : document.body.clientWidth * 0.6,
-      800
+      370
     );
     if (this.item) {
       this.selectedItem = this.item;
@@ -112,6 +112,9 @@ export default class CategorySelector extends Vue {
     position: fixed;
     top: 0px;
     left: 0px;
+    @include xs {
+      background-color: rgba(40, 40, 40, 0.25);
+    }
   }
   .selector {
     position: absolute;
@@ -121,14 +124,20 @@ export default class CategorySelector extends Vue {
     padding: 8px;
     box-shadow: 2px 2px 3px 3px rgba(120, 120, 120, 0.25);
     background-color: #ffffff;
-    width: 100vw;
+    width: calc(100vw - 18px);
+    @include xs {
+      position: fixed;
+      top: 15vh;
+      left: 0px;
+    }
+    overflow: hidden;
     .tabs {
       display: flex;
       border-bottom: 1px solid #c0c0c0;
       width: 100%;
       .tab {
-        min-width: 80px;
-        padding: 7px 10px;
+        min-width: 65px;
+        padding: 5px 8px;
         border-radius: 3px 3px 0px 0px;
         border: 1px solid #c0c0c0;
         border-width: 1px 0px 0px 1px;
@@ -150,28 +159,38 @@ export default class CategorySelector extends Vue {
       }
     }
     .body {
-      display: flex;
-      flex-wrap: wrap;
+      width: calc(100% + 24px);
+      max-height: 235px;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      @include xs {
+        height: calc(80vh - 100px);
+        max-height: calc(80vh - 100px);
+      }
       .section {
-        margin: 2px 5px;
         padding: 3px;
-        width: calc(48% - 10px);
-        // margin-right: 4%;
+        display: flex;
+        width: 100%;
         .title {
-          width: 100%;
-          border-bottom: 1px solid #c0c0c0;
+          width: 18%;
+          min-width: 110px;
           h3 {
-            margin: 3px 0px;
+            margin: 0px;
           }
         }
         .items {
+          width: 75%;
           display: flex;
           flex-wrap: wrap;
           .item {
-            padding: 4px 8px;
+            padding: 1px 5px;
             font-size: 0.9rem;
             color: #404440;
             cursor: pointer;
+            margin: 1px 2px;
+            border-radius: 3px;
+            background-color: #f0f0f0;
+            height: 21px;
           }
         }
       }

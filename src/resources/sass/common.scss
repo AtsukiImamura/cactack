@@ -627,3 +627,13 @@ body {
     right: -($cell-width + $space);
   }
 }
+
+@mixin with-label($label) {
+  margin-top: 28px;
+  &:before {
+    position: absolute;
+    left: 0px;
+    top: -20px;
+    content: $label;
+  }
+}

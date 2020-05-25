@@ -7,6 +7,7 @@ import IUserCategoryItemRepository from "./interface/IUserCategoryItemRepository
 import UserCategoryItemTransaformer from "./transformer/UserCategoryItemTransaformer";
 import UserIdentifiedRepositoryBase from "./UserIdentifiedRepositoryBase";
 import UserCategoryRepository from "./UserCategoryRepository";
+import UserAuthService from "@/service/UserAuthService";
 
 @singleton()
 export default class UserCategoryItemRepository
@@ -19,6 +20,17 @@ export default class UserCategoryItemRepository
       "parentId",
       (value: DUserCategoryItem) => value.parentId
     );
+    const userId = container.resolve(UserAuthService).userId;
+    if (!userId) {
+      return;
+    }
+    // 暖気
+    (async () => {
+      const docs = await this.ref.where("userId", "==", userId).get();
+      docs.forEach((doc) => {
+        this.cache.add(doc.data() as DUserCategoryItem);
+      });
+    })();
   }
 
   public async aggregate(item: DUserCategoryItem): Promise<IUserCategoryItem> {
