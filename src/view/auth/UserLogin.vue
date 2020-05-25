@@ -74,6 +74,11 @@ export default class UserLogin extends Vue {
       await container
         .resolve(UserAuthService)
         .signIn(this.email, this.password);
+      const user = container.resolve(UserAuthService).getFirebaseUser();
+      if (!user!.emailVerified) {
+        // const err =  new Error();
+        // err.co
+      }
       await AppModule.init();
       this.$router.push("/");
     } catch (err) {

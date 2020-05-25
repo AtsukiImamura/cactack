@@ -45,6 +45,13 @@ const router = new Router({
         ),
     },
     {
+      path: "/user/create/email-verification",
+      component: () =>
+        import(
+          /* webpackChunkName: "top" */ "@/view/auth/creation/UserCreationWaitingEmailVerification.vue"
+        ),
+    },
+    {
       path: "/user/create/cash",
       component: () =>
         import(

@@ -19,10 +19,17 @@ import { Component, Vue } from "vue-property-decorator";
 import PublicFrame from "@/view/common/PublicFrame.vue";
 import UserCreationModule from "@/store/UserCreationStore";
 import ProcessButton from "@/view/common/ProcessButton.vue";
+import { container } from "tsyringe";
+import UserAuthService from "../../../service/UserAuthService";
 
 @Component({ components: { PublicFrame, ProcessButton } })
 export default class UserCreationTop extends Vue {
   public mounted(): void {
+    const user = container.resolve(UserAuthService).getFirebaseUser();
+    if (!user || !user.emailVerified) {
+      this.$router.push("/user/create/email-verification");
+      return;
+    }
     UserCreationModule.init();
   }
 

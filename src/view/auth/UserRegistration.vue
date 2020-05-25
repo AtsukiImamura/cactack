@@ -8,7 +8,13 @@
     </div>
     <div class="area email">
       <label for="ur-email">email</label>
-      <input id="ur-email" name="email" type="text" v-model="email" placeholder="email" />
+      <input
+        id="ur-email"
+        name="email"
+        type="text"
+        v-model="email"
+        placeholder="email"
+      />
     </div>
     <div class="area password">
       <label for="ur-password">password</label>
@@ -87,13 +93,13 @@ export default class UserRegistration extends Vue {
     container
       .resolve(UserAuthService)
       .createUserIfNotExist(this.email, this.password)
-      .then(user => {
+      .then((user) => {
         return container
           .resolve(UserAuthService)
           .signIn(this.email, this.password);
       })
-      .then(() => this.$router.push("/user/create/begin"))
-      .catch(err => {
+      .then(() => this.$router.push("/user/create/email-verification"))
+      .catch((err) => {
         console.log(err);
         this.message = "エラーが発生しました";
       });
