@@ -34,7 +34,7 @@ export default interface IJournal
 }
 
 export interface IJournalDetail {
-  hash: string;
+  // hash: string;
 
   category: IUserCategoryItem;
 

@@ -5,6 +5,6 @@ export default interface Identifiable {
   // delete: () => void;
 }
 
-export interface UserIdentifiable {
+export interface UserIdentifiable extends Identifiable {
   userId: string;
 }

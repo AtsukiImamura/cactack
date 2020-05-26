@@ -6,28 +6,8 @@ import JournalDate from "@/model/common/JournalDate";
 import IJournalDate from "@/model/interface/IJournalDate";
 import { DJournal } from "@/model/interface/DJournal";
 import IdBase from "./IdBase";
-import hash from "object-hash";
 
 export default abstract class JournalBase extends IdBase implements IJournal {
-  // public static simple(
-  //   userId: string,
-  //   accountAt: IJournalDate,
-  //   executeAt: IJournalDate,
-  //   creditItem: IUserCategoryItem,
-  //   debitItem: IUserCategoryItem
-  // ): IJournal {
-  //   return new Journal(
-  //     "",
-  //     userId,
-  //     "",
-  //     JournalDate.today(),
-  //     accountAt,
-  //     executeAt,
-  //     [{ amount: amount, category: creditItem }],
-  //     [{ amount: amount, category: debitItem }]
-  //   );
-  // }
-
   private _userId: string;
   /** 仕訳タイトル（コメント） */
   private _title: string;
@@ -75,20 +55,20 @@ export default abstract class JournalBase extends IdBase implements IJournal {
     this._createdAt = JournalDate.cast(createdAt);
     this._accountAt = JournalDate.cast(accountAt);
     this._executeAt = executeAt ? JournalDate.cast(executeAt) : undefined;
-    this._credits = this.setHashIfNot(credits);
-    this._debits = this.setHashIfNot(debits);
+    this._credits = credits;
+    this._debits = debits;
     period && (this._period = period);
   }
 
-  private setHashIfNot(details: IJournalDetail[]) {
-    return details.map((d) => {
-      if (d.hash) {
-        return d;
-      }
-      d.hash = `${hash(d)}${hash(new Date())}`;
-      return d;
-    });
-  }
+  // private setHashIfNot(details: IJournalDetail[]) {
+  //   return details.map((d) => {
+  //     if (d.hash) {
+  //       return d;
+  //     }
+  //     d.hash = `${hash(d)}${hash(new Date())}`;
+  //     return d;
+  //   });
+  // }
 
   /**
    * Getter userId
@@ -186,12 +166,12 @@ export default abstract class JournalBase extends IdBase implements IJournal {
   public get balanceItems(): IJournalDetail[] {
     return [
       ...this.credits.map((detail) => ({
-        hash: detail.hash,
+        // hash: detail.hash,
         category: detail.category,
         amount: (detail.category.type.isCredit ? 1 : -1) * detail.amount,
       })),
       ...this.debits.map((detail) => ({
-        hash: detail.hash,
+        // hash: detail.hash,
         category: detail.category,
         amount: (detail.category.type.isDebit ? 1 : -1) * detail.amount,
       })),

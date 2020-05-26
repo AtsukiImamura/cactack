@@ -1,11 +1,11 @@
 <script lang="ts">
 import { Component, Mixins } from "vue-property-decorator";
 import CategoryEditor from "./CategoryEditor.vue";
-import UserCategoryRepository from "@/repository/UserCategoryRepository";
 import { container } from "tsyringe";
 import UserAuthService from "../../service/UserAuthService";
 import UserCategory from "@/model/UserCategory";
 import AppModule from "@/store/ApplicationStore";
+import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
 
 @Component({})
 export default class CategoryUpdate extends Mixins(CategoryEditor) {
@@ -17,7 +17,7 @@ export default class CategoryUpdate extends Mixins(CategoryEditor) {
     height: "20px",
     display: "block",
     cursor: "pointer",
-    margin: "0px 0px 0px 4px",
+    margin: "0px 0px 0px 4px"
   };
 
   public async execute(): Promise<void> {
@@ -33,16 +33,15 @@ export default class CategoryUpdate extends Mixins(CategoryEditor) {
       throw new Error("category is required for update");
     }
     await container
-      .resolve(UserCategoryRepository)
+      .resolve(UserCategoryFlyweight)
       .update(
         new UserCategory(
           this.category.id,
           userId,
           this.name,
           this.category.type.code,
-          [],
           undefined
-        )
+        ).simplify()
       );
     await AppModule.init();
   }

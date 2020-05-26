@@ -2,11 +2,12 @@ import SettlementAction from "./SettlementAction";
 import IJournal from "@/model/interface/IJournal";
 import { isNumber } from "util";
 import { container } from "tsyringe";
-import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
 import IJournalDate from "@/model/interface/IJournalDate";
 import JournalDate from "../../common/JournalDate";
 import VirtualJournal from "../../VirtualJournal";
 import JournalRepository from "@/repository/JournalRepository";
+import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
+import UserCategoryItem from "@/model/UserCategoryItem";
 
 export default class ReserveSettlementAction extends SettlementAction {
   public static readonly COMMAND_NAME = "RESERVE";
@@ -96,15 +97,15 @@ export default class ReserveSettlementAction extends SettlementAction {
       return [];
     }
     const debitCategoryItem = await container
-      .resolve(UserCategoryItemRepository)
-      .getById(this.debitCategoryItemId);
+      .resolve(UserCategoryItemFlyweight)
+      .get(this.debitCategoryItemId);
     if (!debitCategoryItem) {
       throw new Error("user category item of debit not found.");
     }
 
     const creditCategoryItem = await container
-      .resolve(UserCategoryItemRepository)
-      .getById(this.creditCategoryItemId);
+      .resolve(UserCategoryItemFlyweight)
+      .get(this.creditCategoryItemId);
     if (!creditCategoryItem) {
       throw new Error("user category item of credit not found.");
     }
@@ -112,8 +113,18 @@ export default class ReserveSettlementAction extends SettlementAction {
     const journal = new VirtualJournal(
       this.title,
       this.date,
-      [{ hash: "", amount: this.amount, category: creditCategoryItem }],
-      [{ hash: "", amount: this.amount, category: debitCategoryItem }]
+      [
+        {
+          amount: this.amount,
+          category: UserCategoryItem.parse(creditCategoryItem),
+        },
+      ],
+      [
+        {
+          amount: this.amount,
+          category: UserCategoryItem.parse(debitCategoryItem),
+        },
+      ]
     );
     journal.ancestorId = ancestor ? ancestor.id : "";
     return [journal];

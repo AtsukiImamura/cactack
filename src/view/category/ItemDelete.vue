@@ -1,8 +1,5 @@
 <template>
-  <OpenableModal
-    ref="modal"
-    :option="{ height: 240, enableHeader: true, enableFooter: true }"
-  >
+  <OpenableModal ref="modal" :option="{ height: 240, enableHeader: true, enableFooter: true }">
     <slot>
       <span>削除</span>
     </slot>
@@ -14,9 +11,7 @@
         <span>{{ message }}</span>
       </div>
       <div class="attr select-item" v-if="!canDelete">
-        <TransferCategorySelector
-          @select="alternativeItem = $event"
-        ></TransferCategorySelector>
+        <TransferCategorySelector @select="alternativeItem = $event"></TransferCategorySelector>
       </div>
     </template>
     <template #f>
@@ -24,11 +19,7 @@
         <span>{{ errorMessage }}</span>
       </div>
       <div class="actions">
-        <ProcessButton
-          value="OK"
-          :click="onClickOk"
-          :disabled="!canClickOk"
-        ></ProcessButton>
+        <ProcessButton value="OK" :click="onClickOk" :disabled="!canClickOk"></ProcessButton>
       </div>
     </template>
   </OpenableModal>
@@ -45,15 +36,17 @@ import TransferCategorySelector from "@/view/register/components/TransferCategor
 import { container } from "tsyringe";
 import JournalRepository from "@/repository/JournalRepository";
 import Journal from "@/model/Journal";
-import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
+import JournalDetail from "../../model/JournalDetail";
+import UserCategoryItemFlyweight from "../../repository/flyweight/UserCategoryItemFlyweight";
+import JournalDate from "../../model/common/JournalDate";
 
 @Component({
   components: {
     OpenableModal,
     Selector,
     ProcessButton,
-    TransferCategorySelector,
-  },
+    TransferCategorySelector
+  }
 })
 export default class ItemDelete extends Vue {
   @Prop()
@@ -107,7 +100,7 @@ export default class ItemDelete extends Vue {
       for (const jnl of AppModule.journals) {
         if (
           [...jnl.credits, ...jnl.debits].filter(
-            (d) => d.category.id === this.item.id
+            d => d.category.id === this.item.id
           ).length === 0
         ) {
           continue;
@@ -120,15 +113,23 @@ export default class ItemDelete extends Vue {
             jnl.createdAt,
             jnl.accountAt,
             jnl.executeAt,
-            jnl.credits.map((item) => {
+            jnl.credits.map(item => {
               if (item.category.id === this.item.id) {
-                item.category = this.alternativeItem! as IUserCategoryItem;
+                return new JournalDetail(
+                  this.alternativeItem! as IUserCategoryItem,
+                  item.amount,
+                  item.action
+                );
               }
               return item;
             }),
-            jnl.debits.map((item) => {
+            jnl.debits.map(item => {
               if (item.category.id === this.item.id) {
-                item.category = this.alternativeItem! as IUserCategoryItem;
+                return new JournalDetail(
+                  this.alternativeItem! as IUserCategoryItem,
+                  item.amount,
+                  item.action
+                );
               }
               return item;
             })
@@ -137,9 +138,15 @@ export default class ItemDelete extends Vue {
       }
     }
     // 補助科目の論理削除
-    await container
-      .resolve(UserCategoryItemRepository)
-      .logicalDelete(this.item as IUserCategoryItem);
+    await container.resolve(UserCategoryItemFlyweight).update(
+      // TDOO: 論理削除メソッド作成
+      (() => {
+        const data = (this.item as IUserCategoryItem).simplify();
+        data.deletedAt = JournalDate.today().toString();
+        return data;
+      })()
+    );
+    await AppModule.init();
     this.onComplete(this.item);
   }
 

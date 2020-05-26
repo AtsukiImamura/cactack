@@ -10,17 +10,11 @@
             :class="`pro-info ${info.cls ? info.cls : 'success'}`"
             v-for="(info, index) in pros"
             :key="index"
-          >
-            {{ info.disp }}
-          </div>
+          >{{ info.disp }}</div>
         </div>
         <div class="action">
           <!-- <router-link to="/" tag="input" type="button" class="btn ok-btn" value="アプリへ"></router-link> -->
-          <ProcessButton
-            value="アプリへ"
-            :click="next"
-            :disabled="false"
-          ></ProcessButton>
+          <ProcessButton value="アプリへ" :click="next" :disabled="false"></ProcessButton>
         </div>
       </div>
     </div>
@@ -36,8 +30,6 @@ import CategoryMasterRepository from "@/repository/CategoryMasterRepository";
 import CategoryService from "@/service/CategoryService";
 import UserCategory from "@/model/UserCategory";
 import UserAuthService from "@/service/UserAuthService";
-import UserCategoryItem from "@/model/UserCategoryItem";
-// import UserCreationModule from "@/store/UserCreationStore";
 import { IUserCategory } from "@/model/interface/ICategory";
 
 @Component({ components: { PublicFrame, ProcessButton } })
@@ -53,7 +45,7 @@ export default class UserCreationFinish extends Vue {
     if (!userId) {
       this.pros.push({
         disp: "ユーザーデータの取得に失敗しました",
-        cls: "error",
+        cls: "error"
       });
       return Promise.reject();
     }
@@ -62,32 +54,32 @@ export default class UserCreationFinish extends Vue {
         .resolve(CategoryMasterRepository)
         .getAll();
       this.pros.push({
-        disp: "デフォルト勘定科目データの読み込みが完了しました。",
+        disp: "デフォルト勘定科目データの読み込みが完了しました。"
       });
       await container.resolve(CategoryService).insertUserCategories(
         categoryMasters.map(
-          (master) =>
+          master =>
             new UserCategory(
               "",
               userId,
               master.name,
               master.type.code,
-              master.items.map(
-                (item) =>
-                  new UserCategoryItem("", userId, master, item.name, undefined)
-              ),
+              // master.items.map(
+              //   (item) =>
+              //     new UserCategoryItem("", userId, master, item.name, undefined)
+              // ),
               undefined
             )
         ),
         (category: IUserCategory) =>
           this.pros.push({
-            disp: `勘定科目「${category.name}」が作成されました`,
+            disp: `勘定科目「${category.name}」が作成されました`
           })
       );
     } catch (e) {
       this.pros.push({
         disp: "勘定科目データの生成と保存に失敗しました",
-        cls: "error",
+        cls: "error"
       });
     }
 

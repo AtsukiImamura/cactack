@@ -139,6 +139,7 @@ import UserAuthService from "@/service/UserAuthService";
 import TransferCategorySelector from "@/view/register/components/TransferCategorySelector.vue";
 import DatePicker from "vuejs-datepicker";
 import hash from "object-hash";
+import JournalDetail from "../../model/JournalDetail";
 
 interface ITransferJournalDetail {
   item?: IUserCategoryItem;
@@ -259,7 +260,6 @@ export default class JournalEditor extends Vue {
         .map(c => {
           const item = c.item!;
           const detail = {
-            hash: "",
             amount: c.amount,
             category: item,
             action: ""
@@ -273,11 +273,15 @@ export default class JournalEditor extends Vue {
               .build(detail as IJournalDetail, true);
             detail.action = command;
           }
-          return detail;
+          return new JournalDetail(
+            detail.category,
+            detail.amount,
+            detail.action
+          );
         }),
       this.debits
         .filter(c => c.item)
-        .map(c => ({ hash: "", amount: c.amount, category: c.item! }))
+        .map(c => new JournalDetail(c.item!, c.amount))
     );
     return journal;
   }

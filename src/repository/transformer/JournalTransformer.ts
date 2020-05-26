@@ -3,8 +3,10 @@ import { DJournal, DJournalDetail } from "@/model/interface/DJournal";
 import IJournal, { IJournalDetail } from "@/model/interface/IJournal";
 import { singleton, container } from "tsyringe";
 import Journal from "@/model/Journal";
-import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
 import JournalDate from "@/model/common/JournalDate";
+import JournalDetail from "@/model/JournalDetail";
+import UserCategoryItemFlyweight from "../flyweight/UserCategoryItemFlyweight";
+import UserCategoryItem from "@/model/UserCategoryItem";
 
 @singleton()
 export default class JournalTransformer extends Transformer<
@@ -17,12 +19,12 @@ export default class JournalTransformer extends Transformer<
 
     if (journal.period) {
       periodDebit = await container
-        .resolve(UserCategoryItemRepository)
-        .getById(journal.period.debitCategoryItemId);
+        .resolve(UserCategoryItemFlyweight)
+        .get(journal.period.debitCategoryItemId);
 
       periodCredit = await container
-        .resolve(UserCategoryItemRepository)
-        .getById(journal.period.creditCategoryItemId);
+        .resolve(UserCategoryItemFlyweight)
+        .get(journal.period.creditCategoryItemId);
       if (!periodDebit || !periodCredit) {
         throw new Error("category item not found.");
       }
@@ -40,8 +42,8 @@ export default class JournalTransformer extends Transformer<
         ? {
             startAt: JournalDate.cast(journal.period.startAt),
             finishAt: JournalDate.cast(journal.period.finishAt),
-            debit: periodDebit!,
-            credit: periodCredit!,
+            debit: UserCategoryItem.parse(periodDebit!),
+            credit: UserCategoryItem.parse(periodCredit!),
           }
         : undefined
     );
@@ -54,18 +56,22 @@ export default class JournalTransformer extends Transformer<
   ): Promise<IJournalDetail[]> {
     const results: IJournalDetail[] = [];
     for (const detail of details) {
+      // const item = await container
+      //   .resolve(UserCategoryItemFlyweight)
+      //   .getById(detail.categoryItemId);
       const item = await container
-        .resolve(UserCategoryItemRepository)
-        .getById(detail.categoryItemId);
+        .resolve(UserCategoryItemFlyweight)
+        .get(detail.categoryItemId);
       if (!item) {
         continue;
       }
-      results.push({
-        hash: detail.hash ? detail.hash : "",
-        amount: detail.amount,
-        category: item,
-        action: detail.action,
-      });
+      // results.push({
+      //   hash: detail.hash ? detail.hash : "",
+      //   amount: detail.amount,
+      //   category: item,
+      //   action: detail.action,
+      // });
+      results.push(new JournalDetail(item.id, detail.amount, detail.action));
     }
     return results;
   }

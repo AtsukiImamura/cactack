@@ -2,7 +2,7 @@
   <div class="credit-card-action" :key="mappingHash">
     <!-- <div class="cell title">
       <input type="text" v-model="mapping.title" />
-    </div> -->
+    </div>-->
     <div class="cell bank">
       <Selector
         v-if="bankSelections.length > 0"
@@ -16,22 +16,13 @@
       ></TransferCategorySelector>
     </div>
     <div class="cell deadline">
-      <Selector
-        :items="mapping.deadlineSelections"
-        @select="mapping.setDeadline($event.seq)"
-      ></Selector>
+      <Selector :items="mapping.deadlineSelections" @select="mapping.setDeadline($event.seq)"></Selector>
     </div>
     <div class="cell month">
-      <Selector
-        :items="mapping.monthSelections"
-        @select="mapping.setMonth($event.seq)"
-      ></Selector>
+      <Selector :items="mapping.monthSelections" @select="mapping.setMonth($event.seq)"></Selector>
     </div>
     <div class="cell day">
-      <Selector
-        :items="mapping.daySelections"
-        @select="mapping.setDay($event.seq)"
-      ></Selector>
+      <Selector :items="mapping.daySelections" @select="mapping.setDay($event.seq)"></Selector>
     </div>
     <div class="cell delete">
       <span class="delete-button enabled" @click="removeCreditCard"></span>
@@ -46,10 +37,11 @@ import { SelectorItem } from "@/model/interface/dto/Selector";
 import { ICategoryItem } from "@/model/interface/ICategory";
 import CreditActionTemplate from "@/model/action/template/CreditActionTemplate";
 import { container } from "tsyringe";
-import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
+import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 import TransferCategorySelector from "@/view/register/components/TransferCategorySelector.vue";
 import Selector from "@/view/common/Selector.vue";
 import hash from "object-hash";
+import UserCategoryItem from "../../../model/UserCategoryItem";
 
 @Component({ components: { Selector, TransferCategorySelector } })
 export default class CreditCardTemplateSelector extends Vue {
@@ -61,7 +53,7 @@ export default class CreditCardTemplateSelector extends Vue {
     return this.banks.map((bk, index) => ({
       seq: index,
       content: bk.name,
-      default: !!this.mapping.bank && this.mapping.bank.id === bk.id,
+      default: !!this.mapping.bank && this.mapping.bank.id === bk.id
     }));
   }
 
@@ -75,10 +67,10 @@ export default class CreditCardTemplateSelector extends Vue {
     if (this.command) {
       const template = CreditActionTemplate.parse(this.command);
       const item = await container
-        .resolve(UserCategoryItemRepository)
-        .getById(template.itemId);
+        .resolve(UserCategoryItemFlyweight)
+        .get(template.itemId);
       const mapping = new CreditMapping();
-      mapping.bank = item ? item : null;
+      mapping.bank = item ? UserCategoryItem.parse(item) : null;
       mapping.deadline = template.deadline;
       mapping.month = template.month;
       mapping.day = template.day;
@@ -108,14 +100,14 @@ export class CreditMapping {
   public day: number = 15;
 
   public get daySelections(): SelectorItem[] {
-    return this.dayOfMonthSelections.map((s) => {
+    return this.dayOfMonthSelections.map(s => {
       s.default = s.seq === this.day;
       return s;
     });
   }
 
   public get deadlineSelections(): SelectorItem[] {
-    return this.dayOfMonthSelections.map((s) => {
+    return this.dayOfMonthSelections.map(s => {
       s.default = s.seq === this.deadline;
       return s;
     });
@@ -125,8 +117,8 @@ export class CreditMapping {
     return ([
       { content: "当月", seq: 0 },
       { content: "翌月", seq: 1 },
-      { content: "翌々月", seq: 2 },
-    ] as SelectorItem[]).map((s) => {
+      { content: "翌々月", seq: 2 }
+    ] as SelectorItem[]).map(s => {
       s.default = s.seq === this.month;
       return s;
     });

@@ -4,20 +4,12 @@
       <div class="main">
         <Step :last="6" :current="6"></Step>
         <h2>費用と収入</h2>
-        <p>
-          費用と収入の勘定科目をつくります。また、定期的な収入・支出があれば登録します。
-        </p>
-        <p>
-          これに加えてあとで予算を組めば、将来の資産状態をシミュレーションすることができます。
-        </p>
+        <p>費用と収入の勘定科目をつくります。また、定期的な収入・支出があれば登録します。</p>
+        <p>これに加えてあとで予算を組めば、将来の資産状態をシミュレーションすることができます。</p>
         <div class="balances">
           <QuestionaierBlock title="固定収入">
             <div class="accounts incomes">
-              <div
-                class="row"
-                v-for="(account, index) in steadyIncomes"
-                :key="index"
-              >
+              <div class="row" v-for="(account, index) in steadyIncomes" :key="index">
                 <div class="cell name">
                   <input type="text" v-model="account.name" />
                 </div>
@@ -25,10 +17,7 @@
                   <NumberInput v-model="account.amount"></NumberInput>
                 </div>
                 <div class="cell delete">
-                  <span
-                    class="delete-button enabled"
-                    @click="removeUserAccount(account)"
-                  ></span>
+                  <span class="delete-button enabled" @click="removeUserAccount(account)"></span>
                 </div>
               </div>
               <div class="action">
@@ -43,10 +32,7 @@
                   <input type="text" v-model="account.name" />
                 </div>
                 <div class="cell delete">
-                  <span
-                    class="delete-button enabled"
-                    @click="removeUserAccount(account)"
-                  ></span>
+                  <span class="delete-button enabled" @click="removeUserAccount(account)"></span>
                 </div>
               </div>
               <div class="action">
@@ -56,11 +42,7 @@
           </QuestionaierBlock>
           <QuestionaierBlock title="固定費用">
             <div class="accounts steady-incomes">
-              <div
-                class="row"
-                v-for="(account, index) in steadySpendings"
-                :key="index"
-              >
+              <div class="row" v-for="(account, index) in steadySpendings" :key="index">
                 <div class="cell name">
                   <input type="text" v-model="account.name" />
                 </div>
@@ -68,10 +50,7 @@
                   <NumberInput v-model="account.amount"></NumberInput>
                 </div>
                 <div class="cell delete">
-                  <span
-                    class="delete-button enabled"
-                    @click="removeUserAccount(account)"
-                  ></span>
+                  <span class="delete-button enabled" @click="removeUserAccount(account)"></span>
                 </div>
               </div>
               <div class="action">
@@ -81,19 +60,12 @@
           </QuestionaierBlock>
           <QuestionaierBlock title="その他費用">
             <div class="accounts steady-incomes">
-              <div
-                class="row"
-                v-for="(account, index) in spendings"
-                :key="index"
-              >
+              <div class="row" v-for="(account, index) in spendings" :key="index">
                 <div class="cell name">
                   <input type="text" v-model="account.name" />
                 </div>
                 <div class="cell delete">
-                  <span
-                    class="delete-button enabled"
-                    @click="removeUserAccount(account)"
-                  ></span>
+                  <span class="delete-button enabled" @click="removeUserAccount(account)"></span>
                 </div>
               </div>
               <div class="action">
@@ -110,11 +82,7 @@
             class="btn cancel-btn"
             value="戻る"
           ></router-link>
-          <ProcessButton
-            value="次へ"
-            :click="next"
-            :disabled="false"
-          ></ProcessButton>
+          <ProcessButton value="次へ" :click="next" :disabled="false"></ProcessButton>
         </div>
       </div>
     </div>
@@ -131,12 +99,11 @@ import UserCreationModule from "@/store/UserCreationStore";
 import NumberInput from "@/view/common/NumberInput.vue";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import { container } from "tsyringe";
-import UserCategoryRepository from "@/repository/UserCategoryRepository";
 import UserCategory from "@/model/UserCategory";
 import UserAuthService from "../../../service/UserAuthService";
 import AccountType from "@/model/AccountType";
-import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
 import UserCategoryItem from "@/model/UserCategoryItem";
+import UserCategoryFlyweight from "../../../repository/flyweight/UserCategoryFlyweight";
 
 interface IUserAccount {
   name: string;
@@ -150,8 +117,8 @@ interface IUserAccount {
     Step,
     QuestionaierBlock,
     NumberInput,
-    ProcessButton,
-  },
+    ProcessButton
+  }
 })
 export default class UserCreationSteadyInOut extends Vue {
   public userAccounts: IUserAccount[] = [];
@@ -161,36 +128,36 @@ export default class UserCreationSteadyInOut extends Vue {
       () =>
         (this.userAccounts = UserCreationModule.creationMasters
           .filter(
-            (m) =>
+            m =>
               m.type === UserCreationMaster.TYPE_INCOME ||
               m.type === UserCreationMaster.TYPE_STEADY_INCOME ||
               m.type === UserCreationMaster.TYPE_SPENDING ||
               m.type === UserCreationMaster.TYPE_STEADY_SPENDING
           )
-          .map((m) => ({ name: m.title, amount: 0, type: m.type })))
+          .map(m => ({ name: m.title, amount: 0, type: m.type })))
     );
   }
 
   public get incomes(): IUserAccount[] {
     return this.userAccounts.filter(
-      (m) => m.type === UserCreationMaster.TYPE_INCOME
+      m => m.type === UserCreationMaster.TYPE_INCOME
     );
   }
 
   public get steadyIncomes(): IUserAccount[] {
     return this.userAccounts.filter(
-      (m) => m.type === UserCreationMaster.TYPE_STEADY_INCOME
+      m => m.type === UserCreationMaster.TYPE_STEADY_INCOME
     );
   }
   public get spendings(): IUserAccount[] {
     return this.userAccounts.filter(
-      (m) => m.type === UserCreationMaster.TYPE_SPENDING
+      m => m.type === UserCreationMaster.TYPE_SPENDING
     );
   }
 
   public get steadySpendings(): IUserAccount[] {
     return this.userAccounts.filter(
-      (m) => m.type === UserCreationMaster.TYPE_STEADY_SPENDING
+      m => m.type === UserCreationMaster.TYPE_STEADY_SPENDING
     );
   }
 
@@ -211,52 +178,62 @@ export default class UserCreationSteadyInOut extends Vue {
     // 収入
     {
       const category = await container
-        .resolve(UserCategoryRepository)
+        .resolve(UserCategoryFlyweight)
         .insert(
           new UserCategory(
             "",
             userId,
             "収入",
             AccountType.TYPE_INCOME,
-            [],
             undefined
-          )
+          ).simplify()
         );
       for (const account of this.userAccounts.filter(
-        (ac) =>
+        ac =>
           ac.type === UserCreationMaster.TYPE_INCOME ||
           ac.type === UserCreationMaster.TYPE_STEADY_INCOME
       )) {
         await container
-          .resolve(UserCategoryItemRepository)
+          .resolve(UserCategoryItemFlyweight)
           .insert(
-            new UserCategoryItem("", userId, category, account.name, undefined)
+            new UserCategoryItem(
+              "",
+              userId,
+              category.id,
+              account.name,
+              undefined
+            ).simplify()
           );
       }
     }
     // 費用
     {
       const category = await container
-        .resolve(UserCategoryRepository)
+        .resolve(UserCategoryFlyweight)
         .insert(
           new UserCategory(
             "",
             userId,
             "費用",
             AccountType.TYPE_SPENDING,
-            [],
             undefined
-          )
+          ).simplify()
         );
       for (const account of this.userAccounts.filter(
-        (ac) =>
+        ac =>
           ac.type === UserCreationMaster.TYPE_SPENDING ||
           ac.type === UserCreationMaster.TYPE_STEADY_SPENDING
       )) {
         await container
-          .resolve(UserCategoryItemRepository)
+          .resolve(UserCategoryItemFlyweight)
           .insert(
-            new UserCategoryItem("", userId, category, account.name, undefined)
+            new UserCategoryItem(
+              "",
+              userId,
+              category.id,
+              account.name,
+              undefined
+            )
           );
       }
     }

@@ -28,7 +28,6 @@ export default class CategoryAdd extends Mixins(CategoryEditor) {
           userId,
           this.name,
           this.accountType.code,
-          [],
           undefined
         )
       );

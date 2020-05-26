@@ -2,10 +2,10 @@
 import { Component, Mixins } from "vue-property-decorator";
 import ItemEditor from "./ItemEditor.vue";
 import { container } from "tsyringe";
-import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
 import UserCategoryItem from "@/model/UserCategoryItem";
 import UserAuthService from "../../service/UserAuthService";
 import AppModule from "@/store/ApplicationStore";
+import UserCategoryItemFlyweight from "../../repository/flyweight/UserCategoryItemFlyweight";
 
 @Component({})
 export default class ItemUpdate extends Mixins(ItemEditor) {
@@ -35,15 +35,15 @@ export default class ItemUpdate extends Mixins(ItemEditor) {
     }
 
     await container
-      .resolve(UserCategoryItemRepository)
+      .resolve(UserCategoryItemFlyweight)
       .update(
         new UserCategoryItem(
           this.item.id,
           userId,
-          this.item.parent,
+          this.item.parent.id,
           this.name,
           this.itemAction
-        )
+        ).simplify()
       );
     await AppModule.init();
   }

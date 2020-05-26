@@ -79,27 +79,27 @@ const router = new Router({
           /* webpackChunkName: "top" */ "@/view/auth/creation/UserCreationCreditMapping.vue"
         ),
     },
-    {
-      path: "/user/create/property-selection",
-      component: () =>
-        import(
-          /* webpackChunkName: "top" */ "@/view/auth/creation/UserCreationPropertySelection.vue"
-        ),
-    },
-    {
-      path: "/user/create/property",
-      component: () =>
-        import(
-          /* webpackChunkName: "top" */ "@/view/auth/creation/UserCreationProperty.vue"
-        ),
-    },
-    {
-      path: "/user/create/in-and-out",
-      component: () =>
-        import(
-          /* webpackChunkName: "top" */ "@/view/auth/creation/UserCreationSteadyInOut.vue"
-        ),
-    },
+    // {
+    //   path: "/user/create/property-selection",
+    //   component: () =>
+    //     import(
+    //       /* webpackChunkName: "top" */ "@/view/auth/creation/UserCreationPropertySelection.vue"
+    //     ),
+    // },
+    // {
+    //   path: "/user/create/property",
+    //   component: () =>
+    //     import(
+    //       /* webpackChunkName: "top" */ "@/view/auth/creation/UserCreationProperty.vue"
+    //     ),
+    // },
+    // {
+    //   path: "/user/create/in-and-out",
+    //   component: () =>
+    //     import(
+    //       /* webpackChunkName: "top" */ "@/view/auth/creation/UserCreationSteadyInOut.vue"
+    //     ),
+    // },
     {
       path: "/user/create/finish",
       component: () =>

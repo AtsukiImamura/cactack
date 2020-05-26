@@ -46,8 +46,8 @@ import EmailVerificationError from "@/model/error/custome/EmailVerificationError
 
 @Component({ components: { AuthFrame, ProcessButton } })
 export default class UserLogin extends Vue {
-  // public email: string = "i@hoge.com";
-  // public password: string = "hogehoge";
+  // public email: string = "ohmoon.au@gmail.com";
+  // public password: string = "ajababe34";
 
   public email: string = "";
   public password: string = "";

@@ -30,11 +30,9 @@
         </div>
       </div>
       <div class="message">
-        <span :style="{ color: topMesasge.fontColor }">
-          {{ topMesasge.value }}
-        </span>
+        <span :style="{ color: topMesasge.fontColor }">{{ topMesasge.value }}</span>
       </div>
-      <div class="results" :key="categories.length" v-if="!deletePage">
+      <div class="results" v-if="!deletePage">
         <div
           class="category"
           v-for="(category, index) in categories"
@@ -49,10 +47,7 @@
                 class="ac dangerous"
                 v-if="category.items.filter((i) => !i.deletedAt).length === 0"
               >
-                <div
-                  class="delete-button"
-                  @click="deleteCateogry(category)"
-                ></div>
+                <div class="delete-button" @click="deleteCateogry(category)"></div>
               </div>
               <div class="ac nomal">
                 <CategoryUpdate :category="category"></CategoryUpdate>
@@ -83,10 +78,7 @@
                           <ItemUpdate :item="item"></ItemUpdate>
                         </div>
                         <div class="ac dangerous">
-                          <ItemDelete
-                            :item="item"
-                            @complete="onItemDeleted"
-                          ></ItemDelete>
+                          <ItemDelete :item="item" @complete="onItemDeleted"></ItemDelete>
                         </div>
                       </HiddenActions>
                     </div>
@@ -100,13 +92,10 @@
           </div>
         </div>
         <div class="add-category">
-          <CategoryAdd
-            :key="`${accountTypeCode}${categories.length}`"
-            :type="type"
-          ></CategoryAdd>
+          <CategoryAdd :key="`${accountTypeCode}${categories.length}`" :type="type"></CategoryAdd>
         </div>
       </div>
-      <div class="gabages" :key="categories.length" v-if="deletePage">
+      <div class="gabages" v-if="deletePage" :key="`${categories.length}${deletedItems.length}`">
         <div class="if-empty" v-if="deletedItems.length === 0">
           <span>ごみ箱は空です</span>
         </div>
@@ -144,7 +133,7 @@ import AccountType from "@/model/AccountType";
 import {
   IAccountCategory,
   ICategoryItem,
-  IUserCategoryItem,
+  IUserCategoryItem
 } from "@/model/interface/ICategory";
 import HiddenActions from "@/view/common/HiddenActions.vue";
 import AppModule from "@/store/ApplicationStore";
@@ -156,12 +145,12 @@ import ItemAdd from "@/view/category/ItemAdd.vue";
 import ItemUpdate from "@/view/category/ItemUpdate.vue";
 import ItemDelete from "@/view/category/ItemDelete.vue";
 import { container } from "tsyringe";
-import UserCategoryRepository from "@/repository/UserCategoryRepository";
 import UserCategory from "@/model/UserCategory";
 import draggable from "vuedraggable";
-import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
 import UserCategoryItem from "@/model/UserCategoryItem";
 import TemporalMessage from "@/view/common/model/TemporalMessage";
+import UserCategoryFlyweight from "../../repository/flyweight/UserCategoryFlyweight";
+import UserCategoryItemFlyweight from "../../repository/flyweight/UserCategoryItemFlyweight";
 
 @Component({
   components: {
@@ -172,8 +161,8 @@ import TemporalMessage from "@/view/common/model/TemporalMessage";
     ItemAdd,
     ItemUpdate,
     ItemDelete,
-    draggable,
-  },
+    draggable
+  }
 })
 export default class CategoryList extends Vue {
   public topMesasge: TemporalMessage = new TemporalMessage(
@@ -186,7 +175,7 @@ export default class CategoryList extends Vue {
       animation: 0,
       group: "description",
       disabled: false,
-      ghostClass: "ghost",
+      ghostClass: "ghost"
     };
   }
 
@@ -204,43 +193,47 @@ export default class CategoryList extends Vue {
   public get categories(): IAccountCategory[] {
     return AppModule.categories
       .getAll()
-      .filter((c) => c.type.code === this.accountTypeCode);
+      .filter(c => c.type.code === this.accountTypeCode);
   }
 
   public get deletedItems(): ICategoryItem[] {
+    console.log("deletedItems");
+    // return container
+    //   .resolve(UserCategoryFlyweight)
+    //   .values.map(v => UserCategory.parse(v))
     return AppModule.categories
       .getAll()
       .reduce((acc, cur) => [...acc, ...cur.items], [])
-      .filter((item) => (item as IUserCategoryItem).isDeleted);
+      .filter(item => (item as IUserCategoryItem).isDeleted);
   }
 
   public async deleteCateogry(category: UserCategory) {
-    await container.resolve(UserCategoryRepository).delete(category);
+    await container.resolve(UserCategoryFlyweight).delete(category.simplify());
     await AppModule.init();
   }
 
   public async reviveItem(item: IUserCategoryItem) {
     await container
-      .resolve(UserCategoryItemRepository)
+      .resolve(UserCategoryItemFlyweight)
       .update(
         new UserCategoryItem(
           item.id,
           item.userId,
-          item.parent,
+          item.parent.id,
           item.name,
           undefined,
           item.action
-        )
+        ).simplify()
       );
+    await AppModule.init();
     this.topMesasge = new TemporalMessage(
       `「${item.name}」をもとに戻しました`,
       TemporalMessage.TYPE_SUCCESS
     );
-    await AppModule.init();
   }
 
   public async deleteItem(item: IUserCategoryItem) {
-    await container.resolve(UserCategoryItemRepository).delete(item);
+    await container.resolve(UserCategoryItemFlyweight).delete(item.simplify());
     this.topMesasge = new TemporalMessage(
       `「${item.name}」を完全に削除しました`,
       TemporalMessage.TYPE_SUCCESS

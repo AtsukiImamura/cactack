@@ -11,20 +11,26 @@ import IJournalDate from "@/model/interface/IJournalDate";
 import { container } from "tsyringe";
 import JournalRepository from "@/repository/JournalRepository";
 import CategoryList from "@/model/category/CategoryList";
-import UserCategoryRepository from "@/repository/UserCategoryRepository";
-import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
-import { IAccountCategory } from "@/model/interface/ICategory";
 import JournalDate from "@/model/common/JournalDate";
+import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
+import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
+import UserCategory from "@/model/UserCategory";
 
 @Module({ dynamic: true, store, name: "app", namespaced: true })
 class AppStore extends VuexModule {
   private _journals: IJournal[] = [];
 
-  private _categories: IAccountCategory[] = []; //CategoryList = new CategoryList();
-
   private _periodBeginWith: IJournalDate = JournalDate.today().getPreviousMonth();
 
   private _periodEndWith: IJournalDate = JournalDate.today();
+
+  // private _categories: IUserCategory[] = [];
+
+  private _initCount: number = 0;
+
+  public get initCount(): number {
+    return this._initCount;
+  }
 
   /**
    * Getter periodBeginWith
@@ -56,7 +62,12 @@ class AppStore extends VuexModule {
    * @return {CategoryList }
    */
   public get categories(): CategoryList {
-    return new CategoryList(this._categories);
+    // return new CategoryList(this._categories);
+    return new CategoryList(
+      container
+        .resolve(UserCategoryFlyweight)
+        .values.map((v) => UserCategory.parse(v))
+    );
   }
 
   /**
@@ -76,17 +87,15 @@ class AppStore extends VuexModule {
 
   @Action({ rawError: true })
   public async init() {
-    // キャッシュ用
-    await container.resolve(UserCategoryItemRepository).getUsersAll();
-
-    const userCategories = await container
-      .resolve(UserCategoryRepository)
-      .getUsersAll();
-    this.CATEGORIES(userCategories);
-    // userCategories.forEach((c) => console.log(c.type.code, c.type.name, c));
-
+    await container.resolve(UserCategoryItemFlyweight).import();
+    await container.resolve(UserCategoryFlyweight).import();
     const journals = await container.resolve(JournalRepository).getUsersAll();
     this.INIT(journals);
+    // this.CATEGORIES(
+    //   container
+    //     .resolve(UserCategoryFlyweight)
+    //     .values.map((v) => UserCategory.parse(v))
+    // );
   }
 
   @Mutation
@@ -95,19 +104,17 @@ class AppStore extends VuexModule {
     if (journals) {
       this._journals.push(...journals);
     }
+    this._initCount++;
   }
 
-  @Mutation
-  private CATEGORIES(list: IAccountCategory[]) {
-    while (this._categories.pop()) {}
-    this._categories.push(...list);
-  }
+  // @Mutation
+  // private CATEGORIES(categories: IUserCategory[]) {
+  //   while (this._categories.pop()) {}
+  //   this._categories.push(...categories);
+  // }
 
   @Action({ rawError: true })
   public appendNew(journals: IJournal[]) {
-    // this._journals.push(
-    //   Transaction.createNew(payload.name, payload.journals, payload.badget)
-    // );
     this._journals.push(...journals);
   }
 

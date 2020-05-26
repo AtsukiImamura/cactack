@@ -1,6 +1,6 @@
 import { IAccountCategory, ICategoryItem } from "../interface/ICategory";
-import IAccountType from "../interface/IType";
 import AccountType from "../AccountType";
+import IAccountType from "../interface/IType";
 
 export default class CategoryList {
   private readonly _categories: IAccountCategory[];

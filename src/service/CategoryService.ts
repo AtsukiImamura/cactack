@@ -1,9 +1,10 @@
 import { singleton, container } from "tsyringe";
-import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
-import UserCategoryRepository from "@/repository/UserCategoryRepository";
 import UserCategoryItem from "@/model/UserCategoryItem";
 import UserAuthService from "./UserAuthService";
 import { IUserCategoryItem, IUserCategory } from "@/model/interface/ICategory";
+import UserCategory from "@/model/UserCategory";
+import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
+import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 
 @singleton()
 export default class CategoryService {
@@ -28,22 +29,21 @@ export default class CategoryService {
     if (!userId) {
       return;
     }
-    const inserted = await container
-      .resolve(UserCategoryRepository)
-      .insert(category);
+    const inserted = UserCategory.parse(
+      await container.resolve(UserCategoryFlyweight).insert(category.simplify())
+    );
     await container
-      .resolve(UserCategoryItemRepository)
+      .resolve(UserCategoryItemFlyweight)
       .batchInsert(
-        category.items.map(
-          (item: IUserCategoryItem) =>
-            new UserCategoryItem(
-              "",
-              userId,
-              inserted,
-              item.name,
-              item.deletedAt?.toString(),
-              item.action
-            )
+        category.items.map((item: IUserCategoryItem) =>
+          new UserCategoryItem(
+            "",
+            userId,
+            inserted.id,
+            item.name,
+            item.deletedAt?.toString(),
+            item.action
+          ).simplify()
         )
       );
   }

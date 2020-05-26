@@ -8,11 +8,7 @@
         <div class="balances">
           <QuestionaierBlock title="クレジットカード">
             <div class="q-content credit-cards">
-              <div
-                class="row"
-                v-for="(mapping, index) in creditMappings"
-                :key="index"
-              >
+              <div class="row" v-for="(mapping, index) in creditMappings" :key="index">
                 <div class="cell title">
                   <input type="text" v-model="mapping.title" />
                 </div>
@@ -66,11 +62,7 @@
             class="btn cancel-btn"
             value="戻る"
           ></router-link>
-          <ProcessButton
-            value="次へ"
-            :click="next"
-            :disabled="false"
-          ></ProcessButton>
+          <ProcessButton value="次へ" :click="next" :disabled="false"></ProcessButton>
         </div>
       </div>
     </div>
@@ -92,7 +84,6 @@ import { container } from "tsyringe";
 import CategoryService from "@/service/CategoryService";
 import UserCategory from "@/model/UserCategory";
 import AccountType from "@/model/AccountType";
-import UserCategoryItem from "@/model/UserCategoryItem";
 
 @Component({
   components: {
@@ -101,8 +92,8 @@ import UserCategoryItem from "@/model/UserCategoryItem";
     Selector,
     ProcessButton,
     QuestionaierBlock,
-    CreditCardTemplateSelector,
-  },
+    CreditCardTemplateSelector
+  }
 })
 export default class UserCreationCreditMapping extends Vue {
   public creditMappings: { title: string; command: string }[] = [];
@@ -119,8 +110,8 @@ export default class UserCreationCreditMapping extends Vue {
 
   public mounted(): void {
     UserCreationModule.selectedCreationMasters
-      .filter((m) => m.type === UserCreationMaster.TYPE_CREDIT_CARD)
-      .forEach((m) => this.addNewCreditCardLine(m.title));
+      .filter(m => m.type === UserCreationMaster.TYPE_CREDIT_CARD)
+      .forEach(m => this.addNewCreditCardLine(m.title));
   }
 
   public addNewCreditCardLine(title?: string): void {
@@ -138,24 +129,23 @@ export default class UserCreationCreditMapping extends Vue {
         "",
         "クレジットカード買掛金",
         AccountType.TYPE_DEBT,
-        this.creditMappings.map(
-          (map) =>
-            new UserCategoryItem(
-              "",
-              "",
-              new UserCategory(
-                "",
-                "",
-                "クレジット買掛金",
-                AccountType.TYPE_DEBT,
-                [],
-                undefined
-              ),
-              map.title,
-              undefined,
-              map.command
-            )
-        ),
+        // this.creditMappings.map(
+        //   (map) =>
+        //     new UserCategoryItem(
+        //       "",
+        //       "",
+        //       new UserCategory(
+        //         "",
+        //         "",
+        //         "クレジット買掛金",
+        //         AccountType.TYPE_DEBT,
+        //         undefined
+        //       ),
+        //       map.title,
+        //       undefined,
+        //       map.command
+        //     )
+        // ),
         undefined
       )
     );

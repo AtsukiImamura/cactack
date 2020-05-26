@@ -8,6 +8,10 @@ import Balance, { IBalanceItem } from "./Balance";
 import IJournalDate from "../interface/IJournalDate";
 import SettlementActionFactory from "../action/settlement/SettlementActionFactory";
 import UserCategoryItem from "../UserCategoryItem";
+import JournalDetail from "../JournalDetail";
+import { container } from "tsyringe";
+import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
+import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 
 export default class VirtualBook {
   private journals: IJournal[] = [];
@@ -56,18 +60,20 @@ export default class VirtualBook {
         // JournalDate.min(to, jnl.period.finishAt),
         undefined,
         [
-          {
-            hash: "",
-            amount: amount,
-            category: jnl.period.credit as IUserCategoryItem,
-          },
+          // {
+          //   // hash: "",
+          //   amount: amount,
+          //   category: jnl.period.credit as IUserCategoryItem,
+          // },
+          new JournalDetail(jnl.period.credit as IUserCategoryItem, amount),
         ],
         [
-          {
-            hash: "",
-            amount: amount,
-            category: jnl.period.debit as IUserCategoryItem,
-          },
+          // {
+          //   // hash: "",
+          //   amount: amount,
+          //   category: jnl.period.debit as IUserCategoryItem,
+          // },
+          new JournalDetail(jnl.period.debit as IUserCategoryItem, amount),
         ]
       );
       virtual.ancestorId = jnl.id;
@@ -162,13 +168,24 @@ export default class VirtualBook {
         const ledgerDetail = {
           category:
             jnl.debits.length > 1
-              ? new UserCategoryItem(
-                  "",
-                  jnl.userId,
-                  new UserCategory("", "", "諸口", -1, [], undefined),
-                  "諸口",
-                  undefined
-                ) // TODO: 決め打ち => staticメソッドで作成？
+              ? (() => {
+                  const category = container
+                    .resolve(UserCategoryFlyweight)
+                    .insertVirtual(
+                      new UserCategory("", "", "諸口", -1, undefined).simplify()
+                    );
+                  const item = new UserCategoryItem(
+                    "",
+                    jnl.userId,
+                    category,
+                    "諸口",
+                    undefined
+                  ).simplify();
+                  item.id = container
+                    .resolve(UserCategoryItemFlyweight)
+                    .insertVirtual(item);
+                  return UserCategoryItem.parse(item);
+                })() // TODO: 決め打ち => staticメソッドで作成？
               : jnl.debits[0].category,
           amount: detail.amount,
           accountAt: jnl.accountAt,
@@ -192,13 +209,24 @@ export default class VirtualBook {
           category:
             jnl.credits.length > 1
               ? // ? new UserCategory("", "", "諸口", -1, [], undefined)
-                new UserCategoryItem(
-                  "",
-                  jnl.userId,
-                  new UserCategory("", "", "諸口", -1, [], undefined),
-                  "諸口",
-                  undefined
-                )
+                (() => {
+                  const category = container
+                    .resolve(UserCategoryFlyweight)
+                    .insertVirtual(
+                      new UserCategory("", "", "諸口", -1, undefined).simplify()
+                    );
+                  const item = new UserCategoryItem(
+                    "",
+                    jnl.userId,
+                    category,
+                    "諸口",
+                    undefined
+                  ).simplify();
+                  item.id = container
+                    .resolve(UserCategoryItemFlyweight)
+                    .insertVirtual(item);
+                  return UserCategoryItem.parse(item);
+                })()
               : jnl.credits[0].category,
           amount: detail.amount,
           accountAt: jnl.accountAt,

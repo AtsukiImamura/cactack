@@ -3,13 +3,84 @@ import {
   DUserCategoryItem,
   IAccountCategory,
 } from "./interface/ICategory";
-import CategoryItemBase from "./CategoryItemBase";
 import IJournalDate from "./interface/IJournalDate";
 import JournalDate from "./common/JournalDate";
+import IAccountType from "./interface/IType";
+import IdBase from "./IdBase";
+import { container } from "tsyringe";
+import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
+import UserCategory from "./UserCategory";
 
-export default class UserCategoryItem extends CategoryItemBase
+export default class UserCategoryItem extends IdBase
   implements IUserCategoryItem {
+  public static parse(raw: DUserCategoryItem) {
+    // const parent = container.resolve(UserCategoryFlyweight).get(raw.parentId);
+    // if (!parent) {
+    //   throw new Error("item not found!" + raw.id);
+    // }
+    return new UserCategoryItem(
+      raw.id,
+      raw.userId,
+      raw.parentId,
+      raw.name,
+      raw.deletedAt,
+      raw.action
+    );
+  }
+
+  private _userId: string = "";
+
+  private _parentId: string = "";
+
   private _action?: string;
+
+  private _name: string;
+
+  /**
+   * Getter userId
+   * @return {string }
+   */
+  public get userId(): string {
+    return this._userId;
+  }
+
+  /**
+   * Getter parentId
+   * @return {string }
+   */
+  public get parent(): IAccountCategory {
+    const category = container
+      .resolve(UserCategoryFlyweight)
+      .get(this._parentId);
+    if (!category) {
+      throw new Error("category not found!" + this._parentId);
+    }
+    return UserCategory.parse(category);
+  }
+
+  /**
+   * Getter name
+   * @return {string}
+   */
+  public get name(): string {
+    return this._name;
+  }
+
+  /**
+   * Getter type
+   * @return {IAccountType}
+   */
+  public get type(): IAccountType {
+    return this.parent.type;
+  }
+
+  /**
+   * Getter items
+   * @return {ICategoryItem[]}
+   */
+  // public get items(): ICategoryItem[] {
+  //   container.resolve(UserCategoryItemFlyweight).getByIds(this.id).map(item => new Usercate)
+  // }
 
   public get action(): string | undefined {
     return this._action;
@@ -31,12 +102,15 @@ export default class UserCategoryItem extends CategoryItemBase
   constructor(
     id: string,
     userId: string,
-    parent: IAccountCategory,
+    parentId: string,
     name: string,
     deletedAt: string | undefined,
     action?: string
   ) {
-    super(id, userId, parent, name);
+    super(id);
+    this._userId = userId;
+    this._parentId = parentId;
+    this._name = name;
     if (deletedAt) {
       this._deletedAt = JournalDate.cast(deletedAt);
     }

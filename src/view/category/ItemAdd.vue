@@ -5,7 +5,7 @@ import UserAuthService from "../../service/UserAuthService";
 import AppModule from "@/store/ApplicationStore";
 import UserCategoryItem from "@/model/UserCategoryItem";
 import ItemEditor from "./ItemEditor.vue";
-import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
+import UserCategoryItemFlyweight from "../../repository/flyweight/UserCategoryItemFlyweight";
 
 @Component({})
 export default class ItemAdd extends Mixins(ItemEditor) {
@@ -17,7 +17,7 @@ export default class ItemAdd extends Mixins(ItemEditor) {
     height: "22px",
     display: "block",
     cursor: "pointer",
-    margin: "0px 0px 0px 4px",
+    margin: "0px 0px 0px 4px"
   };
 
   public async execute(): Promise<void> {
@@ -30,16 +30,16 @@ export default class ItemAdd extends Mixins(ItemEditor) {
       return;
     }
     await container
-      .resolve(UserCategoryItemRepository)
+      .resolve(UserCategoryItemFlyweight)
       .insert(
         new UserCategoryItem(
           "",
           userId,
-          this.parent,
+          this.parent.id,
           this.name,
           undefined,
           this.command
-        )
+        ).simplify()
       );
     await AppModule.init();
   }

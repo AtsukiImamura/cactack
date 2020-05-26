@@ -4,16 +4,17 @@ import IUserCreationMaster from "@/model/interface/IUserCreationMaster";
 import { container } from "tsyringe";
 import IUserCreationMasterRepository from "@/repository/interface/IUserCreationMasterRepository";
 import { IUserCategory, IUserCategoryItem } from "@/model/interface/ICategory";
-import UserCategoryRepository from "@/repository/UserCategoryRepository";
 import UserCategory from "@/model/UserCategory";
 import UserAuthService from "@/service/UserAuthService";
 import UserCreationMaster from "@/model/UserCreationMaster";
-import UserCategoryItemRepository from "@/repository/UserCategoryItemRepository";
 import UserCategoryItem from "@/model/UserCategoryItem";
 import AccountType from "@/model/AccountType";
 import JournalRepository from "@/repository/JournalRepository";
 import Journal from "@/model/Journal";
 import JournalDate from "@/model/common/JournalDate";
+import JournalDetail from "@/model/JournalDetail";
+import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
+import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 
 export interface IBalanceInfo {
   name: string;
@@ -55,54 +56,73 @@ class UserCreationStore extends VuexModule {
       return;
     }
 
-    const initIncome = await container
-      .resolve(UserCategoryRepository)
-      .insert(
-        new UserCategory(
-          "",
-          userId,
-          "初期残高",
-          AccountType.TYPE_INCOME,
-          [],
-          undefined
+    const initIncome = UserCategory.parse(
+      await container
+        .resolve(UserCategoryFlyweight)
+        .insert(
+          new UserCategory(
+            "",
+            userId,
+            "初期残高",
+            AccountType.TYPE_INCOME,
+            undefined
+          ).simplify()
         )
-      );
+    );
     const initDebitItem = initIncome.addItem("初期残高") as IUserCategoryItem;
-    const initIncomeItem = await container
-      .resolve(UserCategoryItemRepository)
-      .insert(initDebitItem);
+    const initIncomeItem = UserCategoryItem.parse(
+      await container
+        .resolve(UserCategoryItemFlyweight)
+        .insert(initDebitItem.simplify())
+    );
 
     const insertCategory = async (
       title: string,
       type: number,
       accountType: number
     ) => {
-      const inserted = await container
-        .resolve(UserCategoryRepository)
-        .insert(
-          new UserCategory("", userId, title, accountType, [], undefined)
-        );
+      const inserted = UserCategory.parse(
+        await container
+          .resolve(UserCategoryFlyweight)
+          .insert(
+            new UserCategory(
+              "",
+              userId,
+              title,
+              accountType,
+              undefined
+            ).simplify()
+          )
+      );
       const userCategoryItems: IUserCategoryItem[] = [];
       for (const balance of info[type]) {
-        const item = await container
-          .resolve(UserCategoryItemRepository)
-          .insert(
-            new UserCategoryItem("", userId, inserted, balance.name, undefined)
-          );
-        await container
-          .resolve(JournalRepository)
-          .insert(
-            new Journal(
-              "",
-              "",
-              `${item.name} 初期残高`,
-              JournalDate.today(),
-              JournalDate.today(),
-              JournalDate.today(),
-              [{ hash: "", category: initIncomeItem, amount: balance.amount }],
-              [{ hash: "", category: item, amount: balance.amount }]
+        const item = UserCategoryItem.parse(
+          await container
+            .resolve(UserCategoryItemFlyweight)
+            .insert(
+              new UserCategoryItem(
+                "",
+                userId,
+                inserted.id,
+                balance.name,
+                undefined
+              ).simplify()
             )
-          );
+        );
+        await container.resolve(JournalRepository).insert(
+          new Journal(
+            "",
+            "",
+            `${item.name} 初期残高`,
+            JournalDate.today(),
+            JournalDate.today(),
+            JournalDate.today(),
+            [new JournalDetail(initIncomeItem, balance.amount)],
+            [new JournalDetail(item, balance.amount)]
+            // [{ category: initIncomeItem, amount: balance.amount }],
+            // [{  category: item, amount: balance.amount }]
+          )
+        );
         userCategoryItems.push(item);
       }
       this.userBalanceInfoMap[type] = new UserCategory(
@@ -110,7 +130,7 @@ class UserCreationStore extends VuexModule {
         userId,
         title,
         accountType,
-        userCategoryItems,
+        // userCategoryItems,
         // await container
         //   .resolve(UserCategoryItemRepository)
         //   .batchInsert(
