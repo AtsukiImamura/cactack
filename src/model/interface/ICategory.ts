@@ -75,4 +75,8 @@ export interface IUserCategoryItem
     Treatable<DUserCategoryItem>,
     ILogicalDeletable {
   action?: string;
+
+  logicalDelete: () => void;
+
+  revive: () => void;
 }

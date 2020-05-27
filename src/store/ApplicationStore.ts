@@ -14,7 +14,6 @@ import CategoryList from "@/model/category/CategoryList";
 import JournalDate from "@/model/common/JournalDate";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
-import UserCategory from "@/model/UserCategory";
 
 @Module({ dynamic: true, store, name: "app", namespaced: true })
 class AppStore extends VuexModule {
@@ -62,12 +61,7 @@ class AppStore extends VuexModule {
    * @return {CategoryList }
    */
   public get categories(): CategoryList {
-    // return new CategoryList(this._categories);
-    return new CategoryList(
-      container
-        .resolve(UserCategoryFlyweight)
-        .values.map((v) => UserCategory.parse(v))
-    );
+    return new CategoryList(container.resolve(UserCategoryFlyweight).values);
   }
 
   /**

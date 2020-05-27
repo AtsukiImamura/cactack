@@ -7,7 +7,6 @@ import JournalDate from "../../common/JournalDate";
 import VirtualJournal from "../../VirtualJournal";
 import JournalRepository from "@/repository/JournalRepository";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
-import UserCategoryItem from "@/model/UserCategoryItem";
 
 export default class ReserveSettlementAction extends SettlementAction {
   public static readonly COMMAND_NAME = "RESERVE";
@@ -116,13 +115,13 @@ export default class ReserveSettlementAction extends SettlementAction {
       [
         {
           amount: this.amount,
-          category: UserCategoryItem.parse(creditCategoryItem),
+          category: creditCategoryItem,
         },
       ],
       [
         {
           amount: this.amount,
-          category: UserCategoryItem.parse(debitCategoryItem),
+          category: debitCategoryItem,
         },
       ]
     );

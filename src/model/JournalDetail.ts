@@ -2,7 +2,6 @@ import { IJournalDetail } from "./interface/IJournal";
 import { IUserCategoryItem } from "./interface/ICategory";
 import { container } from "tsyringe";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
-import UserCategoryItem from "./UserCategoryItem";
 
 export default class JournalDetail implements IJournalDetail {
   private _itemId: string;
@@ -16,7 +15,7 @@ export default class JournalDetail implements IJournalDetail {
     if (!item) {
       throw new Error("item not found! " + this._itemId);
     }
-    return UserCategoryItem.parse(item);
+    return item;
   }
   /**
    * Getter amount
@@ -42,9 +41,7 @@ export default class JournalDetail implements IJournalDetail {
       typeof item !== "string" &&
       !container.resolve(UserCategoryItemFlyweight).get(item.id)
     ) {
-      container
-        .resolve(UserCategoryItemFlyweight)
-        .insertVirtual(item.simplify());
+      container.resolve(UserCategoryItemFlyweight).insertVirtual(item);
     }
   }
 }

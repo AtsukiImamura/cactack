@@ -41,7 +41,6 @@ import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFl
 import TransferCategorySelector from "@/view/register/components/TransferCategorySelector.vue";
 import Selector from "@/view/common/Selector.vue";
 import hash from "object-hash";
-import UserCategoryItem from "../../../model/UserCategoryItem";
 
 @Component({ components: { Selector, TransferCategorySelector } })
 export default class CreditCardTemplateSelector extends Vue {
@@ -70,7 +69,7 @@ export default class CreditCardTemplateSelector extends Vue {
         .resolve(UserCategoryItemFlyweight)
         .get(template.itemId);
       const mapping = new CreditMapping();
-      mapping.bank = item ? UserCategoryItem.parse(item) : null;
+      mapping.bank = item ? item : null;
       mapping.deadline = template.deadline;
       mapping.month = template.month;
       mapping.day = template.day;

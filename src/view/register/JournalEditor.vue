@@ -139,7 +139,7 @@ import UserAuthService from "@/service/UserAuthService";
 import TransferCategorySelector from "@/view/register/components/TransferCategorySelector.vue";
 import DatePicker from "vuejs-datepicker";
 import hash from "object-hash";
-import JournalDetail from "../../model/JournalDetail";
+import JournalDetail from "@/model/JournalDetail";
 
 interface ITransferJournalDetail {
   item?: IUserCategoryItem;
@@ -264,6 +264,7 @@ export default class JournalEditor extends Vue {
             category: item,
             action: ""
           };
+          // ここではなく、仮想帳簿で生成する
           if (
             item.action &&
             item.action.startsWith(CreditCardSettlementAction.COMMAND_NAME)

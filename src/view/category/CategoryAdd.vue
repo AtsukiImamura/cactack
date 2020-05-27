@@ -2,8 +2,8 @@
 import { Component, Mixins } from "vue-property-decorator";
 import CategoryEditor from "./CategoryEditor.vue";
 import { container } from "tsyringe";
-import UserAuthService from "../../service/UserAuthService";
-import CategoryService from "../../service/CategoryService";
+import UserAuthService from "@/service/UserAuthService";
+import CategoryService from "@/service/CategoryService";
 import UserCategory from "@/model/UserCategory";
 import AppModule from "@/store/ApplicationStore";
 

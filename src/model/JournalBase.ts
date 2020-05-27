@@ -60,16 +60,6 @@ export default abstract class JournalBase extends IdBase implements IJournal {
     period && (this._period = period);
   }
 
-  // private setHashIfNot(details: IJournalDetail[]) {
-  //   return details.map((d) => {
-  //     if (d.hash) {
-  //       return d;
-  //     }
-  //     d.hash = `${hash(d)}${hash(new Date())}`;
-  //     return d;
-  //   });
-  // }
-
   /**
    * Getter userId
    * @return {string}
@@ -100,6 +90,14 @@ export default abstract class JournalBase extends IdBase implements IJournal {
    */
   public get accountAt(): IJournalDate {
     return this._accountAt;
+  }
+
+  /**
+   * Setter accountAt
+   * @param {IJournalDate} value
+   */
+  public set accountAt(value: IJournalDate) {
+    this._accountAt = value;
   }
 
   /**
@@ -145,13 +143,6 @@ export default abstract class JournalBase extends IdBase implements IJournal {
    * @return {IJournalDetail[] }
    */
   public get credits(): IJournalDetail[] {
-    // return this._credits.map(d => {
-    //   if(!d.category.action){
-    //     return d;
-    //   }
-    //   d.action =
-    //   return d;
-    // })
     return this._credits;
   }
 

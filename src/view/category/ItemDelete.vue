@@ -36,9 +36,8 @@ import TransferCategorySelector from "@/view/register/components/TransferCategor
 import { container } from "tsyringe";
 import JournalRepository from "@/repository/JournalRepository";
 import Journal from "@/model/Journal";
-import JournalDetail from "../../model/JournalDetail";
-import UserCategoryItemFlyweight from "../../repository/flyweight/UserCategoryItemFlyweight";
-import JournalDate from "../../model/common/JournalDate";
+import JournalDetail from "@/model/JournalDetail";
+import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 
 @Component({
   components: {
@@ -114,38 +113,34 @@ export default class ItemDelete extends Vue {
             jnl.accountAt,
             jnl.executeAt,
             jnl.credits.map(item => {
-              if (item.category.id === this.item.id) {
-                return new JournalDetail(
-                  this.alternativeItem! as IUserCategoryItem,
-                  item.amount,
-                  item.action
-                );
+              if (item.category.id !== this.item.id) {
+                return item;
               }
-              return item;
+              return new JournalDetail(
+                this.alternativeItem! as IUserCategoryItem,
+                item.amount,
+                item.action
+              );
             }),
             jnl.debits.map(item => {
-              if (item.category.id === this.item.id) {
-                return new JournalDetail(
-                  this.alternativeItem! as IUserCategoryItem,
-                  item.amount,
-                  item.action
-                );
+              if (item.category.id !== this.item.id) {
+                return item;
               }
-              return item;
+              return new JournalDetail(
+                this.alternativeItem! as IUserCategoryItem,
+                item.amount,
+                item.action
+              );
             })
           )
         );
       }
     }
+    (this.item as IUserCategoryItem).logicalDelete();
     // 補助科目の論理削除
-    await container.resolve(UserCategoryItemFlyweight).update(
-      // TDOO: 論理削除メソッド作成
-      (() => {
-        const data = (this.item as IUserCategoryItem).simplify();
-        data.deletedAt = JournalDate.today().toString();
-        return data;
-      })()
-    );
+    await container
+      .resolve(UserCategoryItemFlyweight)
+      .update(this.item as IUserCategoryItem);
     await AppModule.init();
     this.onComplete(this.item);
   }

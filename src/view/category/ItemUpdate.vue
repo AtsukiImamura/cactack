@@ -3,9 +3,9 @@ import { Component, Mixins } from "vue-property-decorator";
 import ItemEditor from "./ItemEditor.vue";
 import { container } from "tsyringe";
 import UserCategoryItem from "@/model/UserCategoryItem";
-import UserAuthService from "../../service/UserAuthService";
+import UserAuthService from "@/service/UserAuthService";
 import AppModule from "@/store/ApplicationStore";
-import UserCategoryItemFlyweight from "../../repository/flyweight/UserCategoryItemFlyweight";
+import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 
 @Component({})
 export default class ItemUpdate extends Mixins(ItemEditor) {
@@ -43,7 +43,7 @@ export default class ItemUpdate extends Mixins(ItemEditor) {
           this.item.parent.id,
           this.name,
           this.itemAction
-        ).simplify()
+        )
       );
     await AppModule.init();
   }

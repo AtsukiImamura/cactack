@@ -30,9 +30,7 @@
           </div>
           <ul class="contents">
             <li>
-              <router-link tag="div" to="/ledger/general"
-                >総勘定元帳</router-link
-              >
+              <router-link tag="div" to="/ledger/general">総勘定元帳</router-link>
             </li>
             <li>
               <router-link tag="div" to="/journal">仕訳一覧</router-link>
@@ -41,26 +39,18 @@
               <router-link tag="div" to="/balance">貸借対照表</router-link>
             </li>
             <li>
-              <router-link tag="div" to="/" class="disabled" :event="''"
-                >損益計算書</router-link
-              >
+              <router-link tag="div" to="/" class="disabled" :event="''">損益計算書</router-link>
             </li>
             <li>
-              <router-link tag="div" to="/" class="disabled" :event="''"
-                >資産</router-link
-              >
+              <router-link tag="div" to="/" class="disabled" :event="''">資産</router-link>
             </li>
             <li>
-              <router-link tag="div" to="/category/list"
-                >勘定科目一覧</router-link
-              >
+              <router-link tag="div" to="/category/list">勘定科目一覧</router-link>
             </li>
           </ul>
           <ul class="configs">
             <li>
-              <router-link tag="div" to="/config" class="disabled" :event="''"
-                >設定</router-link
-              >
+              <router-link tag="div" to="/config" class="disabled" :event="''">設定</router-link>
             </li>
             <li>
               <router-link
@@ -69,15 +59,12 @@
                 :notice-num="noticeNum"
                 class="notice-item"
                 :class="{ num: noticeNum > 0 }"
-                >お知らせ</router-link
-              >
+              >お知らせ</router-link>
             </li>
           </ul>
         </div>
       </div>
-      <router-link to="/" tag="h1" style="cursor: pointer;"
-        >Cactack</router-link
-      >
+      <router-link to="/" tag="h1" style="cursor: pointer;">Cactack</router-link>
       <div class="register-area only-wide">
         <router-link class="register-mark" tag="div" to="/journalize">
           <span class="str">仕訳</span>
@@ -185,7 +172,7 @@ import JournalDate from "@/model/common/JournalDate";
 import IJournal from "@/model/interface/IJournal";
 import VirtualBook from "@/model/virtual/VirtualBook";
 import { container } from "tsyringe";
-import UserAuthService from "../../service/UserAuthService";
+import UserAuthService from "@/service/UserAuthService";
 
 @Component({ components: { MenuItem } })
 export default class AppMenu extends Vue {
@@ -203,7 +190,7 @@ export default class AppMenu extends Vue {
   public async onJournalsUpdated() {
     const journals = await new VirtualBook(this.journals).getVirtualJournals();
     this.noticeNum = journals.filter(
-      (jnl) =>
+      jnl =>
         jnl.accountAt.beforeThanOrEqualsTo(JournalDate.today()) &&
         !jnl.executeAt
     ).length;

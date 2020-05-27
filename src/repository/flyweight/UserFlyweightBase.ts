@@ -1,15 +1,17 @@
-import { UserIdentifiable } from "@/model/interface/Identifiable";
+import Identifiable, { UserIdentifiable } from "@/model/interface/Identifiable";
 import * as firebase from "firebase/app";
 import Strable from "@/model/interface/common/Strable";
 import { container } from "tsyringe";
 import UserAuthService from "@/service/UserAuthService";
 import hash from "object-hash";
+import Treatable from "@/model/interface/common/Treatable";
 
 export default abstract class UserFlyweightBase<
-  S extends UserIdentifiable & Strable
+  S extends UserIdentifiable & Strable,
+  T extends Identifiable & Treatable<S>
 > {
-  public get values(): S[] {
-    return Array.from(this.mapping.values());
+  public get values(): T[] {
+    return Array.from(this.mapping.values()).map((v) => this.aggregate(v));
   }
   /** DBに裏付けのあるデータ */
   protected realMapping: Map<string, S> = new Map<string, S>();
@@ -27,16 +29,19 @@ export default abstract class UserFlyweightBase<
 
   protected key: string = "";
 
+  protected abstract aggregate(data: S): T;
+
   // protected abstract aggregate(raw: S): T;
 
   protected putReal(value: S): void {
     this.realMapping.set(value.id, value);
   }
 
-  protected putVirtual(value: S): string {
+  protected putVirtual(value: S): S {
     const key = hash({ id: this.sequenseKey++ });
     this.realMapping.set(key, value);
-    return key;
+    value.id = key;
+    return value;
   }
 
   public async import() {
@@ -57,29 +62,28 @@ export default abstract class UserFlyweightBase<
     }
   }
 
-  public get(key: string): S | undefined {
+  public get(key: string): T | undefined {
     const raw = this.mapping.get(key);
     if (!raw) {
       return undefined;
     }
-    // return this.aggregate(raw);
-    return raw;
+    return this.aggregate(raw);
   }
 
-  public async update(value: S): Promise<boolean> {
+  public async update(value: T): Promise<boolean> {
     const mapValue = this.mapping.get(value.id);
     if (!mapValue) {
       return false;
     }
     if (!value.id) {
-      this.putVirtual(value);
+      this.putVirtual(value.simplify());
       return true;
     }
     try {
       await this.connection()
         .doc(value.id)
         .set(value);
-      this.putReal(value);
+      this.putReal(value.simplify());
     } catch (e) {
       console.warn(e);
       return false;
@@ -87,32 +91,29 @@ export default abstract class UserFlyweightBase<
     return true;
   }
 
-  public insertVirtual(value: S) {
-    return this.putVirtual(value);
+  public insertVirtual(value: T): T {
+    return this.aggregate(this.putVirtual(value.simplify()));
   }
 
-  public async insert(value: S): Promise<S> {
+  public async insert(value: T): Promise<T> {
     const mapValue = this.mapping.get(value.id);
     if (mapValue) {
       throw new Error("there is a value which has an id same as given value.");
     }
     if (!value.id) {
-      value.id = this.putVirtual(value);
-      return value;
+      return this.aggregate(this.putVirtual(value.simplify()));
     }
     const id = (await this.connection().add(value)).id;
     value.id = id;
-    this.putReal(value);
+    this.putReal(value.simplify());
     return value;
   }
 
-  public async batchInsert(values: S[]): Promise<S[]> {
-    const insertedValues: S[] = [];
-    values.forEach(async (v) => insertedValues.push(await this.insert(v)));
-    return values;
+  public async batchInsert(values: T[]): Promise<T[]> {
+    return await Promise.all(values.map(async (v) => await this.insert(v)));
   }
 
-  public async delete(value: S) {
+  public async delete(value: T) {
     const mapValue = this.mapping.get(value.id);
     if (!mapValue) {
       return false;
@@ -130,12 +131,12 @@ export default abstract class UserFlyweightBase<
     return true;
   }
 
-  public getByIds(ids: string[]): S[] {
-    return ids.map((id) => this.get(id)).filter((item) => !!item) as S[];
+  public getByIds(ids: string[]): T[] {
+    return ids.map((id) => this.get(id)).filter((item) => !!item) as T[];
   }
 
-  public getAll(): S[] {
-    return Array.from(this.mapping.values());
+  public getAll(): T[] {
+    return Array.from(this.mapping.values()).map((v) => this.aggregate(v));
   }
 
   private connection() {

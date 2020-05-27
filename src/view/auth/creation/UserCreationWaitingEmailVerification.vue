@@ -18,7 +18,7 @@ import { Component, Vue } from "vue-property-decorator";
 import PublicFrame from "@/view/common/PublicFrame.vue";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import { container } from "tsyringe";
-import UserAuthService from "../../../service/UserAuthService";
+import UserAuthService from "@/service/UserAuthService";
 
 @Component({ components: { PublicFrame, ProcessButton } })
 export default class UserCreationWaitingEmailVerification extends Vue {

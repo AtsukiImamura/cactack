@@ -31,6 +31,8 @@ export default interface IJournal
   balanceItems: IJournalDetail[];
 
   isValid: boolean;
+
+  execute: () => void;
 }
 
 export interface IJournalDetail {

@@ -6,7 +6,6 @@ import Journal from "@/model/Journal";
 import JournalDate from "@/model/common/JournalDate";
 import JournalDetail from "@/model/JournalDetail";
 import UserCategoryItemFlyweight from "../flyweight/UserCategoryItemFlyweight";
-import UserCategoryItem from "@/model/UserCategoryItem";
 
 @singleton()
 export default class JournalTransformer extends Transformer<
@@ -42,8 +41,8 @@ export default class JournalTransformer extends Transformer<
         ? {
             startAt: JournalDate.cast(journal.period.startAt),
             finishAt: JournalDate.cast(journal.period.finishAt),
-            debit: UserCategoryItem.parse(periodDebit!),
-            credit: UserCategoryItem.parse(periodCredit!),
+            debit: periodDebit!,
+            credit: periodCredit!,
           }
         : undefined
     );
@@ -56,21 +55,12 @@ export default class JournalTransformer extends Transformer<
   ): Promise<IJournalDetail[]> {
     const results: IJournalDetail[] = [];
     for (const detail of details) {
-      // const item = await container
-      //   .resolve(UserCategoryItemFlyweight)
-      //   .getById(detail.categoryItemId);
       const item = await container
         .resolve(UserCategoryItemFlyweight)
         .get(detail.categoryItemId);
       if (!item) {
         continue;
       }
-      // results.push({
-      //   hash: detail.hash ? detail.hash : "",
-      //   amount: detail.amount,
-      //   category: item,
-      //   action: detail.action,
-      // });
       results.push(new JournalDetail(item.id, detail.amount, detail.action));
     }
     return results;

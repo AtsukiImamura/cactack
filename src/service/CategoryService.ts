@@ -2,7 +2,6 @@ import { singleton, container } from "tsyringe";
 import UserCategoryItem from "@/model/UserCategoryItem";
 import UserAuthService from "./UserAuthService";
 import { IUserCategoryItem, IUserCategory } from "@/model/interface/ICategory";
-import UserCategory from "@/model/UserCategory";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 
@@ -29,21 +28,22 @@ export default class CategoryService {
     if (!userId) {
       return;
     }
-    const inserted = UserCategory.parse(
-      await container.resolve(UserCategoryFlyweight).insert(category.simplify())
-    );
+    const inserted = await container
+      .resolve(UserCategoryFlyweight)
+      .insert(category);
     await container
       .resolve(UserCategoryItemFlyweight)
       .batchInsert(
-        category.items.map((item: IUserCategoryItem) =>
-          new UserCategoryItem(
-            "",
-            userId,
-            inserted.id,
-            item.name,
-            item.deletedAt?.toString(),
-            item.action
-          ).simplify()
+        category.items.map(
+          (item: IUserCategoryItem) =>
+            new UserCategoryItem(
+              "",
+              userId,
+              inserted.id,
+              item.name,
+              item.deletedAt?.toString(),
+              item.action
+            )
         )
       );
   }

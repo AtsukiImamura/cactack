@@ -10,6 +10,7 @@ import IJournalDate from "./interface/IJournalDate";
 import JournalDate from "./common/JournalDate";
 import { container } from "tsyringe";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
+import UserAuthService from "@/service/UserAuthService";
 
 export default class UserCategory extends CategoryBase
   implements IUserCategory {
@@ -22,15 +23,21 @@ export default class UserCategory extends CategoryBase
       raw.deletedAt
     );
   }
+
+  public static simple(name: string, type: number): IUserCategory {
+    const userId = container.resolve(UserAuthService).userId;
+    if (!userId) {
+      throw new Error("user is not logged in!");
+    }
+    return new UserCategory("", userId, name, type, undefined);
+  }
+
   private _userId: string;
 
   private _deletedAt?: IJournalDate;
 
   public get items(): IUserCategoryItem[] {
-    return container
-      .resolve(UserCategoryItemFlyweight)
-      .getByParentId(this.id)
-      .map((item) => UserCategoryItem.parse(item));
+    return container.resolve(UserCategoryItemFlyweight).getByParentId(this.id);
   }
 
   public get isDeleted(): boolean {

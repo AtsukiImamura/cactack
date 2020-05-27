@@ -50,32 +50,12 @@ export default class VirtualBook {
       );
       // 日割りの金額
       const amount = Math.floor(jnl.amount * (targetDayCount / jnlPeriodCount));
-
-      const virtual = new Journal(
+      const virtual = Journal.simple(
         "",
-        "",
-        "",
-        JournalDate.today(),
-        JournalDate.min(to, jnl.period.finishAt),
-        // JournalDate.min(to, jnl.period.finishAt),
-        undefined,
-        [
-          // {
-          //   // hash: "",
-          //   amount: amount,
-          //   category: jnl.period.credit as IUserCategoryItem,
-          // },
-          new JournalDetail(jnl.period.credit as IUserCategoryItem, amount),
-        ],
-        [
-          // {
-          //   // hash: "",
-          //   amount: amount,
-          //   category: jnl.period.debit as IUserCategoryItem,
-          // },
-          new JournalDetail(jnl.period.debit as IUserCategoryItem, amount),
-        ]
+        [new JournalDetail(jnl.period.credit as IUserCategoryItem, amount)],
+        [new JournalDetail(jnl.period.debit as IUserCategoryItem, amount)]
       );
+      virtual.accountAt = JournalDate.min(to, jnl.period.finishAt);
       virtual.ancestorId = jnl.id;
       virtualJournals.push(virtual);
     }
@@ -168,24 +148,7 @@ export default class VirtualBook {
         const ledgerDetail = {
           category:
             jnl.debits.length > 1
-              ? (() => {
-                  const category = container
-                    .resolve(UserCategoryFlyweight)
-                    .insertVirtual(
-                      new UserCategory("", "", "諸口", -1, undefined).simplify()
-                    );
-                  const item = new UserCategoryItem(
-                    "",
-                    jnl.userId,
-                    category,
-                    "諸口",
-                    undefined
-                  ).simplify();
-                  item.id = container
-                    .resolve(UserCategoryItemFlyweight)
-                    .insertVirtual(item);
-                  return UserCategoryItem.parse(item);
-                })() // TODO: 決め打ち => staticメソッドで作成？
+              ? this.createSundry()
               : jnl.debits[0].category,
           amount: detail.amount,
           accountAt: jnl.accountAt,
@@ -208,25 +171,7 @@ export default class VirtualBook {
         const ledgerDetail = {
           category:
             jnl.credits.length > 1
-              ? // ? new UserCategory("", "", "諸口", -1, [], undefined)
-                (() => {
-                  const category = container
-                    .resolve(UserCategoryFlyweight)
-                    .insertVirtual(
-                      new UserCategory("", "", "諸口", -1, undefined).simplify()
-                    );
-                  const item = new UserCategoryItem(
-                    "",
-                    jnl.userId,
-                    category,
-                    "諸口",
-                    undefined
-                  ).simplify();
-                  item.id = container
-                    .resolve(UserCategoryItemFlyweight)
-                    .insertVirtual(item);
-                  return UserCategoryItem.parse(item);
-                })()
+              ? this.createSundry()
               : jnl.credits[0].category,
           amount: detail.amount,
           accountAt: jnl.accountAt,
@@ -240,5 +185,14 @@ export default class VirtualBook {
       }
     }
     return Array.from(ledgerMap.values());
+  }
+
+  private createSundry(): ICategoryItem {
+    const category = container
+      .resolve(UserCategoryFlyweight)
+      .insertVirtual(UserCategory.simple("諸口", -1));
+    return container
+      .resolve(UserCategoryItemFlyweight)
+      .insertVirtual(UserCategoryItem.simple(category.id, "諸口"));
   }
 }

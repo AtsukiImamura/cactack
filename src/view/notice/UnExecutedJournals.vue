@@ -43,7 +43,7 @@ import JournalRepository from "@/repository/JournalRepository";
 import Journal from "@/model/Journal";
 import AppModule from "@/store/ApplicationStore";
 import JournalEditor from "@/view/register/JournalEditor.vue";
-import JournalDetail from "../../model/JournalDetail";
+import JournalDetail from "@/model/JournalDetail";
 
 @Component({ components: { ProcessButton, JournalEditor } })
 export default class UnExecutedJournals extends Vue {
@@ -77,7 +77,6 @@ export default class UnExecutedJournals extends Vue {
         .getById(
           /* 仮想仕訳のIDには一旦もとの仕訳のIDを入れてある */ targetJournal.id
         );
-      // console.log("aquisition: ok", targetJournal);
       if (!relatedJournal) {
         throw new Error("related journal not found.");
       }
@@ -92,33 +91,17 @@ export default class UnExecutedJournals extends Vue {
           relatedJournal.executeAt,
           // FIXME: 本来は必要な補助科目の分に対してだけクリアする必要がある
           relatedJournal.credits.map(d => {
-            // d.action = "";
-            // return d;
             return new JournalDetail(d.category, d.amount);
           }),
           relatedJournal.debits.map(d => {
-            // d.action = "";
-            // return d;
             return new JournalDetail(d.category, d.amount);
           }),
           relatedJournal.period
         )
       );
-      console.log("udpate: ok");
-      const journal = new Journal(
-        "",
-        targetJournal.userId,
-        targetJournal.title,
-        targetJournal.createdAt,
-        targetJournal.accountAt,
-        targetJournal.accountAt,
-        targetJournal.credits,
-        targetJournal.debits,
-        targetJournal.period
-      );
-      journal.ancestorId = targetJournal.id;
-      await container.resolve(JournalRepository).insert(journal);
-      console.log("insert: ok");
+      jnl.execute();
+      jnl.ancestorId = targetJournal.id;
+      await container.resolve(JournalRepository).insert(jnl);
       await AppModule.init();
     };
   }

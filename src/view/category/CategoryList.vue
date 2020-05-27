@@ -147,10 +147,9 @@ import ItemDelete from "@/view/category/ItemDelete.vue";
 import { container } from "tsyringe";
 import UserCategory from "@/model/UserCategory";
 import draggable from "vuedraggable";
-import UserCategoryItem from "@/model/UserCategoryItem";
 import TemporalMessage from "@/view/common/model/TemporalMessage";
-import UserCategoryFlyweight from "../../repository/flyweight/UserCategoryFlyweight";
-import UserCategoryItemFlyweight from "../../repository/flyweight/UserCategoryItemFlyweight";
+import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
+import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 
 @Component({
   components: {
@@ -197,10 +196,6 @@ export default class CategoryList extends Vue {
   }
 
   public get deletedItems(): ICategoryItem[] {
-    console.log("deletedItems");
-    // return container
-    //   .resolve(UserCategoryFlyweight)
-    //   .values.map(v => UserCategory.parse(v))
     return AppModule.categories
       .getAll()
       .reduce((acc, cur) => [...acc, ...cur.items], [])
@@ -208,23 +203,13 @@ export default class CategoryList extends Vue {
   }
 
   public async deleteCateogry(category: UserCategory) {
-    await container.resolve(UserCategoryFlyweight).delete(category.simplify());
+    await container.resolve(UserCategoryFlyweight).delete(category);
     await AppModule.init();
   }
 
   public async reviveItem(item: IUserCategoryItem) {
-    await container
-      .resolve(UserCategoryItemFlyweight)
-      .update(
-        new UserCategoryItem(
-          item.id,
-          item.userId,
-          item.parent.id,
-          item.name,
-          undefined,
-          item.action
-        ).simplify()
-      );
+    item.revive();
+    await container.resolve(UserCategoryItemFlyweight).update(item);
     await AppModule.init();
     this.topMesasge = new TemporalMessage(
       `「${item.name}」をもとに戻しました`,
@@ -233,7 +218,7 @@ export default class CategoryList extends Vue {
   }
 
   public async deleteItem(item: IUserCategoryItem) {
-    await container.resolve(UserCategoryItemFlyweight).delete(item.simplify());
+    await container.resolve(UserCategoryItemFlyweight).delete(item);
     this.topMesasge = new TemporalMessage(
       `「${item.name}」を完全に削除しました`,
       TemporalMessage.TYPE_SUCCESS

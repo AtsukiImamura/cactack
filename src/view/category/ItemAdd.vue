@@ -1,11 +1,11 @@
 <script lang="ts">
 import { Component, Mixins } from "vue-property-decorator";
 import { container } from "tsyringe";
-import UserAuthService from "../../service/UserAuthService";
+import UserAuthService from "@/service/UserAuthService";
 import AppModule from "@/store/ApplicationStore";
 import UserCategoryItem from "@/model/UserCategoryItem";
 import ItemEditor from "./ItemEditor.vue";
-import UserCategoryItemFlyweight from "../../repository/flyweight/UserCategoryItemFlyweight";
+import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 
 @Component({})
 export default class ItemAdd extends Mixins(ItemEditor) {
@@ -29,18 +29,9 @@ export default class ItemAdd extends Mixins(ItemEditor) {
     if (!userId) {
       return;
     }
-    await container
-      .resolve(UserCategoryItemFlyweight)
-      .insert(
-        new UserCategoryItem(
-          "",
-          userId,
-          this.parent.id,
-          this.name,
-          undefined,
-          this.command
-        ).simplify()
-      );
+    const item = UserCategoryItem.simple(this.parent.id, this.name);
+    item.action = this.command;
+    await container.resolve(UserCategoryItemFlyweight).insert(item);
     await AppModule.init();
   }
 }

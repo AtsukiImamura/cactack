@@ -9,15 +9,11 @@ import IAccountType from "./interface/IType";
 import IdBase from "./IdBase";
 import { container } from "tsyringe";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
-import UserCategory from "./UserCategory";
+import UserAuthService from "@/service/UserAuthService";
 
 export default class UserCategoryItem extends IdBase
   implements IUserCategoryItem {
   public static parse(raw: DUserCategoryItem) {
-    // const parent = container.resolve(UserCategoryFlyweight).get(raw.parentId);
-    // if (!parent) {
-    //   throw new Error("item not found!" + raw.id);
-    // }
     return new UserCategoryItem(
       raw.id,
       raw.userId,
@@ -28,6 +24,14 @@ export default class UserCategoryItem extends IdBase
     );
   }
 
+  public static simple(parentId: string, name: string): IUserCategoryItem {
+    const userId = container.resolve(UserAuthService).userId;
+    if (!userId) {
+      throw new Error("user is not logged in!");
+    }
+    return new UserCategoryItem("", userId, name, parentId, undefined);
+  }
+
   private _userId: string = "";
 
   private _parentId: string = "";
@@ -36,12 +40,22 @@ export default class UserCategoryItem extends IdBase
 
   private _name: string;
 
+  private _deletedAt?: IJournalDate;
+
   /**
    * Getter userId
    * @return {string }
    */
   public get userId(): string {
     return this._userId;
+  }
+
+  /**
+   * Setter userId
+   * @param {string } value
+   */
+  public set userId(value: string) {
+    this._userId = value;
   }
 
   /**
@@ -55,7 +69,7 @@ export default class UserCategoryItem extends IdBase
     if (!category) {
       throw new Error("category not found!" + this._parentId);
     }
-    return UserCategory.parse(category);
+    return category;
   }
 
   /**
@@ -74,19 +88,13 @@ export default class UserCategoryItem extends IdBase
     return this.parent.type;
   }
 
-  /**
-   * Getter items
-   * @return {ICategoryItem[]}
-   */
-  // public get items(): ICategoryItem[] {
-  //   container.resolve(UserCategoryItemFlyweight).getByIds(this.id).map(item => new Usercate)
-  // }
-
   public get action(): string | undefined {
     return this._action;
   }
 
-  private _deletedAt?: IJournalDate;
+  public set action(action: string | undefined) {
+    this._action = action;
+  }
 
   public get isDeleted(): boolean {
     return (
@@ -117,6 +125,14 @@ export default class UserCategoryItem extends IdBase
     if (action) {
       this._action = action;
     }
+  }
+
+  public logicalDelete(): void {
+    this._deletedAt = JournalDate.today();
+  }
+
+  public revive(): void {
+    this._deletedAt = undefined;
   }
 
   public simplify(): DUserCategoryItem {

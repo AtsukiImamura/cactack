@@ -1,17 +1,28 @@
 import UserFlyweightBase from "./UserFlyWeightBase";
-import { DUserCategoryItem } from "@/model/interface/ICategory";
+import {
+  DUserCategoryItem,
+  IUserCategoryItem,
+} from "@/model/interface/ICategory";
 import { singleton } from "tsyringe";
+import UserCategoryItem from "@/model/UserCategoryItem";
 
 @singleton()
 export default class UserCategoryItemFlyweight extends UserFlyweightBase<
-  DUserCategoryItem
+  DUserCategoryItem,
+  IUserCategoryItem
 > {
   constructor() {
     super();
     this.key = "userCategoryItem";
   }
 
-  public getByParentId(parentId: string): DUserCategoryItem[] {
-    return this.getAll().filter((item) => item.parentId === parentId);
+  protected aggregate(data: DUserCategoryItem) {
+    return UserCategoryItem.parse(data);
+  }
+
+  public getByParentId(parentId: string): IUserCategoryItem[] {
+    return this.getAll().filter(
+      (item) => item.simplify().parentId === parentId
+    );
   }
 }

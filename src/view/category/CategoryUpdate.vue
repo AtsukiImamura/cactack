@@ -2,7 +2,7 @@
 import { Component, Mixins } from "vue-property-decorator";
 import CategoryEditor from "./CategoryEditor.vue";
 import { container } from "tsyringe";
-import UserAuthService from "../../service/UserAuthService";
+import UserAuthService from "@/service/UserAuthService";
 import UserCategory from "@/model/UserCategory";
 import AppModule from "@/store/ApplicationStore";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
@@ -41,7 +41,7 @@ export default class CategoryUpdate extends Mixins(CategoryEditor) {
           this.name,
           this.category.type.code,
           undefined
-        ).simplify()
+        )
       );
     await AppModule.init();
   }

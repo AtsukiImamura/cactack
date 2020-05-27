@@ -4,10 +4,7 @@
       <div class="title">
         <h2>{{ title }}</h2>
       </div>
-      <JournalEditor
-        :journal="defaultJournal"
-        @commit="commitJournal"
-      ></JournalEditor>
+      <JournalEditor :journal="defaultJournal" @commit="commitJournal"></JournalEditor>
       <div class="actions">
         <!-- ver2.0より導入予定 -->
         <!-- <div class="need-template">
@@ -18,11 +15,7 @@
           />
           <label for="need-template-check">テンプレートにする</label>
         </div>-->
-        <ProcessButton
-          value="OK"
-          :click="register"
-          :disabled="!canRegister"
-        ></ProcessButton>
+        <ProcessButton value="OK" :click="register" :disabled="!canRegister"></ProcessButton>
       </div>
     </div>
   </CommonFrame>
@@ -38,15 +31,15 @@ import JournalRepository from "@/repository/JournalRepository";
 import AppModule from "@/store/ApplicationStore";
 import JournalEditor from "@/view/register/JournalEditor.vue";
 import { container } from "tsyringe";
-import UserAuthService from "../../service/UserAuthService";
+import UserAuthService from "@/service/UserAuthService";
 
 @Component({
   components: {
     RegisterFrame,
     CommonFrame,
     ProcessButton,
-    JournalEditor,
-  },
+    JournalEditor
+  }
 })
 export default class Manually extends Vue {
   public defaultJournal: IJournal = {} as IJournal;
@@ -86,7 +79,7 @@ export default class Manually extends Vue {
       return;
     }
     const journal = AppModule.journals
-      .filter((jnl) => jnl.id === journalId)
+      .filter(jnl => jnl.id === journalId)
       .shift();
     if (!journal) {
       this.$router.push("/journal");

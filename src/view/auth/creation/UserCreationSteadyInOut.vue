@@ -100,10 +100,10 @@ import NumberInput from "@/view/common/NumberInput.vue";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import { container } from "tsyringe";
 import UserCategory from "@/model/UserCategory";
-import UserAuthService from "../../../service/UserAuthService";
+import UserAuthService from "@/service/UserAuthService";
 import AccountType from "@/model/AccountType";
 import UserCategoryItem from "@/model/UserCategoryItem";
-import UserCategoryFlyweight from "../../../repository/flyweight/UserCategoryFlyweight";
+import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
 
 interface IUserAccount {
   name: string;

@@ -8,13 +8,7 @@
     </div>
     <div class="area email">
       <label for="ur-email">email</label>
-      <input
-        id="ur-email"
-        name="email"
-        type="text"
-        v-model="email"
-        placeholder="email"
-      />
+      <input id="ur-email" name="email" type="text" v-model="email" placeholder="email" />
     </div>
     <div class="area password">
       <label for="ur-password">password</label>
@@ -46,7 +40,7 @@
 import { Component, Vue } from "vue-property-decorator";
 import AuthFrame from "@/view/auth/AuthFrame.vue";
 import { container } from "tsyringe";
-import UserAuthService from "../../service/UserAuthService";
+import UserAuthService from "@/service/UserAuthService";
 
 @Component({ components: { AuthFrame } })
 export default class UserRegistration extends Vue {
@@ -93,13 +87,13 @@ export default class UserRegistration extends Vue {
     container
       .resolve(UserAuthService)
       .createUserIfNotExist(this.email, this.password)
-      .then((user) => {
+      .then(user => {
         return container
           .resolve(UserAuthService)
           .signIn(this.email, this.password);
       })
       .then(() => this.$router.push("/user/create/email-verification"))
-      .catch((err) => {
+      .catch(err => {
         console.log(err);
         this.message = "エラーが発生しました";
       });

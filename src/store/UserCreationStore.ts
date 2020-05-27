@@ -11,7 +11,6 @@ import UserCategoryItem from "@/model/UserCategoryItem";
 import AccountType from "@/model/AccountType";
 import JournalRepository from "@/repository/JournalRepository";
 import Journal from "@/model/Journal";
-import JournalDate from "@/model/common/JournalDate";
 import JournalDetail from "@/model/JournalDetail";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
@@ -56,91 +55,44 @@ class UserCreationStore extends VuexModule {
       return;
     }
 
-    const initIncome = UserCategory.parse(
-      await container
-        .resolve(UserCategoryFlyweight)
-        .insert(
-          new UserCategory(
-            "",
-            userId,
-            "初期残高",
-            AccountType.TYPE_INCOME,
-            undefined
-          ).simplify()
-        )
-    );
+    const initIncome = await container
+      .resolve(UserCategoryFlyweight)
+      .insert(UserCategory.simple("初期残高", AccountType.TYPE_INCOME));
     const initDebitItem = initIncome.addItem("初期残高") as IUserCategoryItem;
-    const initIncomeItem = UserCategoryItem.parse(
-      await container
-        .resolve(UserCategoryItemFlyweight)
-        .insert(initDebitItem.simplify())
-    );
+    const initIncomeItem = await container
+      .resolve(UserCategoryItemFlyweight)
+      .insert(initDebitItem);
 
     const insertCategory = async (
       title: string,
       type: number,
       accountType: number
     ) => {
-      const inserted = UserCategory.parse(
-        await container
-          .resolve(UserCategoryFlyweight)
-          .insert(
-            new UserCategory(
-              "",
-              userId,
-              title,
-              accountType,
-              undefined
-            ).simplify()
-          )
-      );
+      const inserted = await container
+        .resolve(UserCategoryFlyweight)
+        .insert(UserCategory.simple(title, accountType));
       const userCategoryItems: IUserCategoryItem[] = [];
       for (const balance of info[type]) {
-        const item = UserCategoryItem.parse(
-          await container
-            .resolve(UserCategoryItemFlyweight)
-            .insert(
-              new UserCategoryItem(
-                "",
-                userId,
-                inserted.id,
-                balance.name,
-                undefined
-              ).simplify()
-            )
+        const item = await container
+          .resolve(UserCategoryItemFlyweight)
+          .insert(UserCategoryItem.simple(inserted.id, balance.name));
+        const journal = Journal.simple(
+          `${item.name} 初期残高`,
+          [new JournalDetail(initIncomeItem, balance.amount)],
+          [new JournalDetail(item, balance.amount)]
         );
-        await container.resolve(JournalRepository).insert(
-          new Journal(
-            "",
-            "",
-            `${item.name} 初期残高`,
-            JournalDate.today(),
-            JournalDate.today(),
-            JournalDate.today(),
-            [new JournalDetail(initIncomeItem, balance.amount)],
-            [new JournalDetail(item, balance.amount)]
-            // [{ category: initIncomeItem, amount: balance.amount }],
-            // [{  category: item, amount: balance.amount }]
-          )
-        );
+        journal.execute();
+        await container.resolve(JournalRepository).insert(journal);
         userCategoryItems.push(item);
       }
-      this.userBalanceInfoMap[type] = new UserCategory(
-        inserted.id,
-        userId,
-        title,
-        accountType,
-        // userCategoryItems,
-        // await container
-        //   .resolve(UserCategoryItemRepository)
-        //   .batchInsert(
-        //     info[type].map(
-        //       (m) => new UserCategoryItem("", userId, inserted, m.name)
-        //     )
-        //   )
-        undefined
-      );
-      // console.log(this.userBalanceInfoMap);
+      this.userBalanceInfoMap[type] = inserted;
+      // = new UserCategory(
+      //   inserted.id,
+      //   userId,
+      //   title,
+      //   accountType,
+      //   undefined
+      // );
     };
     if (info[UserCreationMaster.TYPE_CASH_STRAGE]) {
       await insertCategory(
