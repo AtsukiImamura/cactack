@@ -30,22 +30,13 @@
         <div class="filters">
           <div class="filter item">
             <div class="selector">
-              <TransferCategorySelector
-                @select="addFilter"
-              ></TransferCategorySelector>
+              <TransferCategorySelector @select="addFilter"></TransferCategorySelector>
             </div>
             <div class="filter-items">
-              <div
-                class="f-item"
-                v-for="(filter, index) in filterItems"
-                :key="index"
-              >
+              <div class="f-item" v-for="(filter, index) in filterItems" :key="index">
                 <span class="name">{{ filter.name }}</span>
                 <div class="delete">
-                  <span
-                    class="delete-button enabled"
-                    @click="removeFilter(filter)"
-                  ></span>
+                  <span class="delete-button enabled" @click="removeFilter(filter)"></span>
                 </div>
               </div>
             </div>
@@ -139,15 +130,8 @@
           :container="this"
           :key="journalUpdateKey"
         >
-          <div
-            class="jnl"
-            v-for="(jnl, index) in paginated('journals')"
-            :key="index + 1"
-          >
-            <div
-              class="cell reality"
-              :class="{ virtual: !jnl.executeAt }"
-            ></div>
+          <div class="jnl" v-for="(jnl, index) in paginated('journals')" :key="index + 1">
+            <div class="cell reality" :class="{ virtual: !jnl.executeAt }"></div>
             <div class="cell check" v-if="false">
               <input type="checkbox" v-model="selectedJournals" :value="jnl" />
             </div>
@@ -157,21 +141,13 @@
               </div>
             </div>
             <div class="cell details debits">
-              <div
-                class="detail"
-                v-for="(detail, dIndex) in jnl.debits"
-                :key="-dIndex"
-              >
+              <div class="detail" v-for="(detail, dIndex) in jnl.debits" :key="-dIndex">
                 <div class="cell category">{{ detail.category.name }}</div>
                 <div class="cell amount">{{ detail.amount }}</div>
               </div>
             </div>
             <div class="cell details credits">
-              <div
-                class="detail"
-                v-for="(detail, dIndex) in jnl.credits"
-                :key="-dIndex"
-              >
+              <div class="detail" v-for="(detail, dIndex) in jnl.credits" :key="-dIndex">
                 <div class="cell category">{{ detail.category.name }}</div>
                 <div class="cell amount">{{ detail.amount }}</div>
               </div>
@@ -215,8 +191,8 @@ import { ICategoryItem } from "@/model/interface/ICategory";
     DatePicker,
     HiddenActions,
     JournalDelete,
-    TransferCategorySelector,
-  },
+    TransferCategorySelector
+  }
 })
 export default class Journals extends Vue {
   public journalUpdateKey: number = 0;
@@ -251,7 +227,7 @@ export default class Journals extends Vue {
   private filterItems: ICategoryItem[] = [];
 
   public addFilter(item: ICategoryItem) {
-    if (this.filterItems.map((item) => item.id).includes(item.id)) {
+    if (this.filterItems.map(item => item.id).includes(item.id)) {
       return;
     }
     this.filterItems.push(item);
@@ -269,13 +245,13 @@ export default class Journals extends Vue {
 
   public get journals(): IJournal[] {
     const res = this.virtualJournals
-      .filter((jnl) => {
+      .filter(jnl => {
         if (this.filterItems.length === 0) {
           return true;
         }
-        const filterItemIds = this.filterItems.map((item) => item.id);
+        const filterItemIds = this.filterItems.map(item => item.id);
         return (
-          [...jnl.credits, ...jnl.debits].filter((d) =>
+          [...jnl.credits, ...jnl.debits].filter(d =>
             filterItemIds.includes(d.category.id)
           ).length > 0
         );
@@ -517,8 +493,6 @@ ul {
       display: flex;
       border: 1px solid #c0c0c0;
       border-width: 1px 0px 0px 0px;
-      // padding: 5px 0px;
-
       &:last-child {
         border-width: 1px 0px;
       }
@@ -564,7 +538,7 @@ ul {
 
           @include sm {
             order: 2;
-            width: calc(55% - #{$padding-y * 2});
+            width: calc(60% - #{$padding-y * 2});
           }
           &.virtual {
             position: relative;
@@ -601,29 +575,32 @@ ul {
           background-color: #fafafa;
           margin-left: 7px;
           @include sm {
-            width: calc(100% - #{$padding-y * 2});
+            width: calc(50% - 2px);
             order: 4;
-            margin: 25px 0px 0px 0px;
-            position: relative;
-            &:before {
-              position: absolute;
-              top: -20px;
-              left: 6px;
-              content: "";
-              color: #404040;
-              width: 100%;
-              height: 20px;
-            }
+            margin: 5px 0px 0px 0px;
+            padding-left: 0px;
+            padding-right: 0px;
+            // &:before {
+            //   position: absolute;
+            //   top: -20px;
+            //   left: 6px;
+            //   content: "";
+            //   color: #404040;
+            //   width: 100%;
+            //   height: 20px;
+            // }
             &.debits {
-              &:before {
-                content: "借方";
-              }
+              border-right: 2px solid #ffffff;
+
+              //   &:before {
+              //     content: "借方";
+              //   }
             }
-            &.credits {
-              &:before {
-                content: "貸方";
-              }
-            }
+            // &.credits {
+            //   &:before {
+            //     content: "貸方";
+            //   }
+            // }
           }
           .detail {
             display: flex;
@@ -643,7 +620,7 @@ ul {
           padding-top: 10px;
           @include sm {
             order: 3;
-            width: calc(15% - #{$padding-y * 2});
+            width: calc(10% - #{$padding-y * 2});
           }
           .dangerous-action {
             * {

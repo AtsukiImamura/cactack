@@ -69,9 +69,15 @@
                     <div class="cell name">{{ item.name }}</div>
                     <div class="cell tags"></div>
                     <div class="cell attached-action"></div>
-                    <!-- <div class="cell visibility">
-                  <div class="icon"></div>
-                    </div>-->
+                    <div class="cell visibility">
+                      <SwitchButton
+                        :value="!item.disabled"
+                        @off="disableItem(item)"
+                        @on="enableItem(item)"
+                        on-value="表示"
+                        off-value="非表示"
+                      ></SwitchButton>
+                    </div>
                     <div class="cell user-action">
                       <HiddenActions>
                         <div class="ac nomal">
@@ -150,6 +156,7 @@ import draggable from "vuedraggable";
 import TemporalMessage from "@/view/common/model/TemporalMessage";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
+import SwitchButton from "@/view/common/SwitchButton.vue";
 
 @Component({
   components: {
@@ -160,7 +167,8 @@ import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFl
     ItemAdd,
     ItemUpdate,
     ItemDelete,
-    draggable
+    draggable,
+    SwitchButton
   }
 })
 export default class CategoryList extends Vue {
@@ -226,6 +234,16 @@ export default class CategoryList extends Vue {
     await AppModule.init();
   }
 
+  public async disableItem(item: IUserCategoryItem) {
+    item.disable();
+    await container.resolve(UserCategoryItemFlyweight).update(item);
+  }
+
+  public async enableItem(item: IUserCategoryItem) {
+    item.enable();
+    await container.resolve(UserCategoryItemFlyweight).update(item);
+  }
+
   public onItemDeleted(item: IUserCategoryItem) {
     this.topMesasge = new TemporalMessage(
       `「${item.name}」をごみ箱に移動しました`,
@@ -233,7 +251,11 @@ export default class CategoryList extends Vue {
     );
   }
 
-  public mounted(): void {
+  public async mounted() {
+    // TODO: 消す！！
+    // await container
+    //   .resolve(UserAuthService)
+    //   .signIn("imamura.amzn.code@gmail.com", "hogehoge");
     if (this.categories.length === 0) {
       AppModule.init();
     }
@@ -371,7 +393,11 @@ export default class CategoryList extends Vue {
               $padding-y: 6px;
               padding: 6px $padding-y;
               &.visibility {
-                width: calc(5% - #{$padding-y * 2});
+                padding: 6px 2px;
+                width: calc(7% - 4px);
+                @include xs {
+                  width: calc(14% - 4px);
+                }
                 .icon {
                   position: relative;
                   background-color: #c0c0c0;
@@ -427,7 +453,7 @@ export default class CategoryList extends Vue {
               &.user-action {
                 width: calc(5% - #{$padding-y * 2});
                 @include xs {
-                  width: calc(10% - #{$padding-y * 2});
+                  width: calc(8% - #{$padding-y * 2});
                 }
                 .ac {
                   //   font-size: 0.85rem;
@@ -444,7 +470,7 @@ export default class CategoryList extends Vue {
               &.handle {
                 width: calc(5% - #{$padding-y * 2});
                 @include xs {
-                  width: calc(10% - #{$padding-y * 2});
+                  width: calc(8% - #{$padding-y * 2});
                 }
                 .icon {
                   margin-top: 3px;

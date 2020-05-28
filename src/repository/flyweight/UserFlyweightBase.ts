@@ -82,7 +82,7 @@ export default abstract class UserFlyweightBase<
     try {
       await this.connection()
         .doc(value.id)
-        .set(value);
+        .set(value.simplify());
       this.putReal(value.simplify());
     } catch (e) {
       console.warn(e);
@@ -100,10 +100,7 @@ export default abstract class UserFlyweightBase<
     if (mapValue) {
       throw new Error("there is a value which has an id same as given value.");
     }
-    if (!value.id) {
-      return this.aggregate(this.putVirtual(value.simplify()));
-    }
-    const id = (await this.connection().add(value)).id;
+    const id = (await this.connection().add(value.simplify())).id;
     value.id = id;
     this.putReal(value.simplify());
     return value;

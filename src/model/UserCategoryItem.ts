@@ -20,6 +20,7 @@ export default class UserCategoryItem extends IdBase
       raw.parentId,
       raw.name,
       raw.deletedAt,
+      raw.disabled,
       raw.action
     );
   }
@@ -29,7 +30,7 @@ export default class UserCategoryItem extends IdBase
     if (!userId) {
       throw new Error("user is not logged in!");
     }
-    return new UserCategoryItem("", userId, name, parentId, undefined);
+    return new UserCategoryItem("", userId, parentId, name, undefined, false);
   }
 
   private _userId: string = "";
@@ -41,6 +42,8 @@ export default class UserCategoryItem extends IdBase
   private _name: string;
 
   private _deletedAt?: IJournalDate;
+
+  private _disabled: boolean;
 
   /**
    * Getter userId
@@ -107,12 +110,21 @@ export default class UserCategoryItem extends IdBase
     return this._deletedAt;
   }
 
+  /**
+   * Getter disabled
+   * @return {boolean}
+   */
+  public get disabled(): boolean {
+    return this._disabled;
+  }
+
   constructor(
     id: string,
     userId: string,
     parentId: string,
     name: string,
     deletedAt: string | undefined,
+    disabled: boolean | undefined,
     action?: string
   ) {
     super(id);
@@ -125,6 +137,7 @@ export default class UserCategoryItem extends IdBase
     if (action) {
       this._action = action;
     }
+    this._disabled = disabled === undefined ? false : disabled;
   }
 
   public logicalDelete(): void {
@@ -135,12 +148,21 @@ export default class UserCategoryItem extends IdBase
     this._deletedAt = undefined;
   }
 
+  public disable(): void {
+    this._disabled = true;
+  }
+
+  public enable(): void {
+    this._disabled = false;
+  }
+
   public simplify(): DUserCategoryItem {
     const item = {
       id: this.id,
       userId: this.userId,
       name: this.name,
       parentId: this.parent.id,
+      disabled: this.disabled,
     } as DUserCategoryItem;
     if (this._action) {
       item.action = this._action;

@@ -42,6 +42,8 @@ export default class ItemUpdate extends Mixins(ItemEditor) {
           userId,
           this.item.parent.id,
           this.name,
+          undefined,
+          false,
           this.itemAction
         )
       );

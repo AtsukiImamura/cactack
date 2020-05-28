@@ -1,28 +1,59 @@
 <template>
-  <CategorySelector
-    :item="item"
-    :tabs="tabs"
-    @select="onSelect"
-  ></CategorySelector>
+  <CategorySelector :item="item" :tabs="tabs" @select="onSelect"></CategorySelector>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Emit, Prop } from "vue-property-decorator";
 import CategorySelector, {
-  CategorySelectorTab,
+  CategorySelectorTab
 } from "@/view/register/components/CategorySelector.vue";
 import AppModule from "@/store/ApplicationStore";
-import { ICategoryItem } from "@/model/interface/ICategory";
+import { ICategoryItem, IUserCategoryItem } from "@/model/interface/ICategory";
+import JournalDate from "../../../model/common/JournalDate";
 
 @Component({ components: { CategorySelector } })
 export default class TransferCategorySelector extends Vue {
-  @Prop() item?: ICategoryItem;
+  @Prop() item?: IUserCategoryItem;
 
   public get tabs(): CategorySelectorTab[] {
-    return AppModule.categories.getAllByType().map((info) => ({
+    const defaultTabs = AppModule.categories.getAllByType().map(info => ({
       name: info.type.name,
-      sections: info.categories.map((c) => ({ name: c.name, items: c.items })),
+      sections: info.categories.map(c => ({
+        name: c.name,
+        items: c.items as IUserCategoryItem[]
+      }))
     }));
+    const customeTab: CategorySelectorTab = {
+      name: "カスタム",
+      sections: []
+    };
+    // 最近使った科目を回数・経過日数を加味して重みづけして算出
+    customeTab.sections.push({
+      name: "よく使う科目",
+      items: Array.from(
+        AppModule.journals
+          .slice(0, 15)
+          .reduce((acc, jnl) => {
+            for (const item of [...jnl.credits, ...jnl.debits].map(
+              d => d.category
+            )) {
+              if (!acc.get(item.id)) {
+                acc.set(item.id, { item: item, count: 0 });
+              }
+              const val = acc.get(item.id)!;
+              // 経過日数に反比例した重みをつける
+              val.count += 1 / JournalDate.today().countDayFrom(jnl.createdAt);
+              acc.set(val.item.id, val);
+            }
+            return acc;
+          }, new Map<string, { item: IUserCategoryItem; count: number }>())
+          .values()
+      )
+        .sort((a, b) => b.count - a.count)
+        .map(v => v.item)
+        .slice(0, 6)
+    });
+    return [customeTab, ...defaultTabs];
   }
 
   @Emit("select")

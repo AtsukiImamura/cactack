@@ -66,6 +66,8 @@ export interface DUserCategoryItem
     Strable,
     UserIdentifiable,
     DLogicalDeletable {
+  disabled: boolean;
+
   action?: string;
 }
 
@@ -79,4 +81,10 @@ export interface IUserCategoryItem
   logicalDelete: () => void;
 
   revive: () => void;
+
+  disable: () => void;
+
+  enable: () => void;
+
+  disabled: boolean;
 }

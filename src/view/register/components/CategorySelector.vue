@@ -5,10 +5,13 @@
     </div>
     <div v-if="open" class="bg" @click="open = false"></div>
     <div v-if="open" class="selector" :style="{ 'max-width': `${selectorMaxWidth}px` }">
+      <div class="disp-hidden-items" @click="enableHiddenItems = !enableHiddenItems">
+        <span>{{ enableHiddenItems ? "非表示の科目を隠す" : "非表示の科目も表示"}}</span>
+      </div>
       <div class="tabs">
         <div
           class="tab"
-          v-for="(tab, index) in tabs"
+          v-for="(tab, index) in displayTabs"
           :key="index"
           @click="tabIndex = index"
           :class="{ selected: index === tabIndex }"
@@ -25,7 +28,7 @@
             <div
               class="item"
               v-for="(item, index) in section.items"
-              :key="sIndex * 10 + index"
+              :key="index"
               @click="select(item, $event)"
             >
               <span>{{ item.name }}</span>
@@ -39,7 +42,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, Emit } from "vue-property-decorator";
-import { ICategoryItem } from "@/model/interface/ICategory";
+import { ICategoryItem, IUserCategoryItem } from "@/model/interface/ICategory";
 
 export interface CategorySelectorTab {
   name: string;
@@ -49,7 +52,7 @@ export interface CategorySelectorTab {
 
 interface CategorySelectorSection {
   name: string;
-  items: ICategoryItem[];
+  items: IUserCategoryItem[];
 }
 
 @Component({})
@@ -62,9 +65,26 @@ export default class CategorySelector extends Vue {
 
   public open: boolean = false;
 
+  public enableHiddenItems: boolean = false;
+
   public selectedItem: ICategoryItem | {} = {};
 
   public selectorMaxWidth: number = 0;
+
+  public get displayTabs(): CategorySelectorTab[] {
+    return this.tabs.map(tab => ({
+      name: tab.name,
+      sections: tab.sections
+        .map(section => ({
+          name: section.name,
+          items: section.items.filter(
+            item => this.enableHiddenItems || !item.disabled
+          )
+        }))
+        .filter(section => section.items.length > 0)
+    }));
+    return this.tabs;
+  }
 
   public mounted(): void {
     this.selectorMaxWidth = Math.min(
@@ -79,10 +99,10 @@ export default class CategorySelector extends Vue {
   }
 
   public get sections(): CategorySelectorSection[] {
-    if (this.tabIndex >= this.tabs.length) {
+    if (this.tabIndex >= this.displayTabs.length) {
       return [];
     }
-    return this.tabs[this.tabIndex].sections;
+    return this.displayTabs[this.tabIndex].sections;
   }
 
   @Emit("select")
@@ -131,13 +151,16 @@ export default class CategorySelector extends Vue {
       left: 0px;
     }
     overflow: hidden;
+    .disp-hidden-items {
+      cursor: pointer;
+    }
     .tabs {
       display: flex;
       border-bottom: 1px solid #c0c0c0;
       width: 100%;
       .tab {
-        min-width: 65px;
-        padding: 5px 8px;
+        min-width: 58px;
+        padding: 2px 3px;
         border-radius: 3px 3px 0px 0px;
         border: 1px solid #c0c0c0;
         border-width: 1px 0px 0px 1px;

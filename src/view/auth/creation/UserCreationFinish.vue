@@ -30,7 +30,6 @@ import CategoryMasterRepository from "@/repository/CategoryMasterRepository";
 import CategoryService from "@/service/CategoryService";
 import UserCategory from "@/model/UserCategory";
 import UserAuthService from "@/service/UserAuthService";
-import { IUserCategory } from "@/model/interface/ICategory";
 
 @Component({ components: { PublicFrame, ProcessButton } })
 export default class UserCreationFinish extends Vue {
@@ -56,26 +55,22 @@ export default class UserCreationFinish extends Vue {
       this.pros.push({
         disp: "デフォルト勘定科目データの読み込みが完了しました。"
       });
-      await container.resolve(CategoryService).insertUserCategories(
-        categoryMasters.map(
-          master =>
-            new UserCategory(
-              "",
-              userId,
-              master.name,
-              master.type.code,
-              // master.items.map(
-              //   (item) =>
-              //     new UserCategoryItem("", userId, master, item.name, undefined)
-              // ),
-              undefined
-            )
-        ),
-        (category: IUserCategory) =>
-          this.pros.push({
-            disp: `勘定科目「${category.name}」が作成されました`
-          })
-      );
+      for (const master of categoryMasters) {
+        await container.resolve(CategoryService).insertUserCategory(
+          UserCategory.simple(master.name, master.type.code),
+          master.items.map(item => ({
+            id: "",
+            userId: userId,
+            parentId: "",
+            name: item.name,
+            deletedAt: undefined,
+            disabled: false
+          }))
+        );
+        this.pros.push({
+          disp: `勘定科目「${master.name}」が作成されました`
+        });
+      }
     } catch (e) {
       this.pros.push({
         disp: "勘定科目データの生成と保存に失敗しました",

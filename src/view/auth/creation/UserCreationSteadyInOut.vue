@@ -104,6 +104,7 @@ import UserAuthService from "@/service/UserAuthService";
 import AccountType from "@/model/AccountType";
 import UserCategoryItem from "@/model/UserCategoryItem";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
+import UserCategoryItemFlyweight from "../../../repository/flyweight/UserCategoryItemFlyweight";
 
 interface IUserAccount {
   name: string;
@@ -186,7 +187,7 @@ export default class UserCreationSteadyInOut extends Vue {
             "収入",
             AccountType.TYPE_INCOME,
             undefined
-          ).simplify()
+          )
         );
       for (const account of this.userAccounts.filter(
         ac =>
@@ -201,8 +202,9 @@ export default class UserCreationSteadyInOut extends Vue {
               userId,
               category.id,
               account.name,
-              undefined
-            ).simplify()
+              undefined,
+              false
+            )
           );
       }
     }
@@ -217,7 +219,7 @@ export default class UserCreationSteadyInOut extends Vue {
             "費用",
             AccountType.TYPE_SPENDING,
             undefined
-          ).simplify()
+          )
         );
       for (const account of this.userAccounts.filter(
         ac =>
@@ -232,7 +234,8 @@ export default class UserCreationSteadyInOut extends Vue {
               userId,
               category.id,
               account.name,
-              undefined
+              undefined,
+              false
             )
           );
       }

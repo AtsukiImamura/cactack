@@ -81,9 +81,10 @@ import ProcessButton from "@/view/common/ProcessButton.vue";
 import QuestionaierBlock from "@/view/auth/creation/components/QuestionaierBlock.vue";
 import CreditCardTemplateSelector from "@/view/common/action/CreditCardTemplateSelector.vue";
 import { container } from "tsyringe";
-import CategoryService from "@/service/CategoryService";
 import UserCategory from "@/model/UserCategory";
 import AccountType from "@/model/AccountType";
+import UserAuthService from "@/service/UserAuthService";
+import CategoryService from "@/service/CategoryService";
 
 @Component({
   components: {
@@ -123,31 +124,22 @@ export default class UserCreationCreditMapping extends Vue {
   }
 
   public async next(): Promise<void> {
-    await container.resolve(CategoryService).insertUserCategory(
-      new UserCategory(
-        "",
-        "",
-        "クレジットカード買掛金",
-        AccountType.TYPE_DEBT,
-        // this.creditMappings.map(
-        //   (map) =>
-        //     new UserCategoryItem(
-        //       "",
-        //       "",
-        //       new UserCategory(
-        //         "",
-        //         "",
-        //         "クレジット買掛金",
-        //         AccountType.TYPE_DEBT,
-        //         undefined
-        //       ),
-        //       map.title,
-        //       undefined,
-        //       map.command
-        //     )
-        // ),
-        undefined
-      )
+    // ここの流れまとめたい
+    const userId = container.resolve(UserAuthService).userId;
+    if (!userId) {
+      throw new Error("you are not logged in!");
+    }
+    container.resolve(CategoryService).insertUserCategory(
+      UserCategory.simple("クレジットカード買掛金", AccountType.TYPE_DEBT),
+      this.creditMappings.map(map => ({
+        id: "",
+        userId: userId,
+        parentId: "",
+        name: map.title,
+        deletedAt: undefined,
+        disabled: false,
+        action: map.command
+      }))
     );
     this.$router.push("/user/create/finish");
   }

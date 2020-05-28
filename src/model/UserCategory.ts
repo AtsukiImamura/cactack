@@ -86,6 +86,13 @@ export default class UserCategory extends CategoryBase
   }
 
   public createItem(name: string): ICategoryItem {
-    return new UserCategoryItem("", this.userId, this.id, name, undefined);
+    return new UserCategoryItem(
+      "",
+      this.userId,
+      this.id,
+      name,
+      undefined,
+      false
+    );
   }
 }

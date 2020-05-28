@@ -2,7 +2,6 @@
 import { Component, Mixins } from "vue-property-decorator";
 import CategoryEditor from "./CategoryEditor.vue";
 import { container } from "tsyringe";
-import UserAuthService from "@/service/UserAuthService";
 import CategoryService from "@/service/CategoryService";
 import UserCategory from "@/model/UserCategory";
 import AppModule from "@/store/ApplicationStore";
@@ -16,20 +15,10 @@ export default class CategoryAdd extends Mixins(CategoryEditor) {
   }
 
   private async addCategory() {
-    const userId = container.resolve(UserAuthService).userId;
-    if (!userId) {
-      return;
-    }
     await container
       .resolve(CategoryService)
       .insertUserCategory(
-        new UserCategory(
-          "",
-          userId,
-          this.name,
-          this.accountType.code,
-          undefined
-        )
+        UserCategory.simple(this.name, this.accountType.code)
       );
     await AppModule.init();
   }

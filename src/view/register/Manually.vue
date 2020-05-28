@@ -73,7 +73,7 @@ export default class Manually extends Vue {
     return title;
   }
 
-  public mounted(): void {
+  public async mounted() {
     const journalId = this.$route.params.journalId;
     if (!journalId) {
       return;

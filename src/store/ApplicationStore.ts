@@ -61,6 +61,19 @@ class AppStore extends VuexModule {
    * @return {CategoryList }
    */
   public get categories(): CategoryList {
+    // console.log(
+    //   container
+    //     .resolve(UserCategoryFlyweight)
+    //     .values.filter((v) => v.type.code === AccountType.TYPE_DEBT)
+    //     .map((category) =>
+    //       category.items.map(
+    //         (item) =>
+    //           `name:${item.name} disabled:${
+    //             (item as IUserCategoryItem).disabled
+    //           }`
+    //       )
+    //     )
+    // );
     return new CategoryList(container.resolve(UserCategoryFlyweight).values);
   }
 
@@ -69,7 +82,9 @@ class AppStore extends VuexModule {
    * @return {IJournal[] }
    */
   public get journals(): IJournal[] {
-    return this._journals;
+    return this._journals.sort((a, b) =>
+      a.createdAt.beforeThanOrEqualsTo(b.createdAt) ? 1 : -1
+    );
   }
 
   public get jounalDetails(): IJournalDetail[] {
