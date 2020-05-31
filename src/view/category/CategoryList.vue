@@ -30,7 +30,9 @@
         </div>
       </div>
       <div class="message">
-        <span :style="{ color: topMesasge.fontColor }">{{ topMesasge.value }}</span>
+        <span :style="{ color: topMesasge.fontColor }">{{
+          topMesasge.value
+        }}</span>
       </div>
       <div class="results" v-if="!deletePage">
         <div
@@ -47,7 +49,10 @@
                 class="ac dangerous"
                 v-if="category.items.filter((i) => !i.deletedAt).length === 0"
               >
-                <div class="delete-button" @click="deleteCateogry(category)"></div>
+                <div
+                  class="delete-button"
+                  @click="deleteCateogry(category)"
+                ></div>
               </div>
               <div class="ac nomal">
                 <CategoryUpdate :category="category"></CategoryUpdate>
@@ -84,7 +89,10 @@
                           <ItemUpdate :item="item"></ItemUpdate>
                         </div>
                         <div class="ac dangerous">
-                          <ItemDelete :item="item" @complete="onItemDeleted"></ItemDelete>
+                          <ItemDelete
+                            :item="item"
+                            @complete="onItemDeleted"
+                          ></ItemDelete>
                         </div>
                       </HiddenActions>
                     </div>
@@ -98,10 +106,13 @@
           </div>
         </div>
         <div class="add-category">
-          <CategoryAdd :key="`${accountTypeCode}${categories.length}`" :type="type"></CategoryAdd>
+          <CategoryAdd
+            :key="`${accountTypeCode}${categories.length}`"
+            :type="type"
+          ></CategoryAdd>
         </div>
       </div>
-      <div class="gabages" v-if="deletePage" :key="`${categories.length}${deletedItems.length}`">
+      <div class="gabages" v-if="deletePage" :key="hash">
         <div class="if-empty" v-if="deletedItems.length === 0">
           <span>ごみ箱は空です</span>
         </div>
@@ -139,7 +150,7 @@ import AccountType from "@/model/AccountType";
 import {
   IAccountCategory,
   ICategoryItem,
-  IUserCategoryItem
+  IUserCategoryItem,
 } from "@/model/interface/ICategory";
 import HiddenActions from "@/view/common/HiddenActions.vue";
 import AppModule from "@/store/ApplicationStore";
@@ -157,6 +168,7 @@ import TemporalMessage from "@/view/common/model/TemporalMessage";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 import SwitchButton from "@/view/common/SwitchButton.vue";
+import hash from "object-hash";
 
 @Component({
   components: {
@@ -168,8 +180,8 @@ import SwitchButton from "@/view/common/SwitchButton.vue";
     ItemUpdate,
     ItemDelete,
     draggable,
-    SwitchButton
-  }
+    SwitchButton,
+  },
 })
 export default class CategoryList extends Vue {
   public topMesasge: TemporalMessage = new TemporalMessage(
@@ -182,11 +194,16 @@ export default class CategoryList extends Vue {
       animation: 0,
       group: "description",
       disabled: false,
-      ghostClass: "ghost"
+      ghostClass: "ghost",
     };
   }
 
   public deletePage: boolean = false;
+
+  private hashSeed: any = [];
+  public get hash(): string {
+    return hash(this.hashSeed);
+  }
 
   public get accountTypes(): IAccountType[] {
     return AccountType.all();
@@ -200,14 +217,14 @@ export default class CategoryList extends Vue {
   public get categories(): IAccountCategory[] {
     return AppModule.categories
       .getAll()
-      .filter(c => c.type.code === this.accountTypeCode);
+      .filter((c) => c.type.code === this.accountTypeCode);
   }
 
   public get deletedItems(): ICategoryItem[] {
     return AppModule.categories
       .getAll()
       .reduce((acc, cur) => [...acc, ...cur.items], [])
-      .filter(item => (item as IUserCategoryItem).isDeleted);
+      .filter((item) => (item as IUserCategoryItem).isDeleted);
   }
 
   public async deleteCateogry(category: UserCategory) {
@@ -223,6 +240,7 @@ export default class CategoryList extends Vue {
       `「${item.name}」をもとに戻しました`,
       TemporalMessage.TYPE_SUCCESS
     );
+    this.hashSeed = item;
   }
 
   public async deleteItem(item: IUserCategoryItem) {
@@ -396,7 +414,7 @@ export default class CategoryList extends Vue {
                 padding: 6px 2px;
                 width: calc(7% - 4px);
                 @include xs {
-                  width: calc(14% - 4px);
+                  width: calc(15% - 4px);
                 }
                 .icon {
                   position: relative;

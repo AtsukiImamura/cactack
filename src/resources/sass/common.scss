@@ -376,6 +376,24 @@ body {
   }
 }
 
+.account-type-bg {
+  &.c-0 {
+    background-color: $color-asset;
+  }
+  &.c-1 {
+    background-color: $color-spending;
+  }
+  &.c-2 {
+    background-color: $color-income;
+  }
+  &.c-10 {
+    background-color: $color-debt;
+  }
+  &.c-11 {
+    background-color: $color-net-asset;
+  }
+}
+
 .category-color {
   display: inline-block;
   &.c-1 {

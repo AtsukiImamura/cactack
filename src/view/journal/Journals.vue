@@ -30,20 +30,28 @@
         <div class="filters">
           <div class="filter item">
             <div class="selector">
-              <TransferCategorySelector @select="addFilter"></TransferCategorySelector>
+              <TransferCategorySelector
+                @select="addFilter"
+              ></TransferCategorySelector>
             </div>
             <div class="filter-items">
-              <div class="f-item" v-for="(filter, index) in filterItems" :key="index">
+              <div
+                class="f-item"
+                v-for="(filter, index) in filterItems"
+                :key="index"
+              >
                 <span class="name">{{ filter.name }}</span>
                 <div class="delete">
-                  <span class="delete-button enabled" @click="removeFilter(filter)"></span>
+                  <span
+                    class="delete-button enabled"
+                    @click="removeFilter(filter)"
+                  ></span>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
       <paginate-links
         for="journals"
         :container="{
@@ -130,8 +138,15 @@
           :container="this"
           :key="journalUpdateKey"
         >
-          <div class="jnl" v-for="(jnl, index) in paginated('journals')" :key="index + 1">
-            <div class="cell reality" :class="{ virtual: !jnl.executeAt }"></div>
+          <div
+            class="jnl"
+            v-for="(jnl, index) in paginated('journals')"
+            :key="index + 1"
+          >
+            <div
+              class="cell reality"
+              :class="{ virtual: !jnl.executeAt }"
+            ></div>
             <div class="cell check" v-if="false">
               <input type="checkbox" v-model="selectedJournals" :value="jnl" />
             </div>
@@ -141,13 +156,21 @@
               </div>
             </div>
             <div class="cell details debits">
-              <div class="detail" v-for="(detail, dIndex) in jnl.debits" :key="-dIndex">
+              <div
+                class="detail"
+                v-for="(detail, dIndex) in jnl.debits"
+                :key="-dIndex"
+              >
                 <div class="cell category">{{ detail.category.name }}</div>
                 <div class="cell amount">{{ detail.amount }}</div>
               </div>
             </div>
             <div class="cell details credits">
-              <div class="detail" v-for="(detail, dIndex) in jnl.credits" :key="-dIndex">
+              <div
+                class="detail"
+                v-for="(detail, dIndex) in jnl.credits"
+                :key="-dIndex"
+              >
                 <div class="cell category">{{ detail.category.name }}</div>
                 <div class="cell amount">{{ detail.amount }}</div>
               </div>
@@ -164,6 +187,9 @@
                   <JournalDelete :journal="jnl"></JournalDelete>
                 </div>
               </HiddenActions>
+            </div>
+            <div class="cell memo" v-if="jnl.title">
+              <span>{{ jnl.title }}</span>
             </div>
           </div>
         </paginate>
@@ -191,8 +217,8 @@ import { ICategoryItem } from "@/model/interface/ICategory";
     DatePicker,
     HiddenActions,
     JournalDelete,
-    TransferCategorySelector
-  }
+    TransferCategorySelector,
+  },
 })
 export default class Journals extends Vue {
   public journalUpdateKey: number = 0;
@@ -227,7 +253,7 @@ export default class Journals extends Vue {
   private filterItems: ICategoryItem[] = [];
 
   public addFilter(item: ICategoryItem) {
-    if (this.filterItems.map(item => item.id).includes(item.id)) {
+    if (this.filterItems.map((item) => item.id).includes(item.id)) {
       return;
     }
     this.filterItems.push(item);
@@ -245,13 +271,13 @@ export default class Journals extends Vue {
 
   public get journals(): IJournal[] {
     const res = this.virtualJournals
-      .filter(jnl => {
+      .filter((jnl) => {
         if (this.filterItems.length === 0) {
           return true;
         }
-        const filterItemIds = this.filterItems.map(item => item.id);
+        const filterItemIds = this.filterItems.map((item) => item.id);
         return (
-          [...jnl.credits, ...jnl.debits].filter(d =>
+          [...jnl.credits, ...jnl.debits].filter((d) =>
             filterItemIds.includes(d.category.id)
           ).length > 0
         );
@@ -332,12 +358,11 @@ ul {
     color: $color-main;
   }
   li {
-    width: 20px;
+    width: 28px;
     border: 1px solid $color-main;
     border-width: 1px 0px 1px 1px;
     display: block;
     list-style: none;
-    padding: 8px 6px;
     text-align: center;
     cursor: pointer;
     &:first-child {
@@ -352,6 +377,12 @@ ul {
       * {
         color: #ffffff;
       }
+    }
+    a {
+      display: block;
+      width: calc(100% - 12px);
+      height: 100%;
+      padding: 8px 6px;
     }
   }
 }
@@ -491,14 +522,15 @@ ul {
     .jnl {
       width: 100%;
       display: flex;
-      border: 1px solid #c0c0c0;
+      // border: 1px solid #c0c0c0;
       border-width: 1px 0px 0px 0px;
       &:last-child {
         border-width: 1px 0px;
       }
+      flex-wrap: wrap;
 
-      @include sm {
-        flex-wrap: wrap;
+      &:nth-child(2n + 1) {
+        background-color: #f8f8f8;
       }
 
       > .cell {
@@ -571,8 +603,8 @@ ul {
           }
         }
         &.details {
-          width: calc(40% - #{$padding-y * 2} + 7px);
-          background-color: #fafafa;
+          width: calc(40% - #{$padding-y * 2});
+          // background-color: #f0f0f0;
           margin-left: 7px;
           @include sm {
             width: calc(50% - 2px);
@@ -580,27 +612,9 @@ ul {
             margin: 5px 0px 0px 0px;
             padding-left: 0px;
             padding-right: 0px;
-            // &:before {
-            //   position: absolute;
-            //   top: -20px;
-            //   left: 6px;
-            //   content: "";
-            //   color: #404040;
-            //   width: 100%;
-            //   height: 20px;
-            // }
             &.debits {
               border-right: 2px solid #ffffff;
-
-              //   &:before {
-              //     content: "借方";
-              //   }
             }
-            // &.credits {
-            //   &:before {
-            //     content: "貸方";
-            //   }
-            // }
           }
           .detail {
             display: flex;
@@ -628,9 +642,29 @@ ul {
             }
           }
         }
+        &.memo {
+          margin-left: calc(15px + 10% + #{$padding-y * 4} + 20px);
+          width: calc(90% - 22px - #{$padding-y * 4} - 13px);
+          position: relative;
+          @include sm {
+            margin-left: 20px;
+            width: (100% - #{$padding-y * 2} - 20px);
+            order: 5;
+          }
+          &:after {
+            position: absolute;
+            content: "";
+            left: -20px;
+            top: 7px;
+            width: 20px;
+            height: 20px;
+            background-image: url("image/memo.svg");
+          }
+        }
       }
       &.header {
         background-color: #ffffff;
+        border-bottom: 1px solid #c0c0c0;
         @include sm {
           display: none;
         }

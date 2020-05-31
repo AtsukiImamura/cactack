@@ -1,13 +1,24 @@
 <template>
-  <div class="scroll-down-row" :class="{'display': displayHiddenContent}">
+  <div class="scroll-down-row" :class="{ display: displayHiddenContent }">
     <div class="default-content">
-      <div class="wrapper" @click="onClickWrapper">
+      <div class="wrapper">
         <slot name="display"></slot>
+      </div>
+      <div
+        class="mark"
+        :class="{ display: displayHiddenContent }"
+        @click="onClickWrapper"
+      >
+        <div></div>
       </div>
     </div>
     <div
       class="hidden-content"
-      :class="{'display': displayHiddenContent, 'close': !displayHiddenContent, 'first': first}"
+      :class="{
+        display: displayHiddenContent,
+        close: !displayHiddenContent,
+        first: first,
+      }"
     >
       <slot name="hidden"></slot>
     </div>
@@ -50,50 +61,69 @@ export default class ScrollDownRow extends Vue {
 .scroll-down-row {
   background-color: #ffffff;
   .default-content {
+    display: flex;
     position: relative;
     cursor: pointer;
-
     $base-top: 8px;
-    $base-right: 10px;
-    &:after {
-      position: absolute;
-      content: "";
-      border: 1px solid #c0c0c0;
-      width: 20px;
-      height: 20px;
-      border-radius: 11px;
-      right: $base-right + 0px;
-      top: $base-top;
-      z-index: 10;
-      @include xs {
-        content: none;
-      }
-    }
-    .wrapper {
-      &:after,
-      &:before {
+    $base-right: 5px;
+
+    .mark {
+      width: 30px;
+      &:after {
         position: absolute;
         content: "";
-        background-color: #c0c0c0;
-        height: 1.5px;
-        width: 10px;
-        top: $base-top + 10px;
-        @include xs {
-          content: none;
+        border: 1px solid #c0c0c0;
+        width: 20px;
+        height: 20px;
+        border-radius: 11px;
+        right: $base-right + 0px;
+        top: $base-top;
+        z-index: 10;
+        // @include xs {
+        //   content: none;
+        // }
+      }
+      > div {
+        &:after,
+        &:before {
+          position: absolute;
+          content: "";
+          background-color: #c0c0c0;
+          height: 1.5px;
+          width: 10px;
+          top: $base-top + 10px;
+          // @include xs {
+          //   content: none;
+          // }
+        }
+        &:after {
+          right: $base-right + 9px;
+          transform: rotate(45deg);
+        }
+        &:before {
+          right: $base-right + 3px;
+          transform: rotate(-45deg);
         }
       }
-      &:after {
-        right: $base-right + 9px;
-        transform: rotate(45deg);
+      &.display {
+        > div {
+          &:after {
+            transform: rotate(-45deg);
+          }
+          &:before {
+            transform: rotate(45deg);
+          }
+        }
       }
-      &:before {
-        right: $base-right + 3px;
-        transform: rotate(-45deg);
-      }
+    }
+
+    .wrapper {
+      width: calc(100% - 30px);
     }
   }
   .hidden-content {
     background-color: #ffffff;
+    width: calc(100% - 30px);
     overflow: hidden;
     &.first {
       display: none;

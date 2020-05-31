@@ -99,7 +99,10 @@ export default class ReserveSettlementAction extends SettlementAction {
       .resolve(UserCategoryItemFlyweight)
       .get(this.debitCategoryItemId);
     if (!debitCategoryItem) {
-      throw new Error("user category item of debit not found.");
+      console.log(ancestor);
+      throw new Error(
+        "user category item of debit not found. " + this.debitCategoryItemId
+      );
     }
 
     const creditCategoryItem = await container

@@ -9,7 +9,7 @@ import CategorySelector, {
 } from "@/view/register/components/CategorySelector.vue";
 import AppModule from "@/store/ApplicationStore";
 import { ICategoryItem, IUserCategoryItem } from "@/model/interface/ICategory";
-import JournalDate from "../../../model/common/JournalDate";
+import JournalDate from "@/model/common/JournalDate";
 
 @Component({ components: { CategorySelector } })
 export default class TransferCategorySelector extends Vue {

@@ -19,7 +19,11 @@
     </div>
     <div class="section details-cps float">
       <div class="section details debits cell with-label">
-        <div class="section detail debit" v-for="(detail, index) in debits" :key="index + 1">
+        <div
+          class="section detail debit"
+          v-for="(detail, index) in debits"
+          :key="index + 1"
+        >
           <div class="cell category">
             <TransferCategorySelector
               :item="detail.item"
@@ -31,10 +35,18 @@
             ></TransferCategorySelector>
           </div>
           <div class="cell amount">
-            <NumberInput v-model="detail.amount"></NumberInput>
+            <NumberInput
+              v-model="detail.amount"
+              　
+              place-holder="金額を入力"
+            ></NumberInput>
           </div>
           <div class="cell delete">
-            <div class="delete-button" :class="{ enabled: index > 0 }" @click="deleteDebit(index)"></div>
+            <div
+              class="delete-button"
+              :class="{ enabled: index > 0 }"
+              @click="deleteDebit(index)"
+            ></div>
           </div>
         </div>
         <div class="section add-detail">
@@ -45,7 +57,11 @@
         <div class="message" v-show="creditsMessage">
           <span>{{ creditsMessage }}</span>
         </div>
-        <div class="section detail credit" v-for="(detail, index) in credits" :key="-index">
+        <div
+          class="section detail credit"
+          v-for="(detail, index) in credits"
+          :key="-index"
+        >
           <div class="cell category">
             <TransferCategorySelector
               :item="detail.item"
@@ -57,10 +73,17 @@
             ></TransferCategorySelector>
           </div>
           <div class="cell amount">
-            <NumberInput v-model="detail.amount"></NumberInput>
+            <NumberInput
+              v-model="detail.amount"
+              place-holder="金額を入力"
+            ></NumberInput>
           </div>
           <div class="cell delete">
-            <div class="delete-button" :class="{ enabled: index > 0 }" @click="deleteCredit(index)"></div>
+            <div
+              class="delete-button"
+              :class="{ enabled: index > 0 }"
+              @click="deleteCredit(index)"
+            ></div>
           </div>
         </div>
         <div class="section add-detail">
@@ -83,7 +106,10 @@
               @selected="selectPeriodStartAt"
             ></DatePicker>
           </div>
-          <div class="cell with-label period-finish-at" :key="period.startAt.toString()">
+          <div
+            class="cell with-label period-finish-at"
+            :key="period.startAt.toString()"
+          >
             <DatePicker
               format="yyyy/MM/dd"
               :value="period.finishAt.toString()"
@@ -113,11 +139,15 @@
       </div>
     </div>
     <!-- ver1.1より導入予定 -->
-    <!-- <div class="section memo float">
-          <div class="cell memo with-label">
-            <input type="text" />
-          </div>
-    </div>-->
+    <div class="section memo float">
+      <div class="cell memo with-label">
+        <input
+          type="text"
+          v-model="name"
+          placeholder="例）魔法のランプに1000円お願いしたらくれた"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -125,7 +155,7 @@
 import { Component, Vue, Watch, Emit, Prop } from "vue-property-decorator";
 import IJournal, {
   IJournalPeriodInfo,
-  IJournalDetail
+  IJournalDetail,
 } from "@/model/interface/IJournal";
 import IJournalDate from "@/model/interface/IJournalDate";
 import JournalDate from "@/model/common/JournalDate";
@@ -147,7 +177,7 @@ interface ITransferJournalDetail {
 }
 
 @Component({
-  components: { NumberInput, DatePicker, TransferCategorySelector }
+  components: { NumberInput, DatePicker, TransferCategorySelector },
 })
 export default class JournalEditor extends Vue {
   @Prop() journal?: IJournal;
@@ -166,7 +196,7 @@ export default class JournalEditor extends Vue {
     startAt: JournalDate.today(),
     finishAt: JournalDate.today(),
     credit: {} as IUserCategoryItem,
-    debit: {} as IUserCategoryItem
+    debit: {} as IUserCategoryItem,
   };
 
   public needPeriod: boolean = false;
@@ -174,7 +204,7 @@ export default class JournalEditor extends Vue {
   public get hash(): string {
     return `${this.accountAt.toString()}${hash(this.debits)}${hash(
       this.credits
-    )}${hash(this.period)}${this.journal ? this.journal.id : ""}`;
+    )}${hash(this.period)}${this.journal ? this.journal.id : ""}${this.name}`;
   }
 
   public get creditsMessage(): string {
@@ -184,7 +214,7 @@ export default class JournalEditor extends Vue {
     ) {
       return "貸方・借方の金額が一致していません";
     }
-    const debitItems = this.debits.filter(d => d.item).map(d => d.item!.id);
+    const debitItems = this.debits.filter((d) => d.item).map((d) => d.item!.id);
     for (const credit of this.credits) {
       if (!credit.item) {
         continue;
@@ -202,10 +232,10 @@ export default class JournalEditor extends Vue {
     }
     this.createdAt = this.journal.createdAt;
     this.accountAt = this.journal.accountAt;
-    this.debits = this.journal.debits.map(d =>
+    this.debits = this.journal.debits.map((d) =>
       this.createDebit(d.amount, d.category)
     );
-    this.credits = this.journal.credits.map(d =>
+    this.credits = this.journal.credits.map((d) =>
       this.createCredit(d.amount, d.category)
     );
     if (this.journal.period) {
@@ -256,13 +286,13 @@ export default class JournalEditor extends Vue {
       this.accountAt,
       this.createdAt,
       this.credits
-        .filter(c => c.item)
-        .map(c => {
+        .filter((c) => c.item)
+        .map((c) => {
           const item = c.item!;
           const detail = {
             amount: c.amount,
             category: item,
-            action: ""
+            action: "",
           };
           // ここではなく、仮想帳簿で生成する
           if (
@@ -281,8 +311,8 @@ export default class JournalEditor extends Vue {
           );
         }),
       this.debits
-        .filter(c => c.item)
-        .map(c => new JournalDetail(c.item!, c.amount))
+        .filter((c) => c.item)
+        .map((c) => new JournalDetail(c.item!, c.amount))
     );
     return journal;
   }
@@ -303,7 +333,7 @@ export default class JournalEditor extends Vue {
       get amount() {
         return (this as any)._amount;
       },
-      item: item
+      item: item,
     } as ITransferJournalDetail;
   }
 
@@ -323,7 +353,7 @@ export default class JournalEditor extends Vue {
       get amount() {
         return (this as any)._amount;
       },
-      item: item
+      item: item,
     } as ITransferJournalDetail;
   }
 

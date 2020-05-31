@@ -167,6 +167,9 @@ export default class UserCategoryItem extends IdBase
     if (this._action) {
       item.action = this._action;
     }
+    if (this.deletedAt) {
+      item.deletedAt = this.deletedAt.toString();
+    }
     return item;
   }
 }

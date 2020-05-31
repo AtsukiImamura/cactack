@@ -10,11 +10,17 @@
             :class="`pro-info ${info.cls ? info.cls : 'success'}`"
             v-for="(info, index) in pros"
             :key="index"
-          >{{ info.disp }}</div>
+          >
+            {{ info.disp }}
+          </div>
         </div>
         <div class="action">
           <!-- <router-link to="/" tag="input" type="button" class="btn ok-btn" value="アプリへ"></router-link> -->
-          <ProcessButton value="アプリへ" :click="next" :disabled="false"></ProcessButton>
+          <ProcessButton
+            value="アプリへ"
+            :click="next"
+            :disabled="false"
+          ></ProcessButton>
         </div>
       </div>
     </div>
@@ -30,6 +36,7 @@ import CategoryMasterRepository from "@/repository/CategoryMasterRepository";
 import CategoryService from "@/service/CategoryService";
 import UserCategory from "@/model/UserCategory";
 import UserAuthService from "@/service/UserAuthService";
+import AppModule from "../../../store/ApplicationStore";
 
 @Component({ components: { PublicFrame, ProcessButton } })
 export default class UserCreationFinish extends Vue {
@@ -44,7 +51,7 @@ export default class UserCreationFinish extends Vue {
     if (!userId) {
       this.pros.push({
         disp: "ユーザーデータの取得に失敗しました",
-        cls: "error"
+        cls: "error",
       });
       return Promise.reject();
     }
@@ -53,31 +60,38 @@ export default class UserCreationFinish extends Vue {
         .resolve(CategoryMasterRepository)
         .getAll();
       this.pros.push({
-        disp: "デフォルト勘定科目データの読み込みが完了しました。"
+        disp: "デフォルト勘定科目データの読み込みが完了しました。",
       });
+      const tasks: Promise<void>[] = [];
       for (const master of categoryMasters) {
-        await container.resolve(CategoryService).insertUserCategory(
-          UserCategory.simple(master.name, master.type.code),
-          master.items.map(item => ({
-            id: "",
-            userId: userId,
-            parentId: "",
-            name: item.name,
-            deletedAt: undefined,
-            disabled: false
-          }))
+        tasks.push(
+          (async () => {
+            await container.resolve(CategoryService).insertUserCategory(
+              UserCategory.simple(master.name, master.type.code),
+              master.items.map((item) => ({
+                id: "",
+                userId: userId,
+                parentId: "",
+                name: item.name,
+                deletedAt: undefined,
+                disabled: false,
+              }))
+            );
+            this.pros.push({
+              disp: `勘定科目「${master.name}」が作成されました`,
+            });
+          })()
         );
-        this.pros.push({
-          disp: `勘定科目「${master.name}」が作成されました`
-        });
       }
+      await Promise.all(tasks);
     } catch (e) {
       this.pros.push({
         disp: "勘定科目データの生成と保存に失敗しました",
-        cls: "error"
+        cls: "error",
       });
     }
 
+    await AppModule.init();
     this.$router.push("/category/list");
   }
 }

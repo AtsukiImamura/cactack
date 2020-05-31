@@ -164,7 +164,7 @@ export default class GeneralLedger extends Vue {
       flex-wrap: wrap;
       .ledger {
         width: calc(33% - 10px);
-        margin: 10px 10px 10px 0px;
+        margin: 4px 10px 4px 0px;
         @include xs {
           width: 100%;
         }

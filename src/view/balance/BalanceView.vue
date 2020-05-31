@@ -119,7 +119,7 @@ export default class BalanceView extends Vue {
     .view {
       display: flex;
       width: 100%;
-      border: 1px solid #c0c0c0;
+      // border: 1px solid #c0c0c0;
       @include sm {
         flex-wrap: wrap;
         border: none;

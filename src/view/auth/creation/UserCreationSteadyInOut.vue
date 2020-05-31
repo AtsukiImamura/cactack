@@ -104,7 +104,7 @@ import UserAuthService from "@/service/UserAuthService";
 import AccountType from "@/model/AccountType";
 import UserCategoryItem from "@/model/UserCategoryItem";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
-import UserCategoryItemFlyweight from "../../../repository/flyweight/UserCategoryItemFlyweight";
+import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 
 interface IUserAccount {
   name: string;

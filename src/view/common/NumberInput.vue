@@ -1,7 +1,12 @@
-
 <template>
   <div class="number-input">
-    <input type="text" :value="value" @input="onInput" @blur="onBlur" />
+    <input
+      type="text"
+      :value="value > 0 ? value : ''"
+      @input="onInput"
+      @blur="onBlur"
+      :placeholder="placeHolder"
+    />
     <div class="message">
       <span>{{ message }}</span>
     </div>
@@ -14,6 +19,8 @@ import { Component, Vue, Prop, Emit } from "vue-property-decorator";
 @Component({})
 export default class NumberInput extends Vue {
   @Prop({ default: () => 0 }) value!: number;
+
+  @Prop({ default: () => "" }) placeHolder!: string;
 
   public message: string = "";
 
@@ -39,5 +46,4 @@ export default class NumberInput extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

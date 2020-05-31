@@ -5,9 +5,14 @@ const webpack = require("webpack");
 const env =
   process.env.NODE_ENV === "production" ? "production" : "development";
 const target = process.env.NODE_ENV === "development" ? "node" : "web";
-const fileName = target === "web" ? "index" : "test";
-// const fileName = "slider";
-console.log(`env=${env} target=${target} fileName=${fileName}`);
+let fileName = target === "web" ? "index" : "test";
+const random =
+  env === "production"
+    ? Math.floor(Math.random() * 10000000000000) + 150000000000000
+    : "";
+console.log(
+  `env=${env} target=${target} fileName=${fileName} random=${random}`
+);
 
 const scssPath = path.resolve(__dirname, "./src/resources/common.scss");
 console.log("scssPath: " + scssPath + "\n");
@@ -20,7 +25,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, "./dist"),
     filename: `${fileName}.js`,
-    chunkFilename: `[name].bundle.js`,
+    chunkFilename: `${random}.[name].bundle.js`,
   },
   module: {
     rules: [

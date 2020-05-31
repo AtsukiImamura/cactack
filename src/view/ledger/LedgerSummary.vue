@@ -1,13 +1,18 @@
 <template>
   <div class="ledger-smr">
-    <div class="title">
-      <h3
-        :class="`account-type-color c-${ledger.category.type.code}`"
-        @click="toLedgerDetail(ledger)"
-      >{{ ledger.name }}</h3>
-    </div>
-    <div class="amount">
-      <span>{{ ledger.amount }}</span>
+    <div
+      class="header"
+      :class="`account-type-bg c-${ledger.category.type.code}`"
+      @click="toLedgerDetail(ledger)"
+    >
+      <div class="title">
+        <h3>
+          {{ ledger.name }}
+        </h3>
+      </div>
+      <div class="amount">
+        <span>{{ ledger.amount }}</span>
+      </div>
     </div>
     <div class="children">
       <div
@@ -46,39 +51,38 @@ export default class LedgerSummary extends Vue {
 
 <style lang="scss" scoped>
 .ledger-smr {
-  box-shadow: 2px 2px 3px 3px rgba(120, 120, 120, 0.5);
+  border: 1px solid #c0c0c0;
   border-radius: 3px;
-  width: calc(100% - 16px);
-  padding: 5px 8px;
+  width: 100%;
   cursor: pointer;
-  .title {
-    display: flex;
-    color: $color-main;
-    h3 {
-      margin: 0px;
-      font-size: 1.2rem;
-      font-weight: 400;
-      transition-duration: 200ms;
-      &:hover {
-        font-weight: 600;
+  .header {
+    padding: 0px 8px;
+    .title {
+      display: flex;
+      h3 {
+        margin: 4px 0px;
+        font-size: 1.2rem;
+        font-weight: 400;
+        color: #ffffff;
+        transition-duration: 200ms;
+        &:hover {
+          font-weight: 600;
+        }
+      }
+    }
+    .amount {
+      font-size: 1rem;
+      * {
+        color: #ffffff;
       }
     }
   }
-  > .amount {
-    margin: 3px 0px;
-    font-size: 1rem;
-  }
   .children {
-    margin: 12px 0px 4px;
+    margin: 7px 0px 4px;
     .child {
       display: flex;
-      width: calc(100% - 4px);
-      padding: 3px 2px;
-      border: 1px solid #c0c0c0;
-      border-width: 1px 0px 0px 0px;
-      &:last-child {
-        border-width: 1px 0px 1px 0px;
-      }
+      width: calc(100% - 12px);
+      padding: 0px 6px;
       &:hover {
         background-color: #f8f8f8;
       }
