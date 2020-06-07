@@ -34,16 +34,8 @@
           transition-duration="0.1s"
           item-selector=".ledger"
         >
-          <div
-            v-masonry-tile
-            class="ledger"
-            v-for="(led, index) in ledgers"
-            :key="index"
-          >
-            <LedgerSummary
-              :ledger="led"
-              @detail="toLedgerDetail"
-            ></LedgerSummary>
+          <div v-masonry-tile class="ledger" v-for="(led, index) in ledgers" :key="index">
+            <LedgerSummary :ledger="led" @detail="toLedgerDetail"></LedgerSummary>
           </div>
         </div>
       </div>
@@ -67,8 +59,8 @@ import IJournal from "@/model/interface/IJournal";
   components: {
     CommonFrame,
     LedgerSummary,
-    DatePicker,
-  },
+    DatePicker
+  }
 })
 export default class GeneralLedger extends Vue {
   public get periodBeginWith(): IJournalDate {
@@ -164,7 +156,7 @@ export default class GeneralLedger extends Vue {
       flex-wrap: wrap;
       .ledger {
         width: calc(33% - 10px);
-        margin: 4px 10px 4px 0px;
+        margin: 4px 0px 4px 10px;
         @include xs {
           width: 100%;
         }

@@ -66,7 +66,8 @@ export default class VirtualBook {
     periodFrom = this.periodStartAt,
     periodTo = this.periodFinishAt
   ) {
-    const virtualJournals = this.getDateValidated(periodFrom, periodTo);
+    const targetJournals = this.getDateValidated(periodFrom, periodTo);
+    const virtualJournals: IJournal[] = [];
     for (const jnl of this.journals) {
       for (const dtl of [...jnl.credits, ...jnl.debits]) {
         if (!dtl.action) {
@@ -88,7 +89,25 @@ export default class VirtualBook {
         );
       }
     }
-    return virtualJournals;
+    // 同日付で借方・貸方の同じものをまとめる
+    const jnlMap = new Map<string, IJournal>();
+    for (const [index, jnl] of virtualJournals.entries()) {
+      if (jnl.credits.length > 1 || jnl.debits.length > 1) {
+        jnlMap.set(String(index), jnl);
+        continue;
+      }
+      const vid =
+        jnl.credits[0].category.id + jnl.debits[0].category.id + jnl.accountAt;
+      if (jnlMap.has(vid)) {
+        const target = jnlMap.get(vid)!;
+        target.addCredit(jnl.credits[0]);
+        target.addDebit(jnl.debits[0]);
+        continue;
+      }
+      jnlMap.set(vid, jnl);
+    }
+    // return virtualJournals;
+    return [...targetJournals, ...Array.from(jnlMap.values())];
   }
 
   /** 期首貸借対照表 */

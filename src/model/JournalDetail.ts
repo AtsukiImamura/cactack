@@ -25,8 +25,16 @@ export default class JournalDetail implements IJournalDetail {
     return this._amount;
   }
 
+  public set amount(val: number) {
+    this._amount = val;
+  }
+
   public get action(): string | undefined {
     return this._action;
+  }
+
+  public add(val: number) {
+    this._amount += val;
   }
 
   constructor(

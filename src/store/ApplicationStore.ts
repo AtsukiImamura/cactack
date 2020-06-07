@@ -100,11 +100,6 @@ class AppStore extends VuexModule {
     await container.resolve(UserCategoryFlyweight).import();
     const journals = await container.resolve(JournalRepository).getUsersAll();
     this.INIT(journals);
-    // this.CATEGORIES(
-    //   container
-    //     .resolve(UserCategoryFlyweight)
-    //     .values.map((v) => UserCategory.parse(v))
-    // );
   }
 
   @Mutation

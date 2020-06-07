@@ -20,11 +20,19 @@
         </div>
       </div>
       <div class="body">
-        <div class="section" v-for="(section, sIndex) in sections" :key="sIndex">
-          <div class="title">
-            <h3>{{ section.name }}</h3>
-          </div>
-          <div class="items">
+        <div
+          class="section"
+          v-for="(section, sIndex) in sections"
+          :key="sIndex"
+          v-show="!isMobile || selectedSections.length === 0"
+        >
+          <input
+            type="button"
+            class="title"
+            :value="section.name"
+            @click="selectedSections = [section]"
+          />
+          <div class="items only-wide">
             <div
               class="item"
               v-for="(item, index) in section.items"
@@ -33,6 +41,17 @@
             >
               <span>{{ item.name }}</span>
             </div>
+          </div>
+        </div>
+        <div class="items only-mobile" v-show="isMobile && selectedSections.length > 0">
+          <div class="back-to-categry" @click="selectedSections = []"></div>
+          <div
+            class="item"
+            v-for="(item, index) in  selectedSections.length === 0 ? [] : selectedSections[0].items"
+            :key="index"
+            @click="select(item, $event)"
+          >
+            <span>{{ item.name }}</span>
           </div>
         </div>
       </div>
@@ -71,6 +90,8 @@ export default class CategorySelector extends Vue {
 
   public selectorMaxWidth: number = 0;
 
+  public selectedSections: CategorySelectorSection[] = [];
+
   public get displayTabs(): CategorySelectorTab[] {
     return this.tabs.map(tab => ({
       name: tab.name,
@@ -86,6 +107,14 @@ export default class CategorySelector extends Vue {
     return this.tabs;
   }
 
+  public get clientWidth(): number {
+    return document.body.clientWidth;
+  }
+
+  public get isMobile(): boolean {
+    return this.clientWidth < 540;
+  }
+
   public mounted(): void {
     this.selectorMaxWidth = Math.min(
       document.body.clientWidth < 500
@@ -99,6 +128,7 @@ export default class CategorySelector extends Vue {
   }
 
   public get sections(): CategorySelectorSection[] {
+    this.selectedSections = [];
     if (this.tabIndex >= this.displayTabs.length) {
       return [];
     }
@@ -144,11 +174,12 @@ export default class CategorySelector extends Vue {
     padding: 8px;
     box-shadow: 2px 2px 3px 3px rgba(120, 120, 120, 0.25);
     background-color: #ffffff;
-    width: calc(100vw - 18px);
+    width: calc(100vw - 16px);
     @include xs {
       position: fixed;
       top: 15vh;
       left: 0px;
+      padding: 8px 0px;
     }
     overflow: hidden;
     .disp-hidden-items {
@@ -194,26 +225,97 @@ export default class CategorySelector extends Vue {
         padding: 3px;
         display: flex;
         width: 100%;
+        overflow: hidden;
         .title {
           width: 18%;
           min-width: 110px;
-          h3 {
-            margin: 0px;
+          border: none;
+          background-color: #ffffff;
+          text-align: start;
+          font-weight: 600;
+          cursor: default;
+          outline: none;
+          @include sm {
+            width: calc(100% - 16px);
+            cursor: pointer;
+            padding: 5px 8px;
+            border-bottom: 1px solid #c0c0c0;
           }
         }
-        .items {
-          width: 75%;
-          display: flex;
-          flex-wrap: wrap;
-          .item {
-            padding: 1px 5px;
-            font-size: 0.9rem;
-            color: #404440;
+      }
+      .items {
+        width: 75%;
+        display: flex;
+        flex-wrap: wrap;
+        @include sm {
+          width: 100%;
+
+          @keyframes disp {
+            0% {
+              margin-left: 100%;
+            }
+            100% {
+              margin-left: 0%;
+            }
+          }
+          animation: disp 0.25s 0s ease-in-out running forwards;
+        }
+        &.only-wide {
+          @include sm {
+            display: none;
+          }
+        }
+        &.only-mobile {
+          display: none;
+          @include sm {
+            display: block;
+          }
+        }
+        .back-to-categry {
+          @include sm {
+            margin: 9px 0px;
+            height: 20px;
+            width: 20px;
             cursor: pointer;
-            margin: 1px 2px;
-            border-radius: 3px;
-            background-color: #f0f0f0;
-            height: 21px;
+            position: relative;
+            &:before,
+            &:after {
+              content: "";
+              position: absolute;
+              width: 13px;
+              height: 2px;
+              left: 8px;
+              background-color: #c0c0c0;
+            }
+            &:before {
+              top: 6px;
+              transform: rotate(-30deg);
+            }
+            &:after {
+              top: 12px;
+              transform: rotate(30deg);
+            }
+          }
+        }
+        .item {
+          padding: 1px 5px;
+          font-size: 0.9rem;
+          color: #404440;
+          cursor: pointer;
+          margin: 1px 2px;
+          border-radius: 3px;
+          background-color: #f0f0f0;
+          height: 21px;
+          @include sm {
+            width: calc(100% - 16px);
+            margin: 0;
+            border-radius: 0px;
+            background-color: #ffffff;
+            padding: 6px 8px;
+            border-bottom: 1px solid #c0c0c0;
+            &:first-child {
+              border-top: 1px solid #c0c0c0;
+            }
           }
         }
       }

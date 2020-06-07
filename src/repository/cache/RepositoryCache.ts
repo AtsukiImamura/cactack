@@ -52,6 +52,7 @@ export default class RepositoryCache<T> {
       }
       const keyValues = indexValues.get(key)!;
       keyValues.set(hash(value), value);
+      // console.log(hash(value), value);
     }
   }
 

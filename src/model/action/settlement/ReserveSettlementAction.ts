@@ -7,6 +7,7 @@ import JournalDate from "../../common/JournalDate";
 import VirtualJournal from "../../VirtualJournal";
 import JournalRepository from "@/repository/JournalRepository";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
+import JournalDetail from "@/model/JournalDetail";
 
 export default class ReserveSettlementAction extends SettlementAction {
   public static readonly COMMAND_NAME = "RESERVE";
@@ -116,16 +117,16 @@ export default class ReserveSettlementAction extends SettlementAction {
       this.title,
       this.date,
       [
-        {
-          amount: this.amount,
-          category: creditCategoryItem,
-        },
+        new JournalDetail(
+          /*category: */ creditCategoryItem,
+          /* amount: */ this.amount
+        ),
       ],
       [
-        {
-          amount: this.amount,
-          category: debitCategoryItem,
-        },
+        new JournalDetail(
+          /*category: */ debitCategoryItem,
+          /* amount: */ this.amount
+        ),
       ]
     );
     journal.ancestorId = ancestor ? ancestor.id : "";

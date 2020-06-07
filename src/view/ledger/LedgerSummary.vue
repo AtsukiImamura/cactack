@@ -6,9 +6,7 @@
       @click="toLedgerDetail(ledger)"
     >
       <div class="title">
-        <h3>
-          {{ ledger.name }}
-        </h3>
+        <h3>{{ ledger.name }}</h3>
       </div>
       <div class="amount">
         <span>{{ ledger.amount }}</span>
@@ -57,11 +55,12 @@ export default class LedgerSummary extends Vue {
   cursor: pointer;
   .header {
     padding: 0px 8px;
+    display: flex;
     .title {
-      display: flex;
+      width: 75%;
       h3 {
         margin: 4px 0px;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: 400;
         color: #ffffff;
         transition-duration: 200ms;
@@ -71,7 +70,10 @@ export default class LedgerSummary extends Vue {
       }
     }
     .amount {
+      width: 20%;
+      margin-left: 5%;
       font-size: 1rem;
+      padding: 6px 0px;
       * {
         color: #ffffff;
       }

@@ -33,6 +33,10 @@ export default interface IJournal
   isValid: boolean;
 
   execute: () => void;
+
+  addCredit: (detail: IJournalDetail) => void;
+
+  addDebit: (detail: IJournalDetail) => void;
 }
 
 export interface IJournalDetail {
@@ -43,6 +47,8 @@ export interface IJournalDetail {
   amount: number;
 
   action?: string;
+
+  add: (val: number) => void;
 }
 
 // export interface I

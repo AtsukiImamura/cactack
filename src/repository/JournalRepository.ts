@@ -12,9 +12,9 @@ export default class JournalRepository
   implements IJournalRepository {
   constructor() {
     super();
-    this.cache.addIndex("ancestorId", (journal: DJournal) =>
-      journal.ancestorId ? journal.ancestorId : undefined
-    );
+    // this.cache.addIndex("ancestorId", (journal: DJournal) =>
+    //   journal.ancestorId ? journal.ancestorId : undefined
+    // );
     this.dbKey = "journals";
   }
 

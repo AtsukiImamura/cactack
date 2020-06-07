@@ -6,6 +6,7 @@ import JournalDate from "@/model/common/JournalDate";
 import IJournalDate from "@/model/interface/IJournalDate";
 import { DJournal } from "@/model/interface/DJournal";
 import IdBase from "./IdBase";
+import JournalDetail from "./JournalDetail";
 
 export default abstract class JournalBase extends IdBase implements IJournal {
   private _userId: string;
@@ -156,16 +157,20 @@ export default abstract class JournalBase extends IdBase implements IJournal {
 
   public get balanceItems(): IJournalDetail[] {
     return [
-      ...this.credits.map((detail) => ({
-        // hash: detail.hash,
-        category: detail.category,
-        amount: (detail.category.type.isCredit ? 1 : -1) * detail.amount,
-      })),
-      ...this.debits.map((detail) => ({
-        // hash: detail.hash,
-        category: detail.category,
-        amount: (detail.category.type.isDebit ? 1 : -1) * detail.amount,
-      })),
+      ...this.credits.map(
+        (detail) =>
+          new JournalDetail(
+            detail.category,
+            (detail.category.type.isCredit ? 1 : -1) * detail.amount
+          )
+      ),
+      ...this.debits.map(
+        (detail) =>
+          new JournalDetail(
+            detail.category,
+            (detail.category.type.isDebit ? 1 : -1) * detail.amount
+          )
+      ),
     ];
   }
 
@@ -182,6 +187,28 @@ export default abstract class JournalBase extends IdBase implements IJournal {
    */
   public execute(): void {
     this._executeAt = JournalDate.today();
+  }
+
+  public addCredit(detail: IJournalDetail) {
+    for (const d of this._credits) {
+      if (d.category.id !== detail.category.id) {
+        continue;
+      }
+      d.add(detail.amount);
+      return;
+    }
+    this._credits.push(detail);
+  }
+
+  public addDebit(detail: IJournalDetail) {
+    for (const d of this._debits) {
+      if (d.category.id !== detail.category.id) {
+        continue;
+      }
+      d.add(detail.amount);
+      return;
+    }
+    this._debits.push(detail);
   }
 
   public simplify(): DJournal {

@@ -8,13 +8,7 @@
     </div>
     <div class="area email">
       <label for="ur-email">email</label>
-      <input
-        id="ur-email"
-        name="email"
-        type="text"
-        v-model="email"
-        placeholder="email"
-      />
+      <input id="ur-email" name="email" type="text" v-model="email" placeholder="email" />
     </div>
     <div class="area password">
       <label for="ur-password">password</label>
@@ -27,11 +21,7 @@
       />
     </div>
     <div class="area actions">
-      <ProcessButton
-        value="LOGIN"
-        :click="signIn"
-        :disabled="!canLogin"
-      ></ProcessButton>
+      <ProcessButton value="LOGIN" :click="signIn" :disabled="!canLogin"></ProcessButton>
       <div class="new-user">
         <span>ユーザー登録は</span>
         <router-link to="/auth/create">こちら</router-link>
@@ -53,7 +43,6 @@ import ErrorMessage from "@/model/error/ErrorMessage";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import AppModule from "@/store/ApplicationStore";
 import EmailVerificationError from "../../model/error/custome/EmailVerificationError";
-// import EmailVerificationError from "@/model/error/custome/EmailVerificationError";
 
 @Component({ components: { AuthFrame, ProcessButton } })
 export default class UserLogin extends Vue {
@@ -68,7 +57,7 @@ export default class UserLogin extends Vue {
   public needEmailVerification: boolean = false;
 
   public get canLogin(): boolean {
-    return this.email !== "" && this.password !== "";
+    return this.email !== "" && this.password.length >= 8;
   }
 
   public mounted(): void {
@@ -112,8 +101,8 @@ export default class UserLogin extends Vue {
         this.needEmailVerification = true;
         throw new EmailVerificationError();
       }
-      await AppModule.init();
       this.$router.push("/");
+      await AppModule.init();
     } catch (err) {
       const message = new ErrorMessage(err.code);
       this.message = message.value;
