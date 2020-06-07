@@ -67,7 +67,7 @@ export default class SearchSelector extends Mixins(Searcher) {}
       .results {
         width: 230px;
         position: absolute;
-        top: 45px;
+        top: 41px;
         left: 0px;
         z-index: 20;
         margin: 0;

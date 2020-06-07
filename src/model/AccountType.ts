@@ -21,6 +21,9 @@ export default class AccountType implements IAccountType {
   /** 収入 */
   public static readonly TYPE_INCOME = 2;
 
+  /** その他 */
+  public static readonly TYPE_OTHER = 99;
+
   protected _code: number;
 
   protected _name: string = "";

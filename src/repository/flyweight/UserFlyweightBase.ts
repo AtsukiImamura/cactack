@@ -38,9 +38,11 @@ export default abstract class UserFlyweightBase<
   }
 
   protected putVirtual(value: S): S {
-    const key = hash({ id: this.sequenseKey++ });
-    this.realMapping.set(key, value);
-    value.id = key;
+    if (!value.id) {
+      const key = hash({ id: this.sequenseKey++ });
+      value.id = key;
+    }
+    this.realMapping.set(value.id, value);
     return value;
   }
 

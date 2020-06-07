@@ -23,13 +23,17 @@ export default class ItemAdd extends Mixins(ItemEditor) {
   public async execute(): Promise<void> {
     return this.addItem();
   }
-
   private async addItem() {
     const userId = container.resolve(UserAuthService).userId;
     if (!userId) {
       return;
     }
-    const item = UserCategoryItem.simple(this.parent.id, this.name);
+
+    const item = UserCategoryItem.simple(
+      this.parent.id,
+      this.name,
+      (await this.addTagsIfNotExist()).map(t => t.id)
+    );
     item.action = this.command;
     await container.resolve(UserCategoryItemFlyweight).insert(item);
     await AppModule.init();

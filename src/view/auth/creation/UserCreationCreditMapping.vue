@@ -138,6 +138,7 @@ export default class UserCreationCreditMapping extends Vue {
         name: map.title,
         deletedAt: undefined,
         disabled: false,
+        tagIds: [],
         action: map.command
       }))
     );

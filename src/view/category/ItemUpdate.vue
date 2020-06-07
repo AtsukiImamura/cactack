@@ -34,19 +34,18 @@ export default class ItemUpdate extends Mixins(ItemEditor) {
       return;
     }
 
-    await container
-      .resolve(UserCategoryItemFlyweight)
-      .update(
-        new UserCategoryItem(
-          this.item.id,
-          userId,
-          this.item.parent.id,
-          this.name,
-          undefined,
-          false,
-          this.itemAction
-        )
-      );
+    await container.resolve(UserCategoryItemFlyweight).update(
+      new UserCategoryItem(
+        this.item.id,
+        userId,
+        this.item.parent.id,
+        this.name,
+        undefined,
+        false,
+        (await this.addTagsIfNotExist()).map(t => t.id),
+        this.itemAction
+      )
+    );
     await AppModule.init();
   }
 }

@@ -2,7 +2,11 @@ import IJournal from "../interface/IJournal";
 import AccountLedger from "./AccountLedger";
 import JournalDate from "../common/JournalDate";
 import Journal from "../Journal";
-import { IUserCategoryItem, ICategoryItem } from "../interface/ICategory";
+import {
+  IUserCategoryItem,
+  ICategoryItem,
+  IAccountCategory,
+} from "../interface/ICategory";
 import UserCategory from "../UserCategory";
 import Balance, { IBalanceItem } from "./Balance";
 import IJournalDate from "../interface/IJournalDate";
@@ -12,6 +16,9 @@ import JournalDetail from "../JournalDetail";
 import { container } from "tsyringe";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
+import LedgerCategory from "./LedgerCategory";
+import AccountType from "../AccountType";
+import UserAuthService from "@/service/UserAuthService";
 
 export default class VirtualBook {
   private journals: IJournal[] = [];
@@ -164,22 +171,34 @@ export default class VirtualBook {
         if (!ledgerMap.has(categoryId)) {
           ledgerMap.set(categoryId, new AccountLedger(detail.category.parent));
         }
+        const category =
+          jnl.debits.length > 1 ? this.createSundry() : jnl.debits[0].category;
         const ledgerDetail = {
-          category:
-            jnl.debits.length > 1
-              ? this.createSundry()
-              : jnl.debits[0].category,
+          category: new LedgerCategory(category),
           amount: detail.amount,
           accountAt: jnl.accountAt,
         };
         ledgerMap.get(categoryId)!.addCredit({
-          category: (ledgerDetail.category as ICategoryItem).parent,
+          category: new LedgerCategory((category as ICategoryItem).parent),
           amount: ledgerDetail.amount,
           accountAt: ledgerDetail.accountAt,
         });
         ledgerMap
           .get(categoryId)!
           .addChildCredit(detail.category, ledgerDetail);
+        for (const tag of detail.category.tags) {
+          if (!ledgerMap.has(tag.id)) {
+            const category = this.createTagCategory(`+tag+${tag.id}`, tag.name);
+            ledgerMap.set(tag.id, new AccountLedger(category));
+          }
+
+          ledgerMap.get(tag.id)!.addCredit({
+            category: new LedgerCategory(category),
+            amount: ledgerDetail.amount,
+            accountAt: ledgerDetail.accountAt,
+          });
+          ledgerMap.get(tag.id)!.addChildCredit(detail.category, ledgerDetail);
+        }
       }
       // for debit
       for (const detail of jnl.debits) {
@@ -187,20 +206,36 @@ export default class VirtualBook {
         if (!ledgerMap.has(categoryId)) {
           ledgerMap.set(categoryId, new AccountLedger(detail.category.parent));
         }
+
+        const category =
+          jnl.credits.length > 1
+            ? this.createSundry()
+            : jnl.credits[0].category;
         const ledgerDetail = {
-          category:
-            jnl.credits.length > 1
-              ? this.createSundry()
-              : jnl.credits[0].category,
+          category: new LedgerCategory(category),
           amount: detail.amount,
           accountAt: jnl.accountAt,
         };
         ledgerMap.get(categoryId)?.addDebit({
-          category: (ledgerDetail.category as ICategoryItem).parent,
+          category: new LedgerCategory((category as ICategoryItem).parent),
           amount: ledgerDetail.amount,
           accountAt: ledgerDetail.accountAt,
         });
         ledgerMap.get(categoryId)?.addChildDebit(detail.category, ledgerDetail);
+
+        for (const tag of detail.category.tags) {
+          if (!ledgerMap.has(tag.id)) {
+            const category = this.createTagCategory(`+tag+${tag.id}`, tag.name);
+            ledgerMap.set(tag.id, new AccountLedger(category));
+          }
+
+          ledgerMap.get(tag.id)!.addDebit({
+            category: new LedgerCategory(category),
+            amount: ledgerDetail.amount,
+            accountAt: ledgerDetail.accountAt,
+          });
+          ledgerMap.get(tag.id)!.addChildDebit(detail.category, ledgerDetail);
+        }
       }
     }
     return Array.from(ledgerMap.values());
@@ -213,5 +248,18 @@ export default class VirtualBook {
     return container
       .resolve(UserCategoryItemFlyweight)
       .insertVirtual(UserCategoryItem.simple(category.id, "諸口"));
+  }
+
+  private createTagCategory(id: string, name: string): IAccountCategory {
+    const userId = container.resolve(UserAuthService).userId;
+    if (!userId) {
+      throw new Error("user not found!");
+    }
+    const category = container
+      .resolve(UserCategoryFlyweight)
+      .insertVirtual(
+        new UserCategory(id, userId, name, AccountType.TYPE_OTHER, undefined)
+      );
+    return category;
   }
 }

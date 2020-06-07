@@ -92,7 +92,8 @@ export default class UserCategory extends CategoryBase
       this.id,
       name,
       undefined,
-      false
+      false,
+      []
     );
   }
 }

@@ -1,8 +1,9 @@
 import { IAccountCategory, ICategoryItem } from "../interface/ICategory";
 import IJournalDate from "../interface/IJournalDate";
+import LedgerCategory from "./LedgerCategory";
 
 export interface ILedgerDetail {
-  category: IAccountCategory | ICategoryItem;
+  category: LedgerCategory;
 
   amount: number;
 
@@ -15,6 +16,8 @@ export default class AccountLedger {
   private _debits: ILedgerDetail[] = [];
 
   private _credits: ILedgerDetail[] = [];
+
+  private _identifier?: LedgerCategory;
 
   private _children: Map<string, AccountLedger> = new Map<
     string,
@@ -50,11 +53,15 @@ export default class AccountLedger {
   }
 
   public get name(): string {
-    return this.category.name;
+    return this._identifier ? this._identifier.name : this.category.name;
   }
 
   public get category(): IAccountCategory | ICategoryItem {
     return this._category;
+  }
+
+  public get id(): string {
+    return this._identifier ? this._identifier.id : this.category.id;
   }
 
   public get debitAmount(): number {
@@ -80,14 +87,16 @@ export default class AccountLedger {
 
   constructor(
     category: IAccountCategory | ICategoryItem,
-    children?: AccountLedger[]
+    children?: AccountLedger[],
+    identifier?: LedgerCategory
   ) {
     this._category = category;
     if (children) {
       for (const child of children) {
-        this._children.set(child.category.id, child);
+        this._children.set(child.id, child);
       }
     }
+    this._identifier = identifier;
   }
 
   public addDebit(detail: ILedgerDetail) {

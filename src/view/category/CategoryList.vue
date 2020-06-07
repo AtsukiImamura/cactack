@@ -30,9 +30,11 @@
         </div>
       </div>
       <div class="message">
-        <span :style="{ color: topMesasge.fontColor }">{{
+        <span :style="{ color: topMesasge.fontColor }">
+          {{
           topMesasge.value
-        }}</span>
+          }}
+        </span>
       </div>
       <div class="results" v-if="!deletePage">
         <div
@@ -49,10 +51,7 @@
                 class="ac dangerous"
                 v-if="category.items.filter((i) => !i.deletedAt).length === 0"
               >
-                <div
-                  class="delete-button"
-                  @click="deleteCateogry(category)"
-                ></div>
+                <div class="delete-button" @click="deleteCateogry(category)"></div>
               </div>
               <div class="ac nomal">
                 <CategoryUpdate :category="category"></CategoryUpdate>
@@ -72,7 +71,11 @@
                 >
                   <div class="row" v-if="!item.isDeleted">
                     <div class="cell name">{{ item.name }}</div>
-                    <div class="cell tags"></div>
+                    <div class="cell tags">
+                      <div class="tag" v-for="(tag, index) in item.tags" :key="index">
+                        <span>{{ tag.name }}</span>
+                      </div>
+                    </div>
                     <div class="cell attached-action"></div>
                     <div class="cell visibility">
                       <SwitchButton
@@ -89,10 +92,7 @@
                           <ItemUpdate :item="item"></ItemUpdate>
                         </div>
                         <div class="ac dangerous">
-                          <ItemDelete
-                            :item="item"
-                            @complete="onItemDeleted"
-                          ></ItemDelete>
+                          <ItemDelete :item="item" @complete="onItemDeleted"></ItemDelete>
                         </div>
                       </HiddenActions>
                     </div>
@@ -106,10 +106,7 @@
           </div>
         </div>
         <div class="add-category">
-          <CategoryAdd
-            :key="`${accountTypeCode}${categories.length}`"
-            :type="type"
-          ></CategoryAdd>
+          <CategoryAdd :key="`${accountTypeCode}${categories.length}`" :type="type"></CategoryAdd>
         </div>
       </div>
       <div class="gabages" v-if="deletePage" :key="hash">
@@ -150,7 +147,7 @@ import AccountType from "@/model/AccountType";
 import {
   IAccountCategory,
   ICategoryItem,
-  IUserCategoryItem,
+  IUserCategoryItem
 } from "@/model/interface/ICategory";
 import HiddenActions from "@/view/common/HiddenActions.vue";
 import AppModule from "@/store/ApplicationStore";
@@ -180,8 +177,8 @@ import hash from "object-hash";
     ItemUpdate,
     ItemDelete,
     draggable,
-    SwitchButton,
-  },
+    SwitchButton
+  }
 })
 export default class CategoryList extends Vue {
   public topMesasge: TemporalMessage = new TemporalMessage(
@@ -194,7 +191,7 @@ export default class CategoryList extends Vue {
       animation: 0,
       group: "description",
       disabled: false,
-      ghostClass: "ghost",
+      ghostClass: "ghost"
     };
   }
 
@@ -217,14 +214,14 @@ export default class CategoryList extends Vue {
   public get categories(): IAccountCategory[] {
     return AppModule.categories
       .getAll()
-      .filter((c) => c.type.code === this.accountTypeCode);
+      .filter(c => c.type.code === this.accountTypeCode);
   }
 
   public get deletedItems(): ICategoryItem[] {
     return AppModule.categories
       .getAll()
       .reduce((acc, cur) => [...acc, ...cur.items], [])
-      .filter((item) => (item as IUserCategoryItem).isDeleted);
+      .filter(item => (item as IUserCategoryItem).isDeleted);
   }
 
   public async deleteCateogry(category: UserCategory) {
@@ -407,9 +404,15 @@ export default class CategoryList extends Vue {
           }
           .row {
             display: flex;
+            @include sm {
+              flex-wrap: wrap;
+            }
             .cell {
               $padding-y: 6px;
               padding: 6px $padding-y;
+              @include sm {
+                padding: 6px $padding-y 2px;
+              }
               &.visibility {
                 padding: 6px 2px;
                 width: calc(7% - 4px);
@@ -453,19 +456,40 @@ export default class CategoryList extends Vue {
               &.name {
                 width: calc(45% - #{$padding-y * 2});
                 @include xs {
-                  width: calc(50% - #{$padding-y * 2});
+                  width: calc(69% - #{$padding-y * 2});
                 }
               }
               &.tags {
                 width: calc(25% - #{$padding-y * 2});
+                display: flex;
+                .tag {
+                  margin: 0px 2px;
+                  border-radius: 3px;
+                  background-color: #f0f0f0;
+                  padding: 2px 5px 2px 22px;
+                  position: relative;
+                  &:after {
+                    content: "";
+                    top: 4px;
+                    left: 3px;
+                    background-image: url("image/tag.svg");
+                    position: absolute;
+                    width: 16px;
+                    height: 16px;
+                  }
+                }
                 @include xs {
-                  display: none;
+                  padding: 2px 0px;
+                  width: calc(72% - #{$padding-y * 2});
+                  order: 8;
                 }
               }
               &.attached-action {
                 width: calc(25% - #{$padding-y * 2});
                 @include xs {
-                  width: calc(30% - #{$padding-y * 2});
+                  padding: 2px 0px;
+                  width: calc(72% - #{$padding-y * 2});
+                  order: 7;
                 }
               }
               &.user-action {

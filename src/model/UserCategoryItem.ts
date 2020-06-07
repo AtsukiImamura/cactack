@@ -10,6 +10,8 @@ import IdBase from "./IdBase";
 import { container } from "tsyringe";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
 import UserAuthService from "@/service/UserAuthService";
+import { IUserTag } from "./interface/ITag";
+import UserTagFlyweight from "@/repository/flyweight/UserTagFlyweight";
 
 export default class UserCategoryItem extends IdBase
   implements IUserCategoryItem {
@@ -21,16 +23,29 @@ export default class UserCategoryItem extends IdBase
       raw.name,
       raw.deletedAt,
       raw.disabled,
+      raw.tagIds ? raw.tagIds : [],
       raw.action
     );
   }
 
-  public static simple(parentId: string, name: string): IUserCategoryItem {
+  public static simple(
+    parentId: string,
+    name: string,
+    tagIds: string[] = []
+  ): IUserCategoryItem {
     const userId = container.resolve(UserAuthService).userId;
     if (!userId) {
       throw new Error("user is not logged in!");
     }
-    return new UserCategoryItem("", userId, parentId, name, undefined, false);
+    return new UserCategoryItem(
+      "",
+      userId,
+      parentId,
+      name,
+      undefined,
+      false,
+      tagIds
+    );
   }
 
   private _userId: string = "";
@@ -44,6 +59,8 @@ export default class UserCategoryItem extends IdBase
   private _deletedAt?: IJournalDate;
 
   private _disabled: boolean;
+
+  private _tagIds: string[] = [];
 
   /**
    * Getter userId
@@ -110,6 +127,10 @@ export default class UserCategoryItem extends IdBase
     return this._deletedAt;
   }
 
+  public get tags(): IUserTag[] {
+    return container.resolve(UserTagFlyweight).getByIds(this._tagIds);
+  }
+
   /**
    * Getter disabled
    * @return {boolean}
@@ -125,6 +146,7 @@ export default class UserCategoryItem extends IdBase
     name: string,
     deletedAt: string | undefined,
     disabled: boolean | undefined,
+    tagIds: string[],
     action?: string
   ) {
     super(id);
@@ -138,6 +160,7 @@ export default class UserCategoryItem extends IdBase
       this._action = action;
     }
     this._disabled = disabled === undefined ? false : disabled;
+    this._tagIds = tagIds;
   }
 
   public logicalDelete(): void {
@@ -156,6 +179,24 @@ export default class UserCategoryItem extends IdBase
     this._disabled = false;
   }
 
+  public attachTag(tag: IUserTag): void {
+    if (this._tagIds.includes(tag.id)) {
+      return;
+    }
+    this._tagIds.push(tag.id);
+  }
+
+  public removeTag(tag: IUserTag): void {
+    if (!this._tagIds.includes(tag.id)) {
+      return;
+    }
+    this._tagIds.splice(this._tagIds.indexOf(tag.id), 1);
+  }
+
+  public hasTag(tag: IUserTag): boolean {
+    return this._tagIds.includes(tag.id);
+  }
+
   public simplify(): DUserCategoryItem {
     const item = {
       id: this.id,
@@ -163,6 +204,7 @@ export default class UserCategoryItem extends IdBase
       name: this.name,
       parentId: this.parent.id,
       disabled: this.disabled,
+      tagIds: this._tagIds,
     } as DUserCategoryItem;
     if (this._action) {
       item.action = this._action;

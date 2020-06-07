@@ -374,6 +374,9 @@ body {
   &.c-11 {
     @include type-color($color-net-asset);
   }
+  &.c-11 {
+    @include type-color($color-other);
+  }
 }
 
 .account-type-bg {
@@ -391,6 +394,9 @@ body {
   }
   &.c-11 {
     background-color: $color-net-asset;
+  }
+  &.c-99 {
+    background-color: $color-other;
   }
 }
 

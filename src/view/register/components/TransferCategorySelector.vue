@@ -10,6 +10,9 @@ import CategorySelector, {
 import AppModule from "@/store/ApplicationStore";
 import { ICategoryItem, IUserCategoryItem } from "@/model/interface/ICategory";
 import JournalDate from "@/model/common/JournalDate";
+import { container } from "tsyringe";
+import UserTagFlyweight from "../../../repository/flyweight/UserTagFlyweight";
+import UserCategoryItemFlyweight from "../../../repository/flyweight/UserCategoryItemFlyweight";
 
 @Component({ components: { CategorySelector } })
 export default class TransferCategorySelector extends Vue {
@@ -20,7 +23,7 @@ export default class TransferCategorySelector extends Vue {
       name: info.type.name,
       sections: info.categories.map(c => ({
         name: c.name,
-        items: c.items as IUserCategoryItem[]
+        items: (c.items as IUserCategoryItem[]).filter(item => !item.isDeleted)
       }))
     }));
     const customeTab: CategorySelectorTab = {
@@ -32,7 +35,7 @@ export default class TransferCategorySelector extends Vue {
       name: "よく使う科目",
       items: Array.from(
         AppModule.journals
-          .slice(0, 15)
+          .slice(0, 20)
           .reduce((acc, jnl) => {
             for (const item of [...jnl.credits, ...jnl.debits].map(
               d => d.category
@@ -51,8 +54,19 @@ export default class TransferCategorySelector extends Vue {
       )
         .sort((a, b) => b.count - a.count)
         .map(v => v.item)
-        .slice(0, 6)
+        .filter(item => !item.isDeleted)
+        .slice(0, 10)
     });
+    for (const tag of container.resolve(UserTagFlyweight).getAll()) {
+      customeTab.sections.push({
+        name: tag.name,
+        items: container
+          .resolve(UserCategoryItemFlyweight)
+          .getAll()
+          .filter(item => item.hasTag(tag))
+          .filter(item => !item.isDeleted)
+      });
+    }
     return [customeTab, ...defaultTabs];
   }
 

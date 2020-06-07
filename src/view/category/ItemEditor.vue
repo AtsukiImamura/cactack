@@ -2,7 +2,7 @@
   <OpenableModal
     ref="modal"
     :option="{
-      height: 310,
+      height: 410,
       enableHeader: true,
       enableFooter: true,
     }"
@@ -17,9 +17,25 @@
       <div class="attr name">
         <input type="text" v-model="name" />
       </div>
-      <div class="attr tags"></div>
+      <div class="attr tags">
+        <div class="tag-selections">
+          <TagSelector @select="onTagSelected"></TagSelector>
+        </div>
+        <div class="attached-tags" v-show="tags.length > 0">
+          <div class="tag" v-for="(tag, index) in tags" :key="index">
+            <div class="name">
+              <span>{{ tag.name }}</span>
+            </div>
+            <div class="delete">
+              <span class="delete-button enabled" @click="removeTag(tag)"></span>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="attr actions">
-        <div class="title"><h3>ひもづけ</h3></div>
+        <div class="title">
+          <h3>ひもづけ</h3>
+        </div>
         <div class="selections">
           <div class="selection">
             <input type="radio" value="none" v-model="actionType" />
@@ -40,11 +56,7 @@
     </template>
     <template #f>
       <div class="actions">
-        <ProcessButton
-          value="OK"
-          :click="onClickOk"
-          :disabled="!canExecute"
-        ></ProcessButton>
+        <ProcessButton value="OK" :click="onClickOk" :disabled="!canExecute"></ProcessButton>
       </div>
     </template>
   </OpenableModal>
@@ -55,11 +67,16 @@ import { Component, Vue, Prop } from "vue-property-decorator";
 import OpenableModal from "@/view/common/OpenableModal.vue";
 import {
   IAccountCategory,
-  IUserCategoryItem,
+  IUserCategoryItem
 } from "@/model/interface/ICategory";
 import Selector from "@/view/common/Selector.vue";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import CreditCardTemplateSelector from "@/view/common/action/CreditCardTemplateSelector.vue";
+import TagSelector from "@/view/category/TagSelector.vue";
+import { IUserTag } from "../../model/interface/ITag";
+import { container } from "tsyringe";
+import UserTagFlyweight from "../../repository/flyweight/UserTagFlyweight";
+import UserTag from "../../model/UserTag";
 
 @Component({
   components: {
@@ -67,7 +84,8 @@ import CreditCardTemplateSelector from "@/view/common/action/CreditCardTemplateS
     Selector,
     ProcessButton,
     CreditCardTemplateSelector,
-  },
+    TagSelector
+  }
 })
 export default class ItemEditor extends Vue {
   @Prop()
@@ -85,7 +103,7 @@ export default class ItemEditor extends Vue {
 
   public actionType: "none" | "credit" = "none";
 
-  // public tags: ITag[] = [];
+  public tags: IUserTag[] = [];
 
   // public actions: ICategoryItemAction[] = []; TODO: こういうの入れる
 
@@ -104,6 +122,7 @@ export default class ItemEditor extends Vue {
       return;
     }
     this.name = this.item.name;
+    this.tags = this.item.tags;
     // TODO: クレジット以外もつくったら対応
     if (this.item.action) {
       this.actionType = "credit";
@@ -124,6 +143,33 @@ export default class ItemEditor extends Vue {
       return;
     }
     modal.close();
+  }
+
+  public onTagSelected(tag: IUserTag) {
+    if (tag.id && this.tags.map(t => t.id).includes(tag.id)) {
+      return;
+    }
+    this.tags.push(tag);
+  }
+
+  public removeTag(tag: IUserTag) {
+    this.tags = this.tags.filter(t => t.name !== tag.name);
+  }
+
+  protected async addTagsIfNotExist() {
+    const tags = this.tags.filter(t => t.id);
+    tags.push(
+      ...(await Promise.all(
+        this.tags
+          .filter(t => !t.id)
+          .map(t =>
+            container
+              .resolve(UserTagFlyweight)
+              .insert(new UserTag("", t.userId, t.name))
+          )
+      ))
+    );
+    return tags;
   }
 
   public async onClickOk(): Promise<void> {
@@ -151,6 +197,47 @@ export default class ItemEditor extends Vue {
   &.name {
     &:after {
       content: "名称";
+    }
+  }
+  &.tags {
+    display: flex;
+    &:after {
+      content: "タグ";
+    }
+    .tag-selections {
+      width: 30%;
+      margin-right: 3%;
+    }
+    .attached-tags {
+      // background-color: #f8f8f8;
+      border-radius: 3px;
+      padding: 6px 8px;
+      width: calc(67% - 16px);
+      display: flex;
+      .tag {
+        display: flex;
+        background-color: #f0f0f0;
+        border-radius: 3px;
+        padding: 3px 6px;
+        max-width: 110px;
+        margin-right: 3px;
+        * {
+          font-size: 0.8rem;
+        }
+        .name {
+          margin-right: 3px;
+          width: calc(100% - 23px);
+        }
+        .delete {
+          margin-top: -5px;
+          width: 20px;
+          .delete-button {
+            margin-top: -6px;
+            display: block;
+            @include round-delete-button;
+          }
+        }
+      }
     }
   }
 }

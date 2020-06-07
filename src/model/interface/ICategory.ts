@@ -5,6 +5,7 @@ import IAccountType from "./IType";
 import ILogicalDeletable, {
   DLogicalDeletable,
 } from "./common/LogicalDeletable";
+import { IUserTag } from "./ITag";
 
 interface ICategoryBase extends Identifiable {
   name: string;
@@ -68,6 +69,8 @@ export interface DUserCategoryItem
     DLogicalDeletable {
   disabled: boolean;
 
+  tagIds: string[];
+
   action?: string;
 }
 
@@ -86,5 +89,13 @@ export interface IUserCategoryItem
 
   enable: () => void;
 
+  attachTag: (tag: IUserTag) => void;
+
+  removeTag: (tag: IUserTag) => void;
+
+  hasTag: (tag: IUserTag) => boolean;
+
   disabled: boolean;
+
+  tags: IUserTag[];
 }

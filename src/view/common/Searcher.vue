@@ -23,6 +23,7 @@ export default class Searcher extends Vue {
 
   public openSearch(): void {
     this.open = true;
+    this.searchInput = "";
     // TODO フォーカスを当てたい。cssでできそう？
     // (this.$refs.searchInput as HTMLInputElement).focus();
   }
@@ -39,6 +40,7 @@ export default class Searcher extends Vue {
 
   public addNew(): void {
     this.select({ content: this.searchInput, disp: this.searchInput });
+    this.closeSearch();
   }
 
   public get canCreateNew(): boolean {

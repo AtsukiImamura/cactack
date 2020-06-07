@@ -47,9 +47,7 @@
             >
               <div class="row" v-for="(detail, index) in details" :key="-index">
                 <div class="cell date">{{ detail.accountAt.toString() }}</div>
-                <div class="cell name">
-                  {{ detail.category ? detail.category.name : "" }}
-                </div>
+                <div class="cell name">{{ detail.category ? detail.category.name : "" }}</div>
                 <div class="cell amount">{{ detail.amount }}</div>
               </div>
             </div>
@@ -89,8 +87,8 @@ import LedgerChart from "@/view/ledger/components/LedgerChart.vue";
     CommonFrame,
     LedgerSummary,
     DatePicker,
-    LedgerChart,
-  },
+    LedgerChart
+  }
 })
 export default class GeneralLedger extends Vue {
   public get periodBeginWith(): IJournalDate {
@@ -126,7 +124,7 @@ export default class GeneralLedger extends Vue {
     );
     const ledgers = (await book.getVirtualLedgers())
       .reduce((acc, cur) => [...acc, cur, ...cur.children], [])
-      .filter((led) => led.category.id === this.categoryItemId);
+      .filter(led => led.category.id === this.categoryItemId);
     const ledger = ledgers.shift();
     this.ledger = ledger ? ledger : null;
 
@@ -162,6 +160,7 @@ export default class GeneralLedger extends Vue {
       return;
     }
     this.categoryItemId = categoryItemId;
+    console.log(`categoryItemId: ${categoryItemId}`);
 
     setTimeout(() => {
       if (!this.ledger) {

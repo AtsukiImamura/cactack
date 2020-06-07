@@ -14,6 +14,7 @@ import CategoryList from "@/model/category/CategoryList";
 import JournalDate from "@/model/common/JournalDate";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
+import UserTagFlyweight from "@/repository/flyweight/UserTagFlyweight";
 
 @Module({ dynamic: true, store, name: "app", namespaced: true })
 class AppStore extends VuexModule {
@@ -96,6 +97,7 @@ class AppStore extends VuexModule {
 
   @Action({ rawError: true })
   public async init() {
+    await container.resolve(UserTagFlyweight).import();
     await container.resolve(UserCategoryItemFlyweight).import();
     await container.resolve(UserCategoryFlyweight).import();
     const journals = await container.resolve(JournalRepository).getUsersAll();

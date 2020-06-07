@@ -100,7 +100,7 @@ export default class GeneralLedger extends Vue {
   public toLedgerDetail(ledger: AccountLedger) {
     this.$router.push(
       `/ledger/detail/${
-        ledger.category.id
+        ledger.id
       }?begin=${this.periodBeginWith.toString()}&end=${this.periodEndWith.toString()}`
     );
   }
