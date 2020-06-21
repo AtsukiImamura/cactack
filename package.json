@@ -7,15 +7,18 @@
     "build": "cross-env NODE_ENV=production webpack",
     "build:test": "cross-env NODE_ENV=test webpack",
     "build:dev": "cross-env NODE_ENV=development webpack ",
+    "build:functions": "cross-env NODE_ENV=functions webpack ",
     "start": "node dist/server.js",
     "watch": "cross-env NODE_ENV=production webpack --watch",
     "watch:web": "cross-env NODE_ENV=test webpack --watch",
     "watch:dev": "cross-env NODE_ENV=development webpack --watch",
+    "watch:functions": "cross-env NODE_ENV=functions webpack --watch",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:local": "node ./dist/test.js",
     "sass:build": "node-sass ./src/resources/sass/ -r -o ./dist/ --output-style compressed",
-    "deploy": "node prepare-build.js && npm run build && firebase deploy"
+    "deploy": "node prepare-build.js && npm run build && firebase deploy",
+    "deploy:functions": "tsc -p ./functions && firebase deploy --only functions"
   },
   "jest": {
     "moduleFileExtensions": [

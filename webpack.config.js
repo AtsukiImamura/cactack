@@ -2,16 +2,45 @@ const VueLoaderplugin = require("vue-loader/lib/plugin"); //vue-loader/lib/plugi
 const path = require("path");
 const webpack = require("webpack");
 
-const env =
-  process.env.NODE_ENV === "production" ? "production" : "development";
-const target = process.env.NODE_ENV === "development" ? "node" : "web";
-let fileName = target === "web" ? "index" : "test";
-const random =
-  env === "production"
-    ? Math.floor(Math.random() * 10000000000000) + 150000000000000
-    : "";
+let env = "development";
+let target = "web";
+let fileName = "index";
+let random = "";
+let destDir = "./dist";
+let outFileName = "";
+
+switch (process.env.NODE_ENV) {
+  case "production":
+    env = "production";
+    random = Math.floor(Math.random() * 10000000000000) + 150000000000000;
+    break;
+  case "development":
+    target = "node";
+    fileName = "test";
+    break;
+  case "test":
+    break;
+  case "functions":
+    env = "production";
+    destDir = "./functions";
+    target = "node";
+    fileName = "functions";
+    outFileName = "index";
+    break;
+  default:
+    throw new Error("error!");
+}
+
+// const env =
+//   process.env.NODE_ENV === "production" ? "production" : "development";
+// const target = process.env.NODE_ENV === "development" ? "node" : "web";
+// let fileName = target === "web" ? "index" : "test";
+// const random =
+//   env === "production"
+//     ? Math.floor(Math.random() * 10000000000000) + 150000000000000
+//     : "";
 console.log(
-  `env=${env} target=${target} fileName=${fileName} random=${random}`
+  `env=${env} target=${target} fileName=${fileName} random=${random} destDir=${destDir} outFileName=${outFileName}`
 );
 
 const scssPath = path.resolve(__dirname, "./src/resources/common.scss");
@@ -23,8 +52,8 @@ module.exports = {
   devtool: "inline-source-map",
   entry: `./src/${fileName}.ts`,
   output: {
-    path: path.join(__dirname, "./dist"),
-    filename: `${fileName}.js`,
+    path: path.join(__dirname, destDir),
+    filename: `${outFileName ? outFileName : fileName}.js`,
     chunkFilename: `${random}.[name].bundle.js`,
   },
   module: {
