@@ -65,7 +65,7 @@ export default class CreditCardTemplateSelector extends Vue {
   public async mounted() {
     if (this.command) {
       const template = CreditActionTemplate.parse(this.command);
-      const item = await container
+      const item = container
         .resolve(UserCategoryItemFlyweight)
         .get(template.itemId);
       const mapping = new CreditMapping();

@@ -6,6 +6,7 @@ import Journal from "@/model/Journal";
 import JournalDate from "@/model/common/JournalDate";
 import JournalDetail from "@/model/JournalDetail";
 import UserCategoryItemFlyweight from "../flyweight/UserCategoryItemFlyweight";
+import { IUserCategoryItem } from "@/model/interface/ICategory";
 
 @singleton()
 export default class JournalTransformer extends Transformer<
@@ -13,15 +14,15 @@ export default class JournalTransformer extends Transformer<
   IJournal
 > {
   public async aggregate(journal: DJournal): Promise<IJournal> {
-    let periodDebit = undefined;
-    let periodCredit = undefined;
+    let periodDebit: IUserCategoryItem | undefined = undefined;
+    let periodCredit: IUserCategoryItem | undefined = undefined;
 
     if (journal.period) {
-      periodDebit = await container
+      periodDebit = container
         .resolve(UserCategoryItemFlyweight)
         .get(journal.period.debitCategoryItemId);
 
-      periodCredit = await container
+      periodCredit = container
         .resolve(UserCategoryItemFlyweight)
         .get(journal.period.creditCategoryItemId);
       if (!periodDebit || !periodCredit) {
@@ -55,7 +56,7 @@ export default class JournalTransformer extends Transformer<
   ): Promise<IJournalDetail[]> {
     const results: IJournalDetail[] = [];
     for (const detail of details) {
-      const item = await container
+      const item = container
         .resolve(UserCategoryItemFlyweight)
         .get(detail.categoryItemId);
       if (!item) {

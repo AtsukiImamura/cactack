@@ -75,27 +75,36 @@ export default class VirtualBook {
   ) {
     const targetJournals = this.getDateValidated(periodFrom, periodTo);
     const virtualJournals: IJournal[] = [];
+    const settleTasks: Promise<IJournal[]>[] = [];
     for (const jnl of this.journals) {
       for (const dtl of [...jnl.credits, ...jnl.debits]) {
         if (!dtl.action) {
           continue;
         }
-        const settledJournals = (
-          await SettlementActionFactory.parse(dtl.action).execute(jnl)
-        ).map((v) => {
-          v.id = jnl.id;
-          return v;
-        });
 
-        virtualJournals.push(
-          ...settledJournals.filter(
-            (jnl) =>
-              jnl.accountAt.afterThanOrEqualsTo(periodFrom) &&
-              jnl.accountAt.beforeThanOrEqualsTo(periodTo)
-          )
+        settleTasks.push(
+          (async () => {
+            const settledJournals = (
+              await SettlementActionFactory.parse(dtl.action!).execute(jnl)
+            ).map((v) => {
+              v.id = jnl.id;
+              return v;
+            });
+            return settledJournals.filter(
+              (jnl) =>
+                jnl.accountAt.afterThanOrEqualsTo(periodFrom) &&
+                jnl.accountAt.beforeThanOrEqualsTo(periodTo)
+            );
+          })()
         );
       }
     }
+    virtualJournals.push(
+      ...(await Promise.all(settleTasks)).reduce(
+        (acc, cur) => [...acc, ...cur],
+        []
+      )
+    );
     // 同日付で借方・貸方の同じものをまとめる
     const jnlMap = new Map<string, IJournal>();
     for (const [index, jnl] of virtualJournals.entries()) {
@@ -113,7 +122,6 @@ export default class VirtualBook {
       }
       jnlMap.set(vid, jnl);
     }
-    // return virtualJournals;
     return [...targetJournals, ...Array.from(jnlMap.values())];
   }
 
@@ -143,8 +151,7 @@ export default class VirtualBook {
    * = 仮想科目の勘定元帳だけを取り出す
    *  */
   public async generateDiffFactors(): Promise<IBalanceItem[]> {
-    const balance = new Balance(await this.getVirtualJournals());
-    return balance.virtualSummary;
+    return new Balance(await this.getVirtualJournals()).virtualSummary;
   }
 
   constructor(

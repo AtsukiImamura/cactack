@@ -67,7 +67,17 @@ export default class UserAuthService {
   }
 
   public getFirebaseUser(): firebase.User | null {
+    // firebase.auth.re
     return firebase.auth().currentUser;
+  }
+
+  public async getFirebaseUserLatest(): Promise<firebase.User | null> {
+    const user = firebase.auth().currentUser;
+    if (!user) {
+      return null;
+    }
+    await user.reload();
+    return user;
   }
 
   public async finishTopIntroduction(): Promise<void> {

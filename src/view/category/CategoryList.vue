@@ -36,7 +36,7 @@
           }}
         </span>
       </div>
-      <div class="results" v-if="!deletePage">
+      <div class="results" v-if="!deletePage" :key="hash">
         <div
           class="category"
           v-for="(category, index) in categories"
@@ -237,7 +237,7 @@ export default class CategoryList extends Vue {
       `「${item.name}」をもとに戻しました`,
       TemporalMessage.TYPE_SUCCESS
     );
-    this.hashSeed = item;
+    this.hashSeed = [item, new Date()];
   }
 
   public async deleteItem(item: IUserCategoryItem) {
@@ -247,16 +247,19 @@ export default class CategoryList extends Vue {
       TemporalMessage.TYPE_SUCCESS
     );
     await AppModule.init();
+    this.hashSeed = [item, new Date()];
   }
 
   public async disableItem(item: IUserCategoryItem) {
     item.disable();
     await container.resolve(UserCategoryItemFlyweight).update(item);
+    this.hashSeed = [item, new Date()];
   }
 
   public async enableItem(item: IUserCategoryItem) {
     item.enable();
     await container.resolve(UserCategoryItemFlyweight).update(item);
+    this.hashSeed = [item, new Date()];
   }
 
   public onItemDeleted(item: IUserCategoryItem) {
@@ -264,6 +267,7 @@ export default class CategoryList extends Vue {
       `「${item.name}」をごみ箱に移動しました`,
       TemporalMessage.TYPE_SUCCESS
     );
+    this.hashSeed = [item, new Date()];
   }
 
   public async mounted() {

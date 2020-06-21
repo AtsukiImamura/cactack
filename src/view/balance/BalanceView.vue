@@ -19,6 +19,7 @@
         </div>
       </div>
       <div class="result">
+        <BalanceChart></BalanceChart>
         <div class="view">
           <div class="side">
             <div class="title">借方</div>
@@ -44,13 +45,15 @@ import AppModule from "@/store/ApplicationStore";
 import Balance, { IBalanceItem } from "@/model/virtual/Balance";
 import DatePicker from "vuejs-datepicker";
 import BalanceSide from "@/view/balance/BalanceSide.vue";
+import BalanceChart from "@/view/top/components/BalanceChart.vue";
 
 @Component({
   components: {
     CommonFrame,
     DatePicker,
     BalanceSide,
-  },
+    BalanceChart
+  }
 })
 export default class BalanceView extends Vue {
   public date: IJournalDate = JournalDate.today();

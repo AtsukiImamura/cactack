@@ -97,9 +97,11 @@ class AppStore extends VuexModule {
 
   @Action({ rawError: true })
   public async init() {
-    await container.resolve(UserTagFlyweight).import();
-    await container.resolve(UserCategoryItemFlyweight).import();
-    await container.resolve(UserCategoryFlyweight).import();
+    Promise.all([
+      await container.resolve(UserTagFlyweight).import(),
+      await container.resolve(UserCategoryItemFlyweight).import(),
+      await container.resolve(UserCategoryFlyweight).import(),
+    ]);
     const journals = await container.resolve(JournalRepository).getUsersAll();
     this.INIT(journals);
   }

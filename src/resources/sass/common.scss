@@ -611,6 +611,44 @@ body {
   }
 }
 
+.loading {
+  width: 60%;
+  margin: 100px 20%;
+  .loading-linear {
+    $heght: 10px;
+    width: 100%;
+    height: $heght;
+    border-radius: $heght / 2;
+    background-color: rgba(30, 30, 30, 0.2);
+    position: relative;
+    &:after {
+      position: absolute;
+      content: "";
+      width: 12%;
+      height: 100%;
+      border-radius: $heght / 2;
+      top: 0px;
+      left: 0px;
+      background-color: rgba(0, 0, 172, 0.5);
+      @keyframes loading {
+        0% {
+          left: 0%;
+          width: 12%;
+        }
+        88% {
+          left: 88%;
+          width: 12%;
+        }
+        100% {
+          left: 100%;
+          width: 0%;
+        }
+      }
+      animation: loading 1.2s 0s linear infinite running;
+    }
+  }
+}
+
 .loading-1 {
   $cell-width: 18px;
   $cell-height: 30px;

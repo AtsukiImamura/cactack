@@ -2,10 +2,7 @@
   <div class="balance-diff-graph">
     <div class="balance begin">
       <div class="graph" :style="{ height: `${beginGraphHeightPercent}%` }">
-        <BalanceGraph
-          :balance="beginBalance"
-          :key="beginBalance.journals.length"
-        ></BalanceGraph>
+        <BalanceGraph :balance="beginBalance" :key="beginBalance.journals.length"></BalanceGraph>
       </div>
       <div class="pad" :style="{ height: `${beginPadPercent}%` }"></div>
     </div>
@@ -19,12 +16,9 @@
           margin: '0px 2px',
         }"
       >
-        <div
-          class="item"
-          :style="{
+        <div class="item" :style="{
             height: `${diff.heightPercent}%`,
-          }"
-        >
+          }">
           <span>{{ diff.item.item.name }} {{ diff.item.amount }}</span>
         </div>
         <div class="pad" :style="{ height: `${diff.padPercent}%` }"></div>
@@ -32,10 +26,7 @@
     </div>
     <div class="balance end">
       <div class="graph" :style="{ height: `${endGraphHeightPercent}%` }">
-        <BalanceGraph
-          :balance="endBalance"
-          :key="beginBalance.journals.length"
-        ></BalanceGraph>
+        <BalanceGraph :balance="endBalance" :key="beginBalance.journals.length"></BalanceGraph>
       </div>
       <div class="pad" :style="{ height: `${endPadPercent}%` }"></div>
     </div>
@@ -82,7 +73,7 @@ export default class BalanceDiffGraph extends Vue {
             this.totalAmount) *
             100 +
           this.diffPadPercent,
-        heightPercent: (Math.abs(diff.amount) / this.totalAmount) * 100,
+        heightPercent: (Math.abs(diff.amount) / this.totalAmount) * 100
       });
     }
     // console.log("diff displays::");
@@ -92,7 +83,7 @@ export default class BalanceDiffGraph extends Vue {
 
   public get diffMaxAmount(): number {
     return this.diffs
-      .filter((d) => d.amount > 0)
+      .filter(d => d.amount > 0)
       .reduce((acc, cur) => acc + cur.amount, 0);
   }
 
@@ -161,11 +152,13 @@ export default class BalanceDiffGraph extends Vue {
 
   @Watch("book")
   private async updateBook() {
-    this.beginBalance = await this.book.generateBalanceOfBeginning();
-    this.endBalance = await this.book.generateBalanceOfEnding();
-    this.diffs = (await this.book.generateDiffFactors()).sort(
-      (a, b) => b.amount - a.amount
-    );
+    await Promise.all([
+      (this.beginBalance = await this.book.generateBalanceOfBeginning()),
+      (this.endBalance = await this.book.generateBalanceOfEnding()),
+      (this.diffs = (await this.book.generateDiffFactors()).sort(
+        (a, b) => b.amount - a.amount
+      ))
+    ]);
   }
   public mounted(): void {
     this.updateBook();

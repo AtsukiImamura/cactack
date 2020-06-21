@@ -96,7 +96,7 @@ export default class ReserveSettlementAction extends SettlementAction {
     ) {
       return [];
     }
-    const debitCategoryItem = await container
+    const debitCategoryItem = container
       .resolve(UserCategoryItemFlyweight)
       .get(this.debitCategoryItemId);
     if (!debitCategoryItem) {
@@ -106,7 +106,7 @@ export default class ReserveSettlementAction extends SettlementAction {
       );
     }
 
-    const creditCategoryItem = await container
+    const creditCategoryItem = container
       .resolve(UserCategoryItemFlyweight)
       .get(this.creditCategoryItemId);
     if (!creditCategoryItem) {

@@ -41,11 +41,12 @@ import UserAuthService from "@/service/UserAuthService";
 import AuthFrame from "@/view/auth/AuthFrame.vue";
 import ErrorMessage from "@/model/error/ErrorMessage";
 import ProcessButton from "@/view/common/ProcessButton.vue";
-import AppModule from "@/store/ApplicationStore";
+// import AppModule from "@/store/ApplicationStore";
 import EmailVerificationError from "../../model/error/custome/EmailVerificationError";
 
 @Component({ components: { AuthFrame, ProcessButton } })
 export default class UserLogin extends Vue {
+  // public email: string = "ohmoon.au@gmail.com";
   // public email: string = "imamura.amzn.code@gmail.com";
   // public password: string = "hogehoge";
 
@@ -63,8 +64,14 @@ export default class UserLogin extends Vue {
   public mounted(): void {
     if (this.email && this.password) {
       this.signIn();
+      return;
     }
-    // container.resolve(CategoryItemMasterRepository).insertAll();
+
+    // console.log("UserLogin", this.$route.path);
+    // if (this.$route.path.startsWith("/auth/login/auto")) {
+    //   this.$router.push("/auth/attempt-to-login");
+    //   return;
+    // }
   }
 
   public async verifyEmail() {
@@ -102,7 +109,7 @@ export default class UserLogin extends Vue {
         throw new EmailVerificationError();
       }
       this.$router.push("/");
-      await AppModule.init();
+      // await AppModule.init();
     } catch (err) {
       const message = new ErrorMessage(err.code);
       this.message = message.value;

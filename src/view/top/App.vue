@@ -25,6 +25,7 @@
             ></DatePicker>
           </div>
         </div>
+
         <div
           class="gragh"
           v-intro="'今月の資産変動を表示しています。左が月初、右が月末です。'"
@@ -38,10 +39,18 @@
           <div class="loading" v-if="loading">
             <div class="loading-linear"></div>
           </div>
-          <BalanceDiffGraph v-if="!loading" :book="book"></BalanceDiffGraph>
+          <!-- <BalanceDiffGraph v-if="!loading" :book="book"></BalanceDiffGraph> -->
+          <div class="charts" v-show="journals.length > 0">
+            <div class="chart balance">
+              <BalanceChart :date="periodEndWith"></BalanceChart>
+            </div>
+            <div class="chart spendings">
+              <SpendingsChart :begin-with="periodBeginWith" :end-with="periodEndWith"></SpendingsChart>
+            </div>
+          </div>
         </div>
       </div>
-      <div
+      <!-- <div
         class="details"
         :key="
           `${ledgerKey}${
@@ -59,47 +68,50 @@
             <Ledger :ledger="led"></Ledger>
           </div>
         </div>
-      </div>
+      </div>-->
     </div>
   </CommonFrame>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Watch } from "vue-property-decorator";
-import { IDiffGraghOption } from "@/view/interface/IDiffGragh";
 import IJournal from "@/model/interface/IJournal";
 import AppModule from "@/store/ApplicationStore";
 import { container } from "tsyringe";
-import NumberIncrementor from "@/view/common/NumberIncrementor.vue";
+// import NumberIncrementor from "@/view/common/NumberIncrementor.vue";
 import UserAuthService from "@/service/UserAuthService";
 import CommonFrame from "@/view/common/CommonFrame.vue";
 import IJournalDate from "@/model/interface/IJournalDate";
-import FlowTypeSelector from "@/view/common/FlowTypeSelector.vue";
-import AccountLedger from "@/model/virtual/AccountLedger";
-import VirtualBook from "@/model/virtual/VirtualBook";
-import Ledger from "@/view/ledger/Ledger.vue";
-import LedgerSummary from "@/view/ledger/LedgerSummary.vue";
-import hash from "object-hash";
+// import FlowTypeSelector from "@/view/common/FlowTypeSelector.vue";
+// import AccountLedger from "@/model/virtual/AccountLedger";
+// import VirtualBook from "@/model/virtual/VirtualBook";
+// import Ledger from "@/view/ledger/Ledger.vue";
+// import LedgerSummary from "@/view/ledger/LedgerSummary.vue";
+// import hash from "object-hash";
 import DatePicker from "vuejs-datepicker";
-import BalanceDiffGraph from "@/view/balance/BalanceDiffGraph.vue";
+// import BalanceDiffGraph from "@/view/balance/BalanceDiffGraph.vue";
 import TopNoticeModal from "./TopNoticeModal.vue";
+import BalanceChart from "@/view/top/components/BalanceChart.vue";
+import SpendingsChart from "@/view/top/components/SpendingsChart.vue";
 
 @Component({
   components: {
-    NumberIncrementor,
+    // NumberIncrementor,
     CommonFrame,
-    FlowTypeSelector,
-    Ledger,
-    LedgerSummary,
+    // FlowTypeSelector,
+    // Ledger,
+    // LedgerSummary,
     DatePicker,
-    BalanceDiffGraph,
-    TopNoticeModal
+    // BalanceDiffGraph,
+    TopNoticeModal,
+    BalanceChart,
+    SpendingsChart
   }
 })
 export default class App extends Vue {
-  public ledgers: AccountLedger[] = [];
+  // public ledgers: AccountLedger[] = [];
 
-  public book: VirtualBook = new VirtualBook([]);
+  // public book: VirtualBook = new VirtualBook([]);
 
   public get periodBeginWith(): IJournalDate {
     return AppModule.periodBeginWith;
@@ -115,55 +127,26 @@ export default class App extends Vue {
     AppModule.setPeriodEndWith(date);
   }
 
-  public diffGraghOption: IDiffGraghOption = {
-    left: { credit: [], debit: [] },
-    right: { credit: [], debit: [] },
-    diffs: [],
-    displayOptions: {
-      displayItemName: true,
-      displayItemAmount: true,
-      diffBorderColor: "#ffffff",
-      diffColor: "#ffffff",
-      balanceBorderColor: "#ffffff"
-    }
-  };
-
-  public get ledgerKey(): string {
-    return hash(this.ledgers);
-  }
+  // public get ledgerKey(): string {
+  //   return hash(this.ledgers);
+  // }
 
   @Watch("journals")
   public async updateLedgers() {
-    const book = new VirtualBook(
-      this.journals,
-      this.periodBeginWith,
-      this.periodEndWith
-    );
-    this.book = book;
-    this.ledgers = await book.getVirtualLedgers();
-    this.diffGraghOption = {
-      left: (await book.generateBalanceOfBeginning()).summary,
-      right: (await book.generateBalanceOfEnding()).summary,
-      diffs: (await book.generateDiffFactors()).map(diff => ({
-        name: diff.item.name,
-        amount: diff.amount
-      })),
-      displayOptions: {
-        displayItemName: true,
-        displayItemAmount: true,
-        diffBorderColor: "#ffffff",
-        diffColor: "#ffffff",
-        balanceBorderColor: "#ffffff"
-      }
-    };
+    // const book = new VirtualBook(
+    //   this.journals,
+    //   this.periodBeginWith,
+    //   this.periodEndWith
+    // );
+    // this.book = book;
+    // this.ledgers = await book.getVirtualLedgers();
   }
 
   public async mounted() {
-    await AppModule.init();
-    await this.updateLedgers();
+    await Promise.all([AppModule.init(), this.doIntro()]);
+  }
 
-    // (this.$refs.topNoticeModal as TopNoticeModal).open();
-
+  public async doIntro() {
     if (document.body.clientWidth <= 760) {
       return;
     }
@@ -185,18 +168,19 @@ export default class App extends Vue {
   }
 
   public get loading(): boolean {
-    return this.journals.length > 0 && this.ledgers.length === 0;
+    return false;
+    // return this.journals.length > 0 && this.ledgers.length === 0;
   }
 }
 </script>
 
 <style lang="scss" scoped>
 .h {
-  height: 55vh;
+  // height: 55vh;
   // background-color: #606060;
   padding: 0px;
   @include sm {
-    height: 110px;
+    // height: 110px;
     background-color: #ffffff;
   }
 
@@ -231,14 +215,46 @@ export default class App extends Vue {
     width: 100%;
     height: calc(100% - 90px);
     margin: 15px 0px 0px 0px;
-    @include responsive-width(70%, 100%, 0%, 0%);
-    @include md {
-      height: calc(100% - 120px);
-    }
-    @include sm {
-      display: none;
-    }
+    // @include responsive-width(70%, 100%, %);
+    // @include md {
+    //   height: calc(100% - 120px);
+    // }
+    // @include sm {
+    //   width: 100%;
+    // }
     position: relative;
+    .charts {
+      margin: 20px 0px;
+      display: flex;
+      width: 100%;
+      .chart {
+        width: 50%;
+        position: relative;
+        &:after {
+          position: absolute;
+          top: 50%;
+          font-size: 1.3rem;
+        }
+        &.balance:after {
+          left: calc(50% - 40px);
+          content: "期末資産";
+        }
+        &.spendings:after {
+          left: calc(50% - 20px);
+          content: "費用";
+        }
+      }
+
+      > div {
+        height: 420px;
+      }
+      @include sm {
+        flex-wrap: wrap;
+        .chart {
+          width: 100%;
+        }
+      }
+    }
     &:after {
       content: "";
       position: absolute;
@@ -265,6 +281,7 @@ export default class App extends Vue {
   // display: flex;
   // flex-wrap: wrap;
   margin: 10px 0px;
+  display: none;
   .app-ledgers {
     // width: 100%;
     display: flex;

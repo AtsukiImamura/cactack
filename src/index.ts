@@ -205,6 +205,11 @@ const router = new Router({
       component: () =>
         import(/* webpackChunkName: "auth" */ "@/view/auth/UserLogin.vue"),
     },
+    {
+      path: "/auth/login/auto",
+      component: () =>
+        import(/* webpackChunkName: "auth" */ "@/view/auth/UserLogin.vue"),
+    },
     // {
     //   path: "/badget",
     //   component: () =>
@@ -241,19 +246,38 @@ const router = new Router({
       component: () =>
         import(/* webpackChunkName: "badget" */ "@/view/config/Configs.vue"),
     },
+    {
+      path: "/load",
+      component: () =>
+        import(/* webpackChunkName: "badget" */ "@/view/Load.vue"),
+    },
+
+    // {
+    //   path: "/auth/attempt-to-login",
+    //   component: () =>
+    //     import(/* webpackChunkName: "badget" */ "@/view/AttemptToLogin.vue"),
+    // },
   ],
 });
 router.beforeEach((to, from, next) => {
+  if (from.path.startsWith("/load") && to.path.startsWith("/load")) {
+    return;
+  }
+  if (from.path.startsWith("/load") || to.path.startsWith("/load")) {
+    next();
+    return;
+  }
   if (
+    !to.path.startsWith("/load") &&
     !to.path.startsWith("/auth") &&
     !to.path.startsWith("/top") &&
     !to.path.startsWith("/user") &&
-    !container.resolve(UserAuthService).userId
+    !container.resolve(UserAuthService).getFirebaseUser()
   ) {
     next("/auth/login");
     return;
   }
-  next();
+  next(`/load?to=${to.path}`);
 });
 
 new Vue({
