@@ -1,30 +1,20 @@
 <script lang="ts">
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 import { Doughnut } from "vue-chartjs";
 import { ChartData } from "chart.js";
 import IJournalDate from "@/model/interface/IJournalDate";
 import JournalDate from "@/model/common/JournalDate";
-import Balance from "@/model/virtual/Balance";
-import VirtualBook from "@/model/virtual/VirtualBook";
-import AppModule from "@/store/ApplicationStore";
-import IJournal from "../../../model/interface/IJournal";
 import Color from "color";
+// import { container } from "tsyringe";
+import BalanceInfoLoader from "@/functions/loader/BalanceInfoLoader";
+// import UserCategoryFlyweight from "../../../repository/flyweight/UserCategoryFlyweight";
 
 @Component
 export default class BalanceChart extends Mixins(Doughnut) {
   @Prop({ default: () => JournalDate.today() }) date!: IJournalDate;
 
-  public balance: Balance = new Balance([]);
-
-  public get journals(): IJournal[] {
-    return AppModule.journals;
-  }
-
-  @Watch("journals")
   public async updateGrapgh() {
-    const book = new VirtualBook(this.journals, undefined, this.date);
-    this.balance = await book.generateBalanceOfEnding();
-    this.renderChart(this.chartData, {
+    this.renderChart(await this.loadChartData(), {
       responsive: true,
       maintainAspectRatio: false
     });
@@ -34,17 +24,21 @@ export default class BalanceChart extends Mixins(Doughnut) {
     this.updateGrapgh();
   }
 
-  public get chartData(): ChartData {
+  public async loadChartData(): Promise<ChartData> {
+    const loader = await BalanceInfoLoader.load(this.date);
+    const targetDataList = loader.bandled.filter(
+      info => info.category.type.isDebit && info.category.type.isReal
+    );
     return {
-      labels: this.balance.debitSide.map(d => d.item.name),
+      labels: targetDataList.map(d => d.category.name),
       datasets: [
         {
           label: "資産",
-          data: this.balance.debitSide.map(d => d.amount),
+          data: targetDataList.map(d => d.amount),
           borderWidth: 1,
           borderColor: "#ffffff",
-          backgroundColor: this.balance.debitSide.map((d, index) =>
-            Color.hsl((index / this.balance.debitSide.length) * 360, 50, 40)
+          backgroundColor: targetDataList.map((d, index) =>
+            Color.hsl((index / targetDataList.length) * 360, 50, 40)
               .rgb()
               .string()
           )

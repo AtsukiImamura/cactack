@@ -19,7 +19,7 @@
         </div>
       </div>
       <div class="result">
-        <BalanceChart></BalanceChart>
+        <BalanceChart :key="date.toString()"></BalanceChart>
         <div class="view">
           <div class="side">
             <div class="title">借方</div>

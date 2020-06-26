@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "esModuleInterop": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "outDir": "lib",
-    "sourceMap": true,
+    // "sourceMap": true,
     "strict": true,
     "target": "es2017",
     "baseUrl": "../",
+    "experimentalDecorators": true,
     // "outDir": "./lib/index.js",
     "paths": {
       "@/*": ["src/*"]

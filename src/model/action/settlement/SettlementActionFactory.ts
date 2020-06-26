@@ -1,4 +1,4 @@
-import CreditSettlementAction from "@/model/action/settlement/CreditCardSettlementAction";
+import CreditCardSettlementAction from "@/model/action/settlement/CreditCardSettlementAction";
 import ReserveSettlementAction from "@/model/action/settlement/ReserveSettlementAction";
 import DepositSettlementAction from "@/model/action/settlement/DepositSettlementAction";
 import SettlementAction from "./SettlementAction";
@@ -11,8 +11,8 @@ export default class SettlementActionFactory {
     }
     const method = args[0];
     switch (method) {
-      case CreditSettlementAction.COMMAND_NAME:
-        return new CreditSettlementAction(args.slice(1));
+      case CreditCardSettlementAction.COMMAND_NAME:
+        return new CreditCardSettlementAction(args.slice(1));
       case DepositSettlementAction.COMMAND_NAME:
         return new DepositSettlementAction(args.slice(1));
       case ReserveSettlementAction.COMMAND_NAME:

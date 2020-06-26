@@ -8,6 +8,7 @@ import VirtualJournal from "../../VirtualJournal";
 import JournalRepository from "@/repository/JournalRepository";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 import JournalDetail from "@/model/JournalDetail";
+import { DJournal } from "@/model/interface/DJournal";
 
 export default class ReserveSettlementAction extends SettlementAction {
   public static readonly COMMAND_NAME = "RESERVE";
@@ -85,7 +86,7 @@ export default class ReserveSettlementAction extends SettlementAction {
     }
   }
 
-  public async execute(ancestor?: IJournal): Promise<IJournal[]> {
+  public async execute(ancestor?: IJournal | DJournal): Promise<IJournal[]> {
     if (
       ancestor &&
       (
