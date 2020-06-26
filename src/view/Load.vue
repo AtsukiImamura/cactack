@@ -7,15 +7,10 @@
 </template>
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { container } from "tsyringe";
-import UserAuthService from "../service/UserAuthService";
 
 @Component({})
 export default class Load extends Vue {
   public created(): void {
-    const user = container.resolve(UserAuthService).getFirebaseUser();
-    console.log(user);
-
     const hash = location.hash;
     const paramTokens = hash
       .split("?")
