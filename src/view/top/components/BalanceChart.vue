@@ -27,10 +27,10 @@ export default class BalanceChart extends Mixins(Doughnut) {
   public async loadChartData(): Promise<ChartData> {
     const loader = await BalanceInfoLoader.load(this.date);
     const targetDataList = loader.bandled.filter(
-      info => info.category.type.isDebit && info.category.type.isReal
+      info => info.item.type.isDebit && info.item.type.isReal
     );
     return {
-      labels: targetDataList.map(d => d.category.name),
+      labels: targetDataList.map(d => d.item.name),
       datasets: [
         {
           label: "資産",

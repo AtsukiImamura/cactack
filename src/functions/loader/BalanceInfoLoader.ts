@@ -5,7 +5,9 @@ import firebase from "firebase";
 import { container } from "tsyringe";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
-import { IUserCategoryItem } from "@/model/interface/ICategory";
+import { BalanceSummaryDto } from "@/model/dto/BalanceSummaryDto";
+import { BalanceSummaryResponseItem } from "../base/balance/BalanceResponse";
+import { ICategoryItem } from "@/model/interface/ICategory";
 export default class BalanceInfoLoader {
   public static async load(date: IJournalDate) {
     const ledgersResult = (await firebase
@@ -13,12 +15,7 @@ export default class BalanceInfoLoader {
       .httpsCallable("getBalance")({
       date: date.toString(),
     })) as {
-      data: IApiResponse<
-        {
-          itemId: string;
-          amount: number;
-        }[]
-      >;
+      data: IApiResponse<BalanceSummaryResponseItem[]>;
     };
 
     if (ledgersResult.data.code !== 200) {
@@ -33,19 +30,19 @@ export default class BalanceInfoLoader {
     );
   }
 
-  private values: {
-    item: IUserCategoryItem;
-    amount: number;
-  }[] = [];
+  private values: BalanceSummaryDto[] = [];
 
   public get list() {
     return this.values;
   }
 
-  public get bandled() {
+  public get bandled(): BalanceSummaryDto[] {
     const categoryAmountMap = new Map<string, number>();
     for (const data of this.list) {
-      const categoryId = data.item.parent.id;
+      if (!(data.item as any).parent) {
+        continue;
+      }
+      const categoryId = (data.item as ICategoryItem).parent.id;
       if (!categoryAmountMap.has(categoryId)) {
         categoryAmountMap.set(categoryId, 0);
       }
@@ -56,18 +53,13 @@ export default class BalanceInfoLoader {
     }
     return Array.from(categoryAmountMap.entries()).map(
       ([categoryId, amount]) => ({
-        category: container.resolve(UserCategoryFlyweight).get(categoryId)!,
+        item: container.resolve(UserCategoryFlyweight).get(categoryId)!,
         amount: amount,
       })
     );
   }
 
-  constructor(
-    values: {
-      item: IUserCategoryItem;
-      amount: number;
-    }[]
-  ) {
+  constructor(values: BalanceSummaryDto[]) {
     this.values = values;
   }
 }

@@ -5,7 +5,8 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
-      "**/development.**.js"
+      "**/development.**.js",
+      "function_test.js"
     ],
     "rewrites": [
       {
