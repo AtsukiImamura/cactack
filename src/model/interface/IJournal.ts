@@ -75,3 +75,15 @@ export interface IExecutable {
 
   execute: () => void;
 }
+
+export interface IContinuousJournalInfo {
+  unit: number;
+
+  day: number;
+}
+
+export enum ContinuousUnit {
+  BY_WEEK = 0,
+
+  BY_MONTH = 1,
+}

@@ -30,15 +30,15 @@ router.beforeEach((to, from, next) => {
   //   next();
   //   return;
   // }
-  if (
-    !to.path.startsWith("/auth") &&
-    !to.path.startsWith("/top") &&
-    !to.path.startsWith("/user") &&
-    !container.resolve(UserAuthService).getFirebaseUser()
-  ) {
-    next("/auth/login");
-    return;
-  }
+  // if (
+  //   !to.path.startsWith("/auth") &&
+  //   !to.path.startsWith("/top") &&
+  //   !to.path.startsWith("/user") &&
+  //   !container.resolve(UserAuthService).getFirebaseUser()
+  // ) {
+  //   next("/auth/login");
+  //   return;
+  // }
   // next(`/load?to=${to.path}`);
   next();
 });

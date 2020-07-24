@@ -1,4 +1,5 @@
 import IJournalDate from "@/model/interface/IJournalDate";
+// import * as dayjs from "dayjs";
 
 export default class JournalDate implements IJournalDate {
   public static cast(value: string | IJournalDate): IJournalDate {

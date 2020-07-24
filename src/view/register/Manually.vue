@@ -4,12 +4,19 @@
       <div class="title">
         <h2>{{ title }}</h2>
       </div>
-      <JournalEditor :journal="defaultJournal" @commit="commitJournal"></JournalEditor>
+      <JournalEditor
+        :journal="defaultJournal"
+        @commit="commitJournal"
+      ></JournalEditor>
       <div v-if="canSaveAsTemplate">
         <div class="template">
           <div class="section">
             <div class="section template-selection">
-              <input id="need-tempalte" type="checkbox" v-model="needTemplate" />
+              <input
+                id="need-tempalte"
+                type="checkbox"
+                v-model="needTemplate"
+              />
               <label for="need-tempalte">テンプレートに登録</label>
             </div>
             <div class="section template-selection" v-show="needTemplate">
@@ -26,8 +33,31 @@
           </div>
         </div>
       </div>
+      <div class="continuous">
+        <div class="template">
+          <div class="section">
+            <div class="section continuous-jnl-selection">
+              <input
+                id="continuous-jnl"
+                type="checkbox"
+                v-model="isContinuous"
+              />
+              <label for="continuous-jnl">周期的に作成</label>
+            </div>
+            <div class="section continuous-unit">
+              <div>
+                <Selector :items="continuousUnitSelections"></Selector>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="actions">
-        <ProcessButton value="OK" :click="register" :disabled="!canRegister"></ProcessButton>
+        <ProcessButton
+          value="OK"
+          :click="register"
+          :disabled="!canRegister"
+        ></ProcessButton>
       </div>
     </div>
   </CommonFrame>
@@ -38,7 +68,7 @@ import { Component, Vue } from "vue-property-decorator";
 import RegisterFrame from "@/view/register/RegisterFrame.vue";
 import CommonFrame from "@/view/common/CommonFrame.vue";
 import ProcessButton from "@/view/common/ProcessButton.vue";
-import IJournal from "@/model/interface/IJournal";
+import IJournal, { ContinuousUnit } from "@/model/interface/IJournal";
 import JournalRepository from "@/repository/JournalRepository";
 import AppModule from "@/store/ApplicationStore";
 import JournalEditor from "@/view/register/JournalEditor.vue";
@@ -49,6 +79,8 @@ import TemplateRepository from "@/repository/TemplateRepository";
 import Journal from "@/model/Journal";
 import JournalDetail from "@/model/JournalDetail";
 import { IUserCategoryItem } from "@/model/interface/ICategory";
+import Selector from "@/view/common/Selector.vue";
+import { SelectorItem } from "../../model/interface/dto/Selector";
 
 @Component({
   components: {
@@ -56,6 +88,7 @@ import { IUserCategoryItem } from "@/model/interface/ICategory";
     CommonFrame,
     ProcessButton,
     JournalEditor,
+    Selector,
   },
 })
 export default class Manually extends Vue {
@@ -65,6 +98,8 @@ export default class Manually extends Vue {
 
   public needPeriod: boolean = false;
 
+  public isContinuous: boolean = false;
+
   public get canSaveAsTemplate(): boolean {
     for (const tplt of AppModule.templates) {
       if (tplt.matchPattern(this.journal)) {
@@ -72,6 +107,32 @@ export default class Manually extends Vue {
       }
     }
     return true;
+  }
+
+  public continuousUnitSelections: SelectorItem[] = [
+    {
+      seq: ContinuousUnit.BY_WEEK,
+      content: "週ごと",
+    },
+    {
+      seq: ContinuousUnit.BY_MONTH,
+      content: "月ごと",
+    },
+  ];
+
+  public continuousUnit: number = -1;
+
+  public get continuousJournalDaySelections(): SelectorItem[] {
+    switch (this.continuousUnit) {
+      case ContinuousUnit.BY_WEEK:
+      // Object.values(DayOfWeek).map(d => ({
+      //   seq: d,
+      //   content:
+      // }))
+      case ContinuousUnit.BY_MONTH:
+      default:
+        return [];
+    }
   }
 
   public needTemplate: boolean = false;
