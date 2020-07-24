@@ -44,9 +44,15 @@
               />
               <label for="continuous-jnl">周期的に作成</label>
             </div>
-            <div class="section continuous-unit">
-              <div>
-                <Selector :items="continuousUnitSelections"></Selector>
+            <div class="section continuous-unit" v-show="isContinuous">
+              <div :style="{ width: '100px' }">
+                <Selector
+                  :items="continuousUnitSelections"
+                  @select="continuousUnit = $event.seq"
+                ></Selector>
+              </div>
+              <div v-show="continuousUnit >= 0" :style="{ width: '100px' }">
+                <Selector :items="continuousJournalDaySelections"></Selector>
               </div>
             </div>
           </div>
@@ -81,6 +87,8 @@ import JournalDetail from "@/model/JournalDetail";
 import { IUserCategoryItem } from "@/model/interface/ICategory";
 import Selector from "@/view/common/Selector.vue";
 import { SelectorItem } from "../../model/interface/dto/Selector";
+import JournalDate, { DayOfWeek } from "../../model/common/JournalDate";
+import IJournalDate from "../../model/interface/IJournalDate";
 
 @Component({
   components: {
@@ -125,11 +133,21 @@ export default class Manually extends Vue {
   public get continuousJournalDaySelections(): SelectorItem[] {
     switch (this.continuousUnit) {
       case ContinuousUnit.BY_WEEK:
-      // Object.values(DayOfWeek).map(d => ({
-      //   seq: d,
-      //   content:
-      // }))
+        let date: IJournalDate = JournalDate.byDayOfWeek(DayOfWeek.SUNDAY);
+        const items: SelectorItem[] = [];
+        for (let d = 0; d < 7; d++) {
+          items.push({
+            seq: date.toDate().getDay(),
+            content: date.dayName,
+          });
+          date = date.getNextDay();
+        }
+        return items;
       case ContinuousUnit.BY_MONTH:
+        return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => ({
+          seq: m,
+          content: `${m}月`,
+        }));
       default:
         return [];
     }

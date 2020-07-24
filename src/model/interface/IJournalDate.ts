@@ -5,6 +5,8 @@ export default interface IJournalDate {
 
   day: number;
 
+  dayName: string;
+
   beforeThanOrEqualsTo: (date: IJournalDate) => boolean;
 
   afterThanOrEqualsTo: (date: IJournalDate) => boolean;
@@ -20,6 +22,12 @@ export default interface IJournalDate {
   getNextMonth: () => IJournalDate;
 
   getNextDay: () => IJournalDate;
+
+  getPreviousDay: () => IJournalDate;
+
+  getNextWeek: () => IJournalDate;
+
+  getPreviousWeek: () => IJournalDate;
 
   getAfterMonthOf: (val: number) => IJournalDate;
 

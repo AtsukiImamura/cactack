@@ -116,10 +116,10 @@ test("cast 3", () => {
 });
 
 test("cast 4", () => {
-  const date = JournalDate.cast("2020/2");
+  const date = JournalDate.cast("2020/2/1");
   expect(date.year).toBe(2020);
   expect(date.month).toBe(2);
-  expect(date.day).toBe(-1);
+  expect(date.day).toBe(1);
 });
 
 test("to string 1", () => {
@@ -129,5 +129,5 @@ test("to string 1", () => {
 
 test("to string 2", () => {
   const date = JournalDate.byMonth(2020, 3);
-  expect(date.toString()).toBe("2020/3");
+  expect(date.toString()).toBe("2020/3/1");
 });

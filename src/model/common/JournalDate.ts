@@ -1,5 +1,10 @@
 import IJournalDate from "@/model/interface/IJournalDate";
-// import * as dayjs from "dayjs";
+import dayjs from "dayjs";
+
+var localeData = require("dayjs/plugin/localeData");
+dayjs.extend(localeData);
+require("dayjs/locale/ja");
+dayjs.locale("ja");
 
 export default class JournalDate implements IJournalDate {
   public static cast(value: string | IJournalDate): IJournalDate {
@@ -9,7 +14,7 @@ export default class JournalDate implements IJournalDate {
    * 今日の値を持つ日付クラスを作成する
    */
   public static today(): IJournalDate {
-    return JournalDate.byDate(new Date());
+    return new JournalDate(new Date());
   }
 
   /**
@@ -17,11 +22,11 @@ export default class JournalDate implements IJournalDate {
    * @param {Date} date
    */
   public static byDate(date: Date) {
-    return JournalDate.byDay(
-      date.getFullYear(),
-      date.getMonth() + 1,
-      date.getDate()
-    );
+    return new JournalDate(date);
+  }
+
+  public static byDayOfWeek(day: DayOfWeek, date?: Date) {
+    return new JournalDate((date ? dayjs(date) : dayjs()).day(day));
   }
 
   /**
@@ -35,14 +40,16 @@ export default class JournalDate implements IJournalDate {
     month: number | string,
     day: number | string
   ): IJournalDate {
-    return new JournalDate(JournalDate.tokenize(year, month, day));
+    return new JournalDate(
+      new Date(Number(year), Number(month) - 1, Number(day))
+    );
   }
 
   public static byMonth(
     year: number | string,
     month: number | string
   ): IJournalDate {
-    return new JournalDate(`${year}/${month}`);
+    return new JournalDate(`${year}/${month}/1`);
   }
 
   public static lastDayOf(year: number, month: number) {
@@ -61,75 +68,41 @@ export default class JournalDate implements IJournalDate {
     return d1.afterThan(d2) ? d1 : d2;
   }
 
-  private static tokenize(
-    year: number | string,
-    month: number | string,
-    day: number | string
-  ) {
-    let token = "";
-    if (!year || year === "" || year <= 0) {
-      return token;
-    }
-    token += year;
-    if (!month || month === "" || month <= 0) {
-      return token;
-    }
-    token += `/${month}`;
-    if (!day || day === "" || day <= 0) {
-      return token;
-    }
-    return (token += `/${day}`);
+  private static parse(token: string): dayjs.Dayjs {
+    return dayjs(token, "YYYY/M/D");
   }
 
-  private static parse(token: string): number[] {
-    return token.split("/").map((t) => Number(t));
-  }
+  private date: dayjs.Dayjs;
 
-  private _year: number;
-
-  private _month: number;
-
-  private _day: number = -1;
-  /** for calculating next month since day might be ajusted due to overflowing. */
-  private _givenDay: number;
-
-  public constructor(date: string | Date) {
-    if (typeof date !== "string") {
-      this._year = date.getFullYear();
-      this._month = date.getMonth() + 1;
-      this._day = date.getDate();
-      this._givenDay = this._day;
+  public constructor(val: string | Date | dayjs.Dayjs) {
+    if (typeof val !== "string") {
+      this.date = dayjs(val);
       return;
     }
-    const tokens = JournalDate.parse(date);
-    if (tokens.length < 2) {
+    let date = JournalDate.parse(val);
+    if (!date.date()) {
+      date = dayjs(
+        val
+          .split("/")
+          .slice(0, -1)
+          .join("/"),
+        "YYYY/M"
+      ).endOf("month");
+    }
+    if (!date.isValid()) {
       throw new Error(
         "Something has gone wrong with given date string. " + date
       );
     }
-    this._year = tokens[0];
-    this._month = tokens[1];
-    this._day = tokens.length > 2 ? tokens[2] : -1;
-    this._givenDay = this._day;
-
-    if (this._day < 0) {
-      return;
-    }
-    // 月終わり調整
-    while (
-      new Date(this.year, this.month - 1, this.day).getMonth() + 1 !==
-      this.month
-    ) {
-      this._day -= 1;
-    }
+    this.date = date;
   }
 
   public get year(): number {
-    return this._year;
+    return this.date.year();
   }
 
   public get month(): number {
-    return this._month;
+    return this.date.month() + 1;
   }
 
   /**
@@ -137,30 +110,19 @@ export default class JournalDate implements IJournalDate {
    * Note that day begins with 1.
    */
   public get day(): number {
-    return this._day;
+    return this.date.date();
+  }
+
+  public get dayName(): string {
+    return (dayjs as any).weekdays()[this.date.day()];
   }
 
   public get firstDay(): IJournalDate {
-    return JournalDate.byDay(this.year, this.month, 1);
+    return new JournalDate(this.date.startOf("month"));
   }
 
   public beforeThan(date: IJournalDate): boolean {
-    if (date.year < this.year) {
-      return false;
-    }
-    if (this.year < date.year) {
-      return true;
-    }
-    if (date.month < this.month) {
-      return false;
-    }
-    if (this.month < date.month) {
-      return true;
-    }
-    if (date.day <= this.day) {
-      return false;
-    }
-    return true;
+    return this.date.isBefore(dayjs(date.toDate()));
   }
 
   public beforeThanOrEqualsTo(date: IJournalDate): boolean {
@@ -168,11 +130,7 @@ export default class JournalDate implements IJournalDate {
   }
 
   public equalsTo(date: IJournalDate) {
-    return (
-      this.year === date.year &&
-      this.month === date.month &&
-      this.day === date.day
-    );
+    return this.date.diff(dayjs(date.toDate()), "date") === 0;
   }
 
   public afterThan(date: IJournalDate) {
@@ -191,26 +149,28 @@ export default class JournalDate implements IJournalDate {
     return new Date(this.year, this.month - 1, this.day > 0 ? this.day : 1);
   }
 
+  public getNextWeek(): IJournalDate {
+    return new JournalDate(this.date.add(1, "week"));
+  }
+
+  public getPreviousWeek(): IJournalDate {
+    return new JournalDate(this.date.subtract(1, "week"));
+  }
+
   public getNextMonth(): IJournalDate {
     return this.getAfterMonthOf(1);
   }
 
   public getNextDay(): IJournalDate {
-    const candidate = JournalDate.byDay(this.year, this.month, this.day + 1);
-    if (candidate.equalsTo(this)) {
-      return candidate.getNextMonth().firstDay;
-    } else {
-      return candidate;
-    }
+    return new JournalDate(this.date.add(1, "day"));
+  }
+
+  public getPreviousDay(): IJournalDate {
+    return new JournalDate(this.date.subtract(1, "day"));
   }
 
   public getAfterMonthOf(val: number) {
-    const rawMonth = (this.month + val) % 12;
-    return JournalDate.byDay(
-      this.year + Math.floor((this.month + val) / 12),
-      rawMonth + Math.floor((12 - rawMonth) / 12) * 12,
-      this._givenDay
-    );
+    return new JournalDate(this.date.add(val, "month"));
   }
 
   public isInMonthOf(date: IJournalDate) {
@@ -230,19 +190,11 @@ export default class JournalDate implements IJournalDate {
   }
 
   public getBeforeMonthOf(val: number): IJournalDate {
-    const rawMonth = (12 + this.month - (val % 12)) % 12;
-    return JournalDate.byDay(
-      this.year - Math.floor((12 - (this.month - val)) / 12),
-      rawMonth + Math.floor((12 - rawMonth) / 12) * 12,
-      this._givenDay
-    );
+    return new JournalDate(this.date.subtract(val, "month").toDate());
   }
 
   public setDate(date: Date): IJournalDate {
-    const d = JournalDate.byDate(date);
-    this._day = d.day;
-    this._month = d.month;
-    this._year = d.year;
+    this.date = dayjs(date);
     return this;
   }
 
@@ -255,19 +207,22 @@ export default class JournalDate implements IJournalDate {
   }
 
   private static countDayBetween(from: IJournalDate, to: IJournalDate): number {
-    if (from.afterThan(to)) {
-      return 0;
-    }
-
-    const getNextDay = (date: IJournalDate) => {
-      return new JournalDate(new Date(date.year, date.month - 1, date.day + 1));
-    };
-    let date = from;
-    let count = 0;
-    while (date.beforeThanOrEqualsTo(to)) {
-      count++;
-      date = getNextDay(date);
-    }
-    return count;
+    return dayjs(from.toDate()).diff(dayjs(to.toDate()), "date");
   }
+}
+
+export enum DayOfWeek {
+  SUNDAY = 0,
+
+  MONDAY = 1,
+
+  TUESDAY = 2,
+
+  WEDNESDAY = 3,
+
+  THIRSDAY = 4,
+
+  FRYDAY = 5,
+
+  SATURDAY = 6,
 }
