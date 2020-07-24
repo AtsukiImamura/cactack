@@ -16,7 +16,6 @@ export default class DependencyInjectionConfig {
     try {
       firebase.initializeApp({
         apiKey: "AIzaSyAzW1labZ1ykRxMOahBv3Z4Jil8wsbqIyc",
-        // authDomain: "### FIREBASE AUTH DOMAIN ###",
         projectId: "cactack-26e4c",
       });
     } catch (e) {

@@ -13,12 +13,12 @@
                 :key="type.code"
                 class="type"
                 :class="{
-                selected: accountTypeCode === type.code && !deletePage,
-              }"
+                  selected: accountTypeCode === type.code && !deletePage,
+                }"
                 @click="
-                deletePage = false;
-                accountTypeCode = type.code;
-              "
+                  deletePage = false;
+                  accountTypeCode = type.code;
+                "
               >
                 <span>{{ type.name }}</span>
               </li>
@@ -34,9 +34,7 @@
       <div class="category-list">
         <div class="message">
           <span :style="{ color: topMesasge.fontColor }">
-            {{
-            topMesasge.value
-            }}
+            {{ topMesasge.value }}
           </span>
         </div>
         <div class="results" v-if="!deletePage" :key="hash">
@@ -54,7 +52,10 @@
                   class="ac dangerous"
                   v-if="category.items.filter((i) => !i.deletedAt).length === 0"
                 >
-                  <div class="delete-button" @click="deleteCateogry(category)"></div>
+                  <div
+                    class="delete-button"
+                    @click="deleteCateogry(category)"
+                  ></div>
                 </div>
                 <div class="ac nomal">
                   <CategoryUpdate :category="category"></CategoryUpdate>
@@ -75,7 +76,11 @@
                     <div class="row" v-if="!item.isDeleted">
                       <div class="cell name">{{ item.name }}</div>
                       <div class="cell tags">
-                        <div class="tag" v-for="(tag, index) in item.tags" :key="index">
+                        <div
+                          class="tag"
+                          v-for="(tag, index) in item.tags"
+                          :key="index"
+                        >
                           <span>{{ tag.name }}</span>
                         </div>
                       </div>
@@ -95,7 +100,10 @@
                             <ItemUpdate :item="item"></ItemUpdate>
                           </div>
                           <div class="ac dangerous">
-                            <ItemDelete :item="item" @complete="onItemDeleted"></ItemDelete>
+                            <ItemDelete
+                              :item="item"
+                              @complete="onItemDeleted"
+                            ></ItemDelete>
                           </div>
                         </HiddenActions>
                       </div>
@@ -109,7 +117,10 @@
             </div>
           </div>
           <div class="add-category">
-            <CategoryAdd :key="`${accountTypeCode}${categories.length}`" :type="type"></CategoryAdd>
+            <CategoryAdd
+              :key="`${accountTypeCode}${categories.length}`"
+              :type="type"
+            ></CategoryAdd>
           </div>
         </div>
         <div class="gabages" v-if="deletePage" :key="hash">
@@ -367,6 +378,10 @@ export default class CategoryList extends Vue {
           padding: 0px 0px 0px 25px;
           position: relative;
           width: 100px;
+          @include sm {
+            margin: 0px 3px;
+            width: 60px;
+          }
           &:before {
             content: "";
             position: absolute;
