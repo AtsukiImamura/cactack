@@ -48,8 +48,6 @@ export interface ICategoryItem extends ICategoryItemBase {
   parent: IAccountCategory;
 
   type: IAccountType;
-
-  // setParent: (parent: IAccountCategory) => void;
 }
 
 export interface DCategoryItem extends ICategoryItemBase {

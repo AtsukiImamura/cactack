@@ -1,7 +1,9 @@
 <template>
-  <div>
+  <div id="common">
     <div id="menu">
-      <AppMenu></AppMenu>
+      <div class="menu-wrp">
+        <AppMenu></AppMenu>
+      </div>
     </div>
     <div id="main">
       <slot></slot>
@@ -17,4 +19,5 @@ import AppMenu from "@/view/common/AppMenu.vue";
 export default class CommonFrame extends Vue {}
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss">
+</style>

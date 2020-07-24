@@ -1,3 +1,1 @@
-declare module "vue-balance" {
-  // 怒られるからとりま用意しているだけ
-}
+declare module "vue-balance" {}

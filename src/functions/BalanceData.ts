@@ -2,11 +2,9 @@ import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 import { DataStore } from "@/repository/infrastracture/DataStore";
 import { DJournal, DJournalDetail } from "@/model/interface/DJournal";
-// import VirtualBook from "@/model/virtual/VirtualBook";
 import JournalDate from "@/model/common/JournalDate";
 import ApiResponse from "./base/ApiResponse";
 import { DUserCategoryItem } from "@/model/interface/ICategory";
-// import Balance from "@/model/virtual/Balance";
 export namespace BalanceData {
   export async function getBalance(
     data: { date: string },
@@ -23,11 +21,13 @@ export namespace BalanceData {
       await new DataStore<DJournal>(
         admin.firestore().collection("journals")
       ).getByKey("userId", uid)
-    ).filter((jnl) =>
-      JournalDate.cast(jnl.accountAt).beforeThanOrEqualsTo(
-        JournalDate.cast(data.date as string)
-      )
-    );
+    )
+      .filter((jnl) => jnl.visible)
+      .filter((jnl) =>
+        JournalDate.cast(jnl.accountAt).beforeThanOrEqualsTo(
+          JournalDate.cast(data.date as string)
+        )
+      );
     return new ApiResponse(200, "", summarize(journals)).json();
   }
 
@@ -47,13 +47,15 @@ export namespace BalanceData {
       await new DataStore<DJournal>(
         admin.firestore().collection("journals")
       ).getByKey("userId", uid)
-    ).filter((jnl) => {
-      const accountAt = JournalDate.cast(jnl.accountAt);
-      return (
-        accountAt.afterThanOrEqualsTo(JournalDate.cast(data.begin)) &&
-        accountAt.beforeThanOrEqualsTo(JournalDate.cast(data.end))
-      );
-    });
+    )
+      .filter((jnl) => jnl.visible)
+      .filter((jnl) => {
+        const accountAt = JournalDate.cast(jnl.accountAt);
+        return (
+          accountAt.afterThanOrEqualsTo(JournalDate.cast(data.begin)) &&
+          accountAt.beforeThanOrEqualsTo(JournalDate.cast(data.end))
+        );
+      });
     console.log(journals);
 
     const userItemMap = (
@@ -127,7 +129,6 @@ export namespace BalanceData {
     const itemMap = new Map<string, number>();
     for (const detail of details) {
       const categoryId = detail.categoryItemId;
-      // console.log(`${detail.category.id}  ${detail.category.name}`);
       if (!itemMap.has(categoryId)) {
         itemMap.set(categoryId, 0);
       }
@@ -160,9 +161,6 @@ export namespace BalanceData {
       });
     }
     return summaries;
-    // return Array.from(
-    //   createSummaryMap(details).entries()
-    // ).map(([itemId, amount]) => ({ itemId: itemId, amount: amount }));
   }
 }
 interface IBalanceAmountInfo {

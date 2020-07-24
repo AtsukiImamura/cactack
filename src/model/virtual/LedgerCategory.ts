@@ -1,5 +1,5 @@
-import { IAccountCategory, ICategoryItem } from "../interface/ICategory";
-import { IUserTag } from "../interface/ITag";
+import { IAccountCategory, ICategoryItem } from "@/model/interface/ICategory";
+import { IUserTag } from "@/model/interface/ITag";
 
 export default class LedgerCategory {
   private _id: string;

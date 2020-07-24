@@ -16,7 +16,8 @@ export default class Journal extends JournalBase {
       JournalDate.today(),
       undefined,
       credits,
-      debits
+      debits,
+      true
     );
   }
 }

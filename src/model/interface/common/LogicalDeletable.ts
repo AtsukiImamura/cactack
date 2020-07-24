@@ -1,4 +1,4 @@
-import IJournalDate from "../IJournalDate";
+import IJournalDate from "@/model/interface/IJournalDate";
 
 export default interface ILogicalDeletable {
   isDeleted: boolean;

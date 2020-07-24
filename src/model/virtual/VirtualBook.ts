@@ -1,23 +1,23 @@
-import IJournal from "../interface/IJournal";
+import IJournal from "@/model/interface/IJournal";
 import AccountLedger from "./AccountLedger";
-import JournalDate from "../common/JournalDate";
-import Journal from "../Journal";
+import JournalDate from "@/model/common/JournalDate";
+import Journal from "@/model/Journal";
 import {
   IUserCategoryItem,
   ICategoryItem,
   IAccountCategory,
-} from "../interface/ICategory";
-import UserCategory from "../UserCategory";
+} from "@/model/interface/ICategory";
+import UserCategory from "@/model/UserCategory";
 import Balance, { IBalanceItem } from "./Balance";
-import IJournalDate from "../interface/IJournalDate";
-import SettlementActionFactory from "../action/settlement/SettlementActionFactory";
-import UserCategoryItem from "../UserCategoryItem";
-import JournalDetail from "../JournalDetail";
+import IJournalDate from "@/model/interface/IJournalDate";
+import SettlementActionFactory from "@/model/action/settlement/SettlementActionFactory";
+import UserCategoryItem from "@/model/UserCategoryItem";
+import JournalDetail from "@/model/JournalDetail";
 import { container } from "tsyringe";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 import LedgerCategory from "./LedgerCategory";
-import AccountType from "../AccountType";
+import AccountType from "@/model/AccountType";
 import UserAuthService from "@/service/UserAuthService";
 
 export default class VirtualBook {
@@ -73,7 +73,9 @@ export default class VirtualBook {
     periodFrom = this.periodStartAt,
     periodTo = this.periodFinishAt
   ) {
-    const targetJournals = this.getDateValidated(periodFrom, periodTo);
+    const targetJournals = this.getDateValidated(periodFrom, periodTo).filter(
+      (jnl) => jnl.isVisible
+    );
     const virtualJournals: IJournal[] = [];
     const settleTasks: Promise<IJournal[]>[] = [];
     for (const jnl of this.journals) {
@@ -99,28 +101,24 @@ export default class VirtualBook {
         );
       }
     }
-    virtualJournals.push(
-      ...(await Promise.all(settleTasks)).reduce(
-        (acc, cur) => [...acc, ...cur],
-        []
-      )
+    (await Promise.all(settleTasks)).forEach((jnls) =>
+      virtualJournals.push(...jnls)
     );
     // 同日付で借方・貸方の同じものをまとめる
     const jnlMap = new Map<string, IJournal>();
-    for (const [index, jnl] of virtualJournals.entries()) {
-      if (jnl.credits.length > 1 || jnl.debits.length > 1) {
-        jnlMap.set(String(index), jnl);
+    for (const jnl of virtualJournals) {
+      const patternId = jnl.patternId;
+      if (!jnlMap.has(patternId)) {
+        jnlMap.set(patternId, jnl);
         continue;
       }
-      const vid =
-        jnl.credits[0].category.id + jnl.debits[0].category.id + jnl.accountAt;
-      if (jnlMap.has(vid)) {
-        const target = jnlMap.get(vid)!;
-        target.addCredit(jnl.credits[0]);
-        target.addDebit(jnl.debits[0]);
-        continue;
-      }
-      jnlMap.set(vid, jnl);
+      const target = jnlMap.get(patternId)!;
+      jnl.credits.forEach((d) =>
+        target.addCredit(Object.assign(d, { origin: jnl }))
+      );
+      jnl.debits.forEach((d) =>
+        target.addDebit(Object.assign(d, { origin: jnl }))
+      );
     }
     return [...targetJournals, ...Array.from(jnlMap.values())];
   }
@@ -184,18 +182,20 @@ export default class VirtualBook {
           category: new LedgerCategory(category),
           amount: detail.amount,
           accountAt: jnl.accountAt,
+          origin: jnl,
         };
         ledgerMap.get(categoryId)!.addCredit({
           category: new LedgerCategory((category as ICategoryItem).parent),
           amount: ledgerDetail.amount,
           accountAt: ledgerDetail.accountAt,
+          origin: jnl,
         });
         ledgerMap
           .get(categoryId)!
           .addChildCredit(detail.category, ledgerDetail);
         for (const tag of detail.category.tags) {
           if (!ledgerMap.has(tag.id)) {
-            const category = this.createTagCategory(`+tag+${tag.id}`, tag.name);
+            const category = this.createTagCategory(`&tag&${tag.id}`, tag.name);
             ledgerMap.set(tag.id, new AccountLedger(category));
           }
 
@@ -203,6 +203,7 @@ export default class VirtualBook {
             category: new LedgerCategory(category),
             amount: ledgerDetail.amount,
             accountAt: ledgerDetail.accountAt,
+            origin: jnl,
           });
           ledgerMap.get(tag.id)!.addChildCredit(detail.category, ledgerDetail);
         }
@@ -222,17 +223,19 @@ export default class VirtualBook {
           category: new LedgerCategory(category),
           amount: detail.amount,
           accountAt: jnl.accountAt,
+          origin: jnl,
         };
         ledgerMap.get(categoryId)?.addDebit({
           category: new LedgerCategory((category as ICategoryItem).parent),
           amount: ledgerDetail.amount,
           accountAt: ledgerDetail.accountAt,
+          origin: jnl,
         });
         ledgerMap.get(categoryId)?.addChildDebit(detail.category, ledgerDetail);
 
         for (const tag of detail.category.tags) {
           if (!ledgerMap.has(tag.id)) {
-            const category = this.createTagCategory(`+tag+${tag.id}`, tag.name);
+            const category = this.createTagCategory(`&tag&${tag.id}`, tag.name);
             ledgerMap.set(tag.id, new AccountLedger(category));
           }
 
@@ -240,6 +243,7 @@ export default class VirtualBook {
             category: new LedgerCategory(category),
             amount: ledgerDetail.amount,
             accountAt: ledgerDetail.accountAt,
+            origin: jnl,
           });
           ledgerMap.get(tag.id)!.addChildDebit(detail.category, ledgerDetail);
         }

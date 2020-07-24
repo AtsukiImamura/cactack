@@ -27,7 +27,7 @@ export default class AuthFrame extends Vue {}
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  background-color: #f0f0f0;
+  background-color: #f6f6f6;
   height: 100vh;
   .center {
     width: 40%;
@@ -62,7 +62,7 @@ export default class AuthFrame extends Vue {}
           display: block;
         }
         input {
-          padding: 6px 8px;
+          // padding: 6px 8px;
         }
         // .btn {
         //   width: 100%;

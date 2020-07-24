@@ -23,6 +23,12 @@ export default abstract class JournalBase extends IdBase implements IJournal {
   /** 借方（左） */
   private _debits: IJournalDetail[] = [];
 
+  private _rawCredits: IJournalDetail[] = [];
+
+  private _rawDebits: IJournalDetail[] = [];
+
+  private _visible: boolean;
+
   private _period?: IJournalPeriodInfo;
 
   private _ancestorId?: string;
@@ -48,6 +54,7 @@ export default abstract class JournalBase extends IdBase implements IJournal {
     executeAt: string | IJournalDate | undefined,
     credits: IJournalDetail[],
     debits: IJournalDetail[],
+    visible: boolean,
     period?: IJournalPeriodInfo
   ) {
     super(id);
@@ -56,8 +63,9 @@ export default abstract class JournalBase extends IdBase implements IJournal {
     this._createdAt = JournalDate.cast(createdAt);
     this._accountAt = JournalDate.cast(accountAt);
     this._executeAt = executeAt ? JournalDate.cast(executeAt) : undefined;
-    this._credits = credits;
-    this._debits = debits;
+    credits.forEach((d) => this.addCredit(d));
+    debits.forEach((d) => this.addDebit(d));
+    this._visible = visible;
     period && (this._period = period);
   }
 
@@ -117,6 +125,10 @@ export default abstract class JournalBase extends IdBase implements IJournal {
     return this._period;
   }
 
+  public get isVisible(): boolean {
+    return this._visible;
+  }
+
   public get isReal(): boolean {
     return true;
   }
@@ -155,6 +167,10 @@ export default abstract class JournalBase extends IdBase implements IJournal {
     return this._debits;
   }
 
+  public get rawDetails(): IJournalDetail[] {
+    return [...this._rawCredits, ...this._rawDebits];
+  }
+
   public get balanceItems(): IJournalDetail[] {
     return [
       ...this.credits.map(
@@ -182,6 +198,14 @@ export default abstract class JournalBase extends IdBase implements IJournal {
     this._ancestorId = id;
   }
 
+  public get patternId(): string {
+    return (
+      [
+        ...this.credits.map((d) => d.category.id).sort(),
+        ...this.debits.map((d) => d.category.id).sort(),
+      ].reduce((acc, cur) => (acc += cur), "") + this.accountAt.toString()
+    );
+  }
   /**
    * この仕訳を実行済みにする
    */
@@ -190,6 +214,7 @@ export default abstract class JournalBase extends IdBase implements IJournal {
   }
 
   public addCredit(detail: IJournalDetail) {
+    this._rawCredits.push(detail);
     for (const d of this._credits) {
       if (d.category.id !== detail.category.id) {
         continue;
@@ -201,6 +226,7 @@ export default abstract class JournalBase extends IdBase implements IJournal {
   }
 
   public addDebit(detail: IJournalDetail) {
+    this._rawDebits.push(detail);
     for (const d of this._debits) {
       if (d.category.id !== detail.category.id) {
         continue;
@@ -209,6 +235,10 @@ export default abstract class JournalBase extends IdBase implements IJournal {
       return;
     }
     this._debits.push(detail);
+  }
+
+  public isSamePattern(jnl: IJournal): boolean {
+    return this.patternId === jnl.patternId;
   }
 
   public simplify(): DJournal {
@@ -229,6 +259,7 @@ export default abstract class JournalBase extends IdBase implements IJournal {
         categoryItemId: detail.category.id,
         action: detail.action ? detail.action : "",
       })),
+      visible: this.isVisible,
     } as DJournal;
     if (this.period) {
       djournal.period = {

@@ -8,7 +8,7 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { container } from "tsyringe";
-import UserAuthService from "../service/UserAuthService";
+import UserAuthService from "@/service/UserAuthService";
 
 @Component({})
 export default class AttemptToLogin extends Vue {

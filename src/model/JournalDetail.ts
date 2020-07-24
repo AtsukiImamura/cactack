@@ -1,4 +1,4 @@
-import { IJournalDetail } from "./interface/IJournal";
+import IJournal, { IJournalDetail } from "./interface/IJournal";
 import { IUserCategoryItem } from "./interface/ICategory";
 import { container } from "tsyringe";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
@@ -9,6 +9,8 @@ export default class JournalDetail implements IJournalDetail {
   private _amount: number;
 
   private _action?: string;
+
+  private _origin?: IJournal;
 
   public get category(): IUserCategoryItem {
     const item = container.resolve(UserCategoryItemFlyweight).get(this._itemId);
@@ -33,6 +35,14 @@ export default class JournalDetail implements IJournalDetail {
     return this._action;
   }
 
+  public get origin(): IJournal | undefined {
+    return this._origin;
+  }
+
+  public set origin(jnl: IJournal | undefined) {
+    this._origin = jnl;
+  }
+
   public add(val: number) {
     this._amount += val;
   }
@@ -40,7 +50,8 @@ export default class JournalDetail implements IJournalDetail {
   constructor(
     item: string | IUserCategoryItem,
     amount: number,
-    action?: string
+    action?: string,
+    origin?: IJournal
   ) {
     this._itemId = typeof item === "string" ? item : item.id;
     this._amount = amount;
@@ -51,5 +62,6 @@ export default class JournalDetail implements IJournalDetail {
     ) {
       container.resolve(UserCategoryItemFlyweight).insertVirtual(item);
     }
+    this._origin = origin;
   }
 }

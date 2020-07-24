@@ -10,6 +10,8 @@ import ILogicalDeletable, {
   DLogicalDeletable,
 } from "@/model/interface/common/LogicalDeletable";
 import JournalDate from "@/model/common/JournalDate";
+import { container } from "tsyringe";
+import UserAuthService from "@/service/UserAuthService";
 
 export default abstract class RepositoryBase<
   S extends Strable & Identifiable,
@@ -86,25 +88,6 @@ export default abstract class RepositoryBase<
     );
     items.push(...values);
     return items;
-
-    // return Promise.all(idNeedSearch.map((id) => this.ref.doc(id).get()))
-    //   .then((docs) => {
-    //     return Promise.all(
-    //       docs
-    //         .filter((doc) => doc.exists)
-    //         .map((doc) => {
-    //           const data = doc.data() as S;
-    //           data.id = doc.id;
-    //           return data;
-    //         })
-    //         .map((data) => this.aggregate(data))
-    //     );
-    //   })
-    //   .then((values) => {
-    //     items.push(...values);
-    //     this.cache.addAll(items);
-    //     return items;
-    //   });
   }
 
   public async insert(value: T): Promise<T> {
@@ -214,14 +197,22 @@ export default abstract class RepositoryBase<
   protected async getByKey(
     index: string,
     key: string,
-    cache = true
+    cache = false
   ): Promise<T[]> {
     const cacheItems = this.cache.get(index, key);
     if (cache && cacheItems && cacheItems.length > 0) {
       return await Promise.all(cacheItems.map((item) => this.aggregate(item)));
     }
 
-    const docs = await this.ref.where(index, "==", key).get();
+    const userId = container.resolve(UserAuthService).userId;
+    if (!userId) {
+      return [];
+    }
+
+    const docs = await this.ref
+      .where("userId", "==", userId)
+      .where(index, "==", key)
+      .get();
     const aggregations: Promise<T>[] = [];
     docs.forEach((doc) => {
       const data = doc.data() as S;

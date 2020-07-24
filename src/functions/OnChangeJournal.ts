@@ -26,6 +26,10 @@ export namespace OnChangeJournal {
         jnl.id = doc.id;
         return jnl;
       });
+
+      // FIXME: 算出されたものが既に確定されている場合を考慮できていない。
+      //    => 確定済み算出仕訳をもつような仕訳をいじるときはアラートを出す？
+
       for (const related of relatedJournals) {
         await collection.doc(related.id).delete();
       }

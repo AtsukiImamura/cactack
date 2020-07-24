@@ -53,6 +53,7 @@ export default class CreditCardJournalGenerator implements IJournalGenerator {
                 amount: dtl.amount,
               },
             ],
+            visible: true,
             ancestorId: source.id,
           };
         })()

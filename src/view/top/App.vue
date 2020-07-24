@@ -3,72 +3,35 @@
     <div class="top">
       <TopNoticeModal ref="topNoticeModal" :num="1"></TopNoticeModal>
       <div class="h">
-        <div class="date-config">
-          <div class="attr begin">
-            <DatePicker
-              format="yyyy/MM/dd"
-              :value="periodBeginWith.toDate()"
-              @selected="
-                periodBeginWith = periodBeginWith.setDate($event);
-                updateLedgers();
-              "
-            ></DatePicker>
-          </div>
-          <div class="attr end">
-            <DatePicker
-              format="yyyy/MM/dd"
-              :value="periodEndWith.toDate()"
-              @selected="
-                periodEndWith = periodEndWith.setDate($event);
-                updateLedgers();
-              "
-            ></DatePicker>
-          </div>
+        <div class="date-config" v-if="isReady">
+          <PeriodSelector></PeriodSelector>
         </div>
-
-        <div
-          class="gragh"
-          v-intro="'今月の資産変動を表示しています。左が月初、右が月末です。'"
-          v-intro-step="1"
-          :key="
-            `${
-              journals.length
-            }${periodBeginWith.toString()}${periodEndWith.toString()}`
-          "
-        >
-          <div class="loading" v-if="loading">
-            <div class="loading-linear"></div>
-          </div>
-          <!-- <BalanceDiffGraph v-if="!loading" :book="book"></BalanceDiffGraph> -->
-          <div class="charts" v-show="journals.length > 0">
+        <div class="gragh" v-intro="'今月の資産変動を表示しています。左が月初、右が月末です。'" v-intro-step="1">
+          <div class="charts">
             <div class="chart balance">
-              <BalanceChart :date="periodEndWith"></BalanceChart>
+              <div class="loading" v-if="balanceSummaries.length === 0">
+                <div class="loading-linear"></div>
+              </div>
+              <BalanceChart
+                :date="periodEndWith"
+                :values="balanceSummaries"
+                v-if="balanceSummaries.length > 0"
+              ></BalanceChart>
             </div>
             <div class="chart spendings">
-              <SpendingsChart :begin-with="periodBeginWith" :end-with="periodEndWith"></SpendingsChart>
+              <div class="loading" v-if="spendingSummaries.length === 0">
+                <div class="loading-linear"></div>
+              </div>
+              <SpendingsChart
+                :begin-with="periodBeginWith"
+                :end-with="periodEndWith"
+                :values="spendingSummaries"
+                v-if="spendingSummaries.length > 0"
+              ></SpendingsChart>
             </div>
           </div>
         </div>
       </div>
-      <!-- <div
-        class="details"
-        :key="
-          `${ledgerKey}${
-            journals.length
-          }${periodBeginWith.toString()}${periodEndWith.toString()}`
-        "
-      >
-        <div
-          class="app-ledgers"
-          v-masonry="`app-ledgers`"
-          transition-duration="0.2s"
-          item-selector=".ledger"
-        >
-          <div v-masonry-tile class="ledger" v-for="(led, index) in ledgers" :key="index">
-            <Ledger :ledger="led"></Ledger>
-          </div>
-        </div>
-      </div>-->
     </div>
   </CommonFrame>
 </template>
@@ -78,72 +41,66 @@ import { Component, Vue, Watch } from "vue-property-decorator";
 import IJournal from "@/model/interface/IJournal";
 import AppModule from "@/store/ApplicationStore";
 import { container } from "tsyringe";
-// import NumberIncrementor from "@/view/common/NumberIncrementor.vue";
 import UserAuthService from "@/service/UserAuthService";
 import CommonFrame from "@/view/common/CommonFrame.vue";
 import IJournalDate from "@/model/interface/IJournalDate";
-// import FlowTypeSelector from "@/view/common/FlowTypeSelector.vue";
-// import AccountLedger from "@/model/virtual/AccountLedger";
-// import VirtualBook from "@/model/virtual/VirtualBook";
-// import Ledger from "@/view/ledger/Ledger.vue";
-// import LedgerSummary from "@/view/ledger/LedgerSummary.vue";
-// import hash from "object-hash";
 import DatePicker from "vuejs-datepicker";
-// import BalanceDiffGraph from "@/view/balance/BalanceDiffGraph.vue";
 import TopNoticeModal from "./TopNoticeModal.vue";
 import BalanceChart from "@/view/top/components/BalanceChart.vue";
 import SpendingsChart from "@/view/top/components/SpendingsChart.vue";
+import BalanceInfoLoader from "@/functions/loader/BalanceInfoLoader";
+import { BalanceSummaryDto } from "@/model/dto/BalanceSummaryDto";
+import LedgerLoader from "@/functions/loader/LedgerLoader";
+import PeriodSelector from "@/view/common/PeriodSelector.vue";
 
 @Component({
   components: {
-    // NumberIncrementor,
     CommonFrame,
-    // FlowTypeSelector,
-    // Ledger,
-    // LedgerSummary,
     DatePicker,
-    // BalanceDiffGraph,
     TopNoticeModal,
     BalanceChart,
-    SpendingsChart
-  }
+    SpendingsChart,
+    PeriodSelector,
+  },
 })
 export default class App extends Vue {
-  // public ledgers: AccountLedger[] = [];
+  public balanceSummaries: BalanceSummaryDto[] = [];
 
-  // public book: VirtualBook = new VirtualBook([]);
+  public spendingSummaries: BalanceSummaryDto[] = [];
+
+  public isReady: boolean = false;
 
   public get periodBeginWith(): IJournalDate {
     return AppModule.periodBeginWith;
-  }
-  public set periodBeginWith(date: IJournalDate) {
-    AppModule.setPeriodBeginWith(date);
   }
 
   public get periodEndWith(): IJournalDate {
     return AppModule.periodEndWith;
   }
-  public set periodEndWith(date: IJournalDate) {
-    AppModule.setPeriodEndWith(date);
-  }
-
-  // public get ledgerKey(): string {
-  //   return hash(this.ledgers);
-  // }
-
-  @Watch("journals")
-  public async updateLedgers() {
-    // const book = new VirtualBook(
-    //   this.journals,
-    //   this.periodBeginWith,
-    //   this.periodEndWith
-    // );
-    // this.book = book;
-    // this.ledgers = await book.getVirtualLedgers();
-  }
 
   public async mounted() {
     await Promise.all([AppModule.init(), this.doIntro()]);
+    this.isReady = true;
+    await this.loadSummaries();
+  }
+
+  public async loadSummaries() {
+    this.balanceSummaries = (
+      await BalanceInfoLoader.load(this.periodEndWith)
+    ).bandled;
+    this.spendingSummaries = (
+      await LedgerLoader.load(this.periodBeginWith, this.periodEndWith)
+    ).bandled;
+  }
+
+  @Watch("periodBeginWith")
+  public onPeriodBeginWithChanged() {
+    this.loadSummaries();
+  }
+
+  @Watch("periodEndWith")
+  public onPeriodEndWithChanged() {
+    this.loadSummaries();
   }
 
   public async doIntro() {
@@ -169,67 +126,34 @@ export default class App extends Vue {
 
   public get loading(): boolean {
     return false;
-    // return this.journals.length > 0 && this.ledgers.length === 0;
   }
 }
 </script>
 
 <style lang="scss" scoped>
 .h {
-  // height: 55vh;
-  // background-color: #606060;
   padding: 0px;
   @include sm {
-    // height: 110px;
     background-color: #ffffff;
   }
 
   .date-config {
     width: 100%;
-    padding: 8px 10px;
-    display: flex;
-    border-bottom: 1px solid #c0c0c0;
-    box-shadow: 1px 1px 2px 2px rgba(120, 120, 120, 0.25);
-    .attr {
-      position: relative;
-      margin: 30px 0px 0px 0px;
-      &:after {
-        content: "";
-        position: absolute;
-        top: -20px;
-        left: 0px;
-      }
-      &.begin {
-        &:after {
-          content: "期首";
-        }
-      }
-      &.end {
-        &:after {
-          content: "期末";
-        }
-      }
-    }
   }
   .gragh {
     width: 100%;
     height: calc(100% - 90px);
     margin: 15px 0px 0px 0px;
-    // @include responsive-width(70%, 100%, %);
-    // @include md {
-    //   height: calc(100% - 120px);
-    // }
-    // @include sm {
-    //   width: 100%;
-    // }
     position: relative;
     .charts {
       margin: 20px 0px;
       display: flex;
       width: 100%;
       .chart {
-        width: 50%;
+        width: calc(50% - 16px);
         position: relative;
+        background-color: #ffffff;
+        margin: 0px 8px;
         &:after {
           position: absolute;
           top: 50%;

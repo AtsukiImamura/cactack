@@ -41,6 +41,9 @@
           <div class="add-button" @click="addDebit"></div>
         </div>
       </div>
+      <div class="switch">
+        <img src="image/switch.svg" @click="switchDetalis" />
+      </div>
       <div class="section details credits cell with-label">
         <div class="message" v-show="creditsMessage">
           <span>{{ creditsMessage }}</span>
@@ -112,10 +115,9 @@
         </div>
       </div>
     </div>
-    <!-- ver1.1より導入予定 -->
     <div class="section memo float">
       <div class="cell memo with-label">
-        <input type="text" v-model="name" placeholder="例）魔法のランプに1000円お願いしたらくれた" />
+        <input type="text" v-model="name" placeholder="例）たなぼた" />
       </div>
     </div>
   </div>
@@ -144,6 +146,7 @@ import JournalDetail from "@/model/JournalDetail";
 interface ITransferJournalDetail {
   item?: IUserCategoryItem;
   amount: number;
+  origin?: IJournal;
 }
 
 @Component({
@@ -169,7 +172,7 @@ export default class JournalEditor extends Vue {
     debit: {} as IUserCategoryItem
   };
 
-  public needPeriod: boolean = false;
+  public needTemplateWithAmount: boolean = false;
 
   public get hash(): string {
     return `${this.accountAt.toString()}${hash(this.debits)}${hash(
@@ -202,17 +205,22 @@ export default class JournalEditor extends Vue {
     }
     this.createdAt = this.journal.createdAt;
     this.accountAt = this.journal.accountAt;
-    this.debits = this.journal.debits.map(d =>
-      this.createDebit(d.amount, d.category)
-    );
-    this.credits = this.journal.credits.map(d =>
-      this.createCredit(d.amount, d.category)
-    );
+    this.debits = this.journal.debits.map(d => {
+      const c = this.createDebit(d.amount, d.category);
+      c.origin = this.journal;
+      return c;
+    });
+    this.credits = this.journal.credits.map(d => {
+      const c = this.createCredit(d.amount, d.category);
+      c.origin = this.journal;
+      return c;
+    });
     if (this.journal.period) {
       this.period = this.journal.period;
     }
     this.name = this.journal.title;
   }
+
   public mounted(): void {
     this.updateData();
   }
@@ -244,13 +252,19 @@ export default class JournalEditor extends Vue {
     this.credits.splice(index, 1);
   }
 
+  public switchDetalis(): void {
+    const creditsTmp = this.credits.splice(0);
+    this.credits.push(...this.debits.splice(0));
+    this.debits.push(...creditsTmp);
+  }
+
   public createJournal(): IJournal {
     const userId = container.resolve(UserAuthService).userId;
     if (!userId) {
       throw new Error("user not found.");
     }
     const journal = new Journal(
-      this.journal ? this.journal.id : "",
+      this.journal && this.journal.id ? this.journal.id : "",
       userId,
       this.name,
       JournalDate.today(),
@@ -263,7 +277,8 @@ export default class JournalEditor extends Vue {
           const detail = {
             amount: c.amount,
             category: item,
-            action: ""
+            action: "",
+            origin: c.origin
           };
           // ここではなく、仮想帳簿で生成する
           if (
@@ -278,12 +293,14 @@ export default class JournalEditor extends Vue {
           return new JournalDetail(
             detail.category,
             detail.amount,
-            detail.action
+            detail.action,
+            detail.origin
           );
         }),
       this.debits
         .filter(c => c.item)
-        .map(c => new JournalDetail(c.item!, c.amount))
+        .map(c => new JournalDetail(c.item!, c.amount)),
+      this.journal && this.journal.id ? this.journal.isVisible : true
     );
     return journal;
   }
@@ -346,9 +363,10 @@ export default class JournalEditor extends Vue {
     flex-wrap: wrap;
     display: flex;
     &.float {
-      box-shadow: 2px 2px 3px 3px rgba(120, 120, 120, 0.3);
+      // box-shadow: 2px 2px 3px 3px rgba(120, 120, 120, 0.3);
+      background-color: #ffffff;
       padding: 10px;
-      margin: 12px 0px;
+      margin: 8px 0px;
       width: 100%;
     }
     &.dates {
@@ -369,8 +387,24 @@ export default class JournalEditor extends Vue {
       @include sm {
         flex-wrap: wrap;
       }
+      .switch {
+        width: 30px;
+        margin-top: 24px;
+        margin-left: -20px;
+        margin-right: 10px;
+        img {
+          cursor: pointer;
+        }
+        @include sm {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          margin-top: 0px;
+          height: 30px;
+        }
+      }
       .details {
-        width: 50%;
+        width: calc(50% - 15px);
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
@@ -380,13 +414,13 @@ export default class JournalEditor extends Vue {
         .detail {
           width: 100%;
           .category {
-            width: 40%;
+            width: calc(48% - 6px);
           }
           .amount {
-            width: 45%;
+            width: calc(45% - 6px);
           }
           .delete {
-            width: 5%;
+            width: calc(6% - 6px);
             .delete-button {
               @include round-delete-button;
             }

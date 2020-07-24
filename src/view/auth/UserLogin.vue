@@ -42,7 +42,7 @@ import AuthFrame from "@/view/auth/AuthFrame.vue";
 import ErrorMessage from "@/model/error/ErrorMessage";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 // import AppModule from "@/store/ApplicationStore";
-import EmailVerificationError from "../../model/error/custome/EmailVerificationError";
+import EmailVerificationError from "@/model/error/custome/EmailVerificationError";
 
 @Component({ components: { AuthFrame, ProcessButton } })
 export default class UserLogin extends Vue {

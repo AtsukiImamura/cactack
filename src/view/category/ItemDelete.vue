@@ -1,8 +1,5 @@
 <template>
-  <OpenableModal
-    ref="modal"
-    :option="{ height: 240, enableHeader: true, enableFooter: true }"
-  >
+  <OpenableModal ref="modal" :option="{ height: 240, enableHeader: true, enableFooter: true }">
     <slot>
       <span>削除</span>
     </slot>
@@ -14,9 +11,7 @@
         <span>{{ message }}</span>
       </div>
       <div class="attr select-item" v-if="!canDelete">
-        <TransferCategorySelector
-          @select="alternativeItem = $event"
-        ></TransferCategorySelector>
+        <TransferCategorySelector @select="alternativeItem = $event"></TransferCategorySelector>
       </div>
     </template>
     <template #f>
@@ -24,11 +19,7 @@
         <span>{{ errorMessage }}</span>
       </div>
       <div class="actions">
-        <ProcessButton
-          value="OK"
-          :click="onClickOk"
-          :disabled="!canClickOk"
-        ></ProcessButton>
+        <ProcessButton value="OK" :click="onClickOk" :disabled="!canClickOk"></ProcessButton>
       </div>
     </template>
   </OpenableModal>
@@ -53,8 +44,8 @@ import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFl
     OpenableModal,
     Selector,
     ProcessButton,
-    TransferCategorySelector,
-  },
+    TransferCategorySelector
+  }
 })
 export default class ItemDelete extends Vue {
   @Prop()
@@ -108,7 +99,7 @@ export default class ItemDelete extends Vue {
       for (const jnl of AppModule.journals) {
         if (
           [...jnl.credits, ...jnl.debits].filter(
-            (d) => d.category.id === this.item.id
+            d => d.category.id === this.item.id
           ).length === 0
         ) {
           continue;
@@ -121,7 +112,7 @@ export default class ItemDelete extends Vue {
             jnl.createdAt,
             jnl.accountAt,
             jnl.executeAt,
-            jnl.credits.map((item) => {
+            jnl.credits.map(item => {
               if (item.category.id !== this.item.id) {
                 return item;
               }
@@ -131,7 +122,7 @@ export default class ItemDelete extends Vue {
                 item.action
               );
             }),
-            jnl.debits.map((item) => {
+            jnl.debits.map(item => {
               if (item.category.id !== this.item.id) {
                 return item;
               }
@@ -140,7 +131,8 @@ export default class ItemDelete extends Vue {
                 item.amount,
                 item.action
               );
-            })
+            }),
+            true
           )
         );
       }

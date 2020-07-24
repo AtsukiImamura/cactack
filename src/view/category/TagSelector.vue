@@ -3,10 +3,10 @@ import { Component, Emit, Mixins } from "vue-property-decorator";
 import SearchSelector from "@/view/common/SearchSelector.vue";
 import { SelectionInfo } from "@/view/common/Searcher.vue";
 import { container } from "tsyringe";
-import UserTagFlyweight from "../../repository/flyweight/UserTagFlyweight";
-import { IUserTag } from "../../model/interface/ITag";
-import UserTag from "../../model/UserTag";
-import UserAuthService from "../../service/UserAuthService";
+import UserTagFlyweight from "@/repository/flyweight/UserTagFlyweight";
+import { IUserTag } from "@/model/interface/ITag";
+import UserTag from "@/model/UserTag";
+import UserAuthService from "@/service/UserAuthService";
 
 @Component({})
 export default class TagSelector extends Mixins(SearchSelector) {
@@ -14,11 +14,11 @@ export default class TagSelector extends Mixins(SearchSelector) {
     return container
       .resolve(UserTagFlyweight)
       .getAll()
-      .filter(h => h.name.startsWith(input) || input === "")
-      .map(h => {
+      .filter((h) => h.name.startsWith(input) || input === "")
+      .map((h) => {
         return {
           disp: `${h.name}`,
-          content: h
+          content: h,
         };
       });
   }
@@ -30,7 +30,7 @@ export default class TagSelector extends Mixins(SearchSelector) {
         container.resolve(UserAuthService).userId,
         this.searchInput
       ),
-      disp: this.searchInput
+      disp: this.searchInput,
     });
   }
 

@@ -20,7 +20,11 @@ export default interface IJournal
 
   debits: IJournalDetail[];
 
+  rawDetails: IJournalDetail[];
+
   amount: number;
+
+  isVisible: boolean;
 
   period?: IJournalPeriodInfo;
 
@@ -37,21 +41,23 @@ export default interface IJournal
   addCredit: (detail: IJournalDetail) => void;
 
   addDebit: (detail: IJournalDetail) => void;
+
+  isSamePattern: (jnl: IJournal) => boolean;
+
+  patternId: string;
 }
 
 export interface IJournalDetail {
-  // hash: string;
-
   category: IUserCategoryItem;
 
   amount: number;
 
   action?: string;
 
+  origin?: IJournal;
+
   add: (val: number) => void;
 }
-
-// export interface I
 
 export interface IJournalPeriodInfo {
   // 対象期間のあるもののみ: 開始日
@@ -69,13 +75,3 @@ export interface IExecutable {
 
   execute: () => void;
 }
-
-// export interface IAccountCategory {
-//   code: number;
-
-//   name: string;
-
-//   isCredit: boolean;
-
-//   isDebit: boolean;
-// }

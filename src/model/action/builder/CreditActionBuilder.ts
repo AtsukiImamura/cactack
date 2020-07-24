@@ -1,7 +1,7 @@
 import IJournalDate from "@/model/interface/IJournalDate";
 import JournalDate from "@/model/common/JournalDate";
 import { IJournalDetail } from "@/model/interface/IJournal";
-import CreditCardSettlementAction from "../settlement/CreditCardSettlementAction";
+import CreditCardSettlementAction from "@/model/action/settlement/CreditCardSettlementAction";
 
 export default class CreditActionBuilder {
   public static begin(command: string): CreditActionBuilder {

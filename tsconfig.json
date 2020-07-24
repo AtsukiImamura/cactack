@@ -1,15 +1,10 @@
 {
   "compilerOptions": {
-    // "noImplicitAny": true,
-    // "module": "es6",
     "module": "esnext",
     "target": "es6",
-    // "jsx": "react",
-    // "target": "es2015",
-    // "jsx": "react",
     "lib": ["es2015", "dom"],
     "moduleResolution": "node",
-    "removeComments": true,
+    "removeComments": false,
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": false,
@@ -22,14 +17,6 @@
     "esModuleInterop": true,
     "baseUrl": "./",
     "paths": {
-      //   "config/*": ["src/model/*"],
-      //   "env/*": ["src/env/*"],
-      //   "model/*": ["src/model/*"],
-      //   "repository/*": ["src/repository/*"],
-      //   "resources/*": ["src/resources/*"],
-      //   "service/*": ["src/service/*"],
-      //   "util/*": ["src/util/*"],
-      //   "view/*": ["src/view/*"],
       "config": ["src/env/node.ts", "src/env/web.ts"],
       "@/*": ["src/*"]
     },

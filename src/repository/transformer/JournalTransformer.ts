@@ -5,7 +5,7 @@ import { singleton, container } from "tsyringe";
 import Journal from "@/model/Journal";
 import JournalDate from "@/model/common/JournalDate";
 import JournalDetail from "@/model/JournalDetail";
-import UserCategoryItemFlyweight from "../flyweight/UserCategoryItemFlyweight";
+import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 import { IUserCategoryItem } from "@/model/interface/ICategory";
 
 @singleton()
@@ -38,6 +38,7 @@ export default class JournalTransformer extends Transformer<
       journal.executeAt ? journal.executeAt : undefined,
       await this.toJournalDetails(journal.credits),
       await this.toJournalDetails(journal.debits),
+      journal.visible,
       journal.period
         ? {
             startAt: JournalDate.cast(journal.period.startAt),

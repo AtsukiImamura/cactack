@@ -1,4 +1,4 @@
-import CreditCardSettlementAction from "../settlement/CreditCardSettlementAction";
+import CreditCardSettlementAction from "@/model/action/settlement/CreditCardSettlementAction";
 
 export default class CreditActionTemplate {
   public static parse(command: string) {

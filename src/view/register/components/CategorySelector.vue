@@ -62,6 +62,7 @@
 <script lang="ts">
 import { Component, Vue, Prop, Emit } from "vue-property-decorator";
 import { ICategoryItem, IUserCategoryItem } from "@/model/interface/ICategory";
+import { IUserTag } from "@/model/interface/ITag";
 
 export interface CategorySelectorTab {
   name: string;
@@ -71,7 +72,7 @@ export interface CategorySelectorTab {
 
 interface CategorySelectorSection {
   name: string;
-  items: IUserCategoryItem[];
+  items: IUserCategoryItem[] | IUserTag[];
 }
 
 @Component({})
@@ -93,16 +94,16 @@ export default class CategorySelector extends Vue {
   public selectedSections: CategorySelectorSection[] = [];
 
   public get displayTabs(): CategorySelectorTab[] {
-    return this.tabs.map(tab => ({
+    return this.tabs.map((tab) => ({
       name: tab.name,
       sections: tab.sections
-        .map(section => ({
+        .map((section) => ({
           name: section.name,
           items: section.items.filter(
-            item => this.enableHiddenItems || !item.disabled
-          )
+            (item) => this.enableHiddenItems || !item.disabled
+          ),
         }))
-        .filter(section => section.items.length > 0)
+        .filter((section) => section.items.length > 0),
     }));
     return this.tabs;
   }
@@ -150,10 +151,22 @@ export default class CategorySelector extends Vue {
   .selected-item {
     width: calc(100% - 16px);
     min-width: 100px;
-    border: 1px solid #c0c0c0;
-    height: 22px;
+    // border: 1px solid #c0c0c0;
+    border-bottom: 1px solid $color-main;
+    height: 26px;
     padding: 3px 8px;
     cursor: pointer;
+    &:after {
+      content: "";
+      position: absolute;
+      right: 5px;
+      bottom: 11px;
+      width: 0px;
+      height: 0px;
+      border-right: 9px solid transparent;
+      border-left: 9px solid transparent;
+      border-top: 10px solid $color-main-light;
+    }
   }
   .bg {
     width: 100vw;
@@ -190,24 +203,17 @@ export default class CategorySelector extends Vue {
       border-bottom: 1px solid #c0c0c0;
       width: 100%;
       .tab {
-        min-width: 58px;
+        width: 100%;
+        max-width: 70px;
         padding: 2px 3px;
-        border-radius: 3px 3px 0px 0px;
-        border: 1px solid #c0c0c0;
-        border-width: 1px 0px 0px 1px;
-        margin: 5px 0px 0px;
+        border-bottom: 2px solid transparent;
+        margin: 5px 0px -1px 0px;
         cursor: pointer;
-        * {
-          color: #c0c0c0;
-        }
-        &:last-child {
-          border-width: 1px 1px 0px 1px;
-        }
+        text-align: center;
         &.selected {
-          background-color: $color-main;
-          border-color: $color-main;
+          border-bottom: 2px solid $color-main;
           * {
-            color: #ffffff;
+            color: $color-main;
           }
         }
       }
@@ -304,7 +310,7 @@ export default class CategorySelector extends Vue {
           cursor: pointer;
           margin: 1px 2px;
           border-radius: 3px;
-          background-color: #f0f0f0;
+          background-color: #f6f6f6;
           height: 21px;
           @include sm {
             width: calc(100% - 16px);

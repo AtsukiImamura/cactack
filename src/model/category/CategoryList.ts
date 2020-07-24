@@ -1,6 +1,6 @@
-import { IAccountCategory, ICategoryItem } from "../interface/ICategory";
-import AccountType from "../AccountType";
-import IAccountType from "../interface/IType";
+import { IAccountCategory, ICategoryItem } from "@/model/interface/ICategory";
+import AccountType from "@/model/AccountType";
+import IAccountType from "@/model/interface/IType";
 
 export default class CategoryList {
   private readonly _categories: IAccountCategory[];

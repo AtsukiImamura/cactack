@@ -50,7 +50,7 @@
           </ul>
           <ul class="configs">
             <li>
-              <router-link tag="div" to="/config" class="disabled" :event="''">設定</router-link>
+              <router-link tag="div" to="/config">設定</router-link>
             </li>
             <li>
               <router-link
@@ -130,6 +130,16 @@
         </div>
         <div class="item">
           <MenuItem
+            title="予算"
+            regex="/badget/?.*"
+            image-path="image/store-skeleton.svg"
+            hilight-image-path="image/store-skeleton.svg"
+            url="/badget"
+            :disabled="true"
+          ></MenuItem>
+        </div>
+        <div class="item">
+          <MenuItem
             title="勘定科目一覧"
             regex="/category/?.*"
             image-path="image/store.svg"
@@ -146,7 +156,7 @@
           image-path="image/setting.svg"
           url="/config"
           color="#808080"
-          :disabled="true"
+          :disabled="false"
         ></MenuItem>
       </div>
       <div class="notice">
@@ -190,7 +200,7 @@ export default class AppMenu extends Vue {
   public async onJournalsUpdated() {
     const journals = await new VirtualBook(this.journals).getVirtualJournals();
     this.noticeNum = journals.filter(
-      jnl =>
+      (jnl) =>
         jnl.accountAt.beforeThanOrEqualsTo(JournalDate.today()) &&
         !jnl.executeAt
     ).length;
@@ -283,8 +293,7 @@ export default class AppMenu extends Vue {
 .menu {
   width: 100%;
   height: 100%;
-  border: 1px solid #c0c0c0;
-  border-width: 0px 1px 0px 0px;
+  background-color: #ffffff;
   margin: 0;
   padding: 0;
 
@@ -305,7 +314,8 @@ export default class AppMenu extends Vue {
       padding: 3px 6px;
     }
     @include xs {
-      width: 100%;
+      padding: 3px 6px;
+      width: calc(100% - 12px);
       display: flex;
       margin: 0;
     }
@@ -320,7 +330,6 @@ export default class AppMenu extends Vue {
           border-radius: 20px;
           border: 2px solid #c0c0c0;
           cursor: pointer;
-          // background-color: #ffffff;
         }
         &.mobile-bg {
           position: fixed;
@@ -396,7 +405,6 @@ export default class AppMenu extends Vue {
         margin: 5px 0px;
         padding: 2px 0px 10px;
       }
-      // color: $color-main;
       color: #ffffff;
 
       @include xs {
@@ -437,16 +445,13 @@ export default class AppMenu extends Vue {
       }
     }
     .item {
-      // border-bottom: 1px solid $color-main-light;
       @include sm {
-        // width: 33%;
         height: 100%;
       }
       @include xs {
         width: auto;
       }
       &:first-child {
-        // border-top: 1px solid $color-main-light;
         @include sm {
           border: none;
         }

@@ -20,6 +20,12 @@ export default class LedgerChart extends Mixins(Bar) {
     }
     this.renderChart(this.chartData, this.options);
   }
+  // @Watch("startValue")
+  // @Watch("beginWith")
+  // @Watch("endWith")
+  // public onStartValueChanged(): void {
+  //   this.renderChart(this.chartData, this.options);
+  // }
 
   public mounted(): void {
     this.renderChart(this.chartData, this.options);
@@ -47,7 +53,7 @@ export default class LedgerChart extends Mixins(Bar) {
             ? `${date.day}`
             : `${date.month}/${date.day}`,
         amount: amount,
-        acc: sum
+        acc: sum,
       });
       /* order: 1 */
       currentMonth = date.month;
@@ -58,28 +64,28 @@ export default class LedgerChart extends Mixins(Bar) {
       a.date.beforeThanOrEqualsTo(b.date) ? -1 : 1
     );
     return {
-      labels: dataBases.map(d => d.dispDate),
+      labels: dataBases.map((d) => d.dispDate),
       datasets: [
         {
           label: "累積額",
           yAxisID: "accumulated-amount",
-          data: dataBases.map(d => d.acc + this.startValue),
+          data: dataBases.map((d) => d.acc + this.startValue),
           borderWidth: 1,
           borderColor: "#009000",
           // backgroundColor: "#009000",
           type: "line",
-          cubicInterpolationMode: "monotone"
+          cubicInterpolationMode: "monotone",
         },
         {
           label: "日額",
           yAxisID: "amount-per-day",
-          data: dataBases.map(d => d.amount),
+          data: dataBases.map((d) => d.amount),
           borderWidth: 1,
           // borderColor: "#009000",
           backgroundColor: "#ffc000",
-          type: "bar"
-        }
-      ]
+          type: "bar",
+        },
+      ],
     } as ChartData;
   }
 
@@ -91,15 +97,15 @@ export default class LedgerChart extends Mixins(Bar) {
         {
           id: "accumulated-amount",
           type: "linear",
-          position: "left"
+          position: "left",
         },
         {
           id: "amount-per-day",
           type: "linear",
-          position: "right"
-        }
-      ]
-    }
+          position: "right",
+        },
+      ],
+    },
   } as ChartOptions;
 }
 </script>

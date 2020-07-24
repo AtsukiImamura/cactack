@@ -46,6 +46,9 @@ export default class AccountType implements IAccountType {
       case AccountType.TYPE_INCOME:
         this._name = "収益";
         break;
+      case AccountType.TYPE_OTHER:
+        this._name = "タグ";
+        break;
     }
   }
 

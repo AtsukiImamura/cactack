@@ -5,6 +5,7 @@ import IJournalDate from "@/model/interface/IJournalDate";
 import { DJournal } from "@/model/interface/DJournal";
 import JournalTransformer from "@/repository/transformer/JournalTransformer";
 import UserIdentifiedRepositoryBase from "./UserIdentifiedRepositoryBase";
+import UserAuthService from "@/service/UserAuthService";
 
 @singleton()
 export default class JournalRepository
@@ -12,9 +13,6 @@ export default class JournalRepository
   implements IJournalRepository {
   constructor() {
     super();
-    // this.cache.addIndex("ancestorId", (journal: DJournal) =>
-    //   journal.ancestorId ? journal.ancestorId : undefined
-    // );
     this.dbKey = "journals";
   }
 
@@ -47,5 +45,13 @@ export default class JournalRepository
 
   public async getByAncestorId(id: string): Promise<IJournal[]> {
     return await this.getByKey("ancestorId", id);
+  }
+
+  public async getUsersAll(): Promise<IJournal[]> {
+    const userId = container.resolve(UserAuthService).userId;
+    if (!userId) {
+      return [];
+    }
+    return this.getByKey("userId", userId, false);
   }
 }

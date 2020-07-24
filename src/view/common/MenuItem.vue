@@ -1,5 +1,6 @@
 <template>
-  <router-link
+  <component
+    :is="disabled ? 'div' : 'router-link'"
     :to="url"
     class="menu-item"
     :class="{ highlight: needHighlight, disabled: disabled }"
@@ -16,7 +17,7 @@
       "
     />
     <span class="title" :style="{ color: fontColor }">{{ title }}</span>
-  </router-link>
+  </component>
 </template>
 
 <script lang="ts">

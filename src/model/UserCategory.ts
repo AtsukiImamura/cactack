@@ -56,11 +56,9 @@ export default class UserCategory extends CategoryBase
     userId: string,
     name: string,
     type: number,
-    // items: ICategoryItem[],
     deletedAt: string | undefined
   ) {
     super(id, name, type, []);
-    // this._itemIds = items.map((item) => item.id);
     if (deletedAt) {
       this._deletedAt = JournalDate.cast(deletedAt);
     }

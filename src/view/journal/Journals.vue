@@ -1,75 +1,50 @@
 <template>
   <CommonFrame ref="page">
     <div class="journals-pp">
-      <div class="top">
-        <h1>仕訳一覧</h1>
-      </div>
-      <div class="config">
-        <div class="date-config">
-          <div class="date from">
-            <DatePicker
-              format="yyyy/MM/dd"
-              :value="periodBeginWith.toDate()"
-              @selected="
-                periodBeginWith = periodBeginWith.setDate($event);
-                updateJournals();
-              "
-            ></DatePicker>
-          </div>
-          <div class="date to">
-            <DatePicker
-              format="yyyy/MM/dd"
-              :value="periodEndWith.toDate()"
-              @selected="
-                periodEndWith = periodEndWith.setDate($event);
-                updateJournals();
-              "
-            ></DatePicker>
-          </div>
+      <div class="header">
+        <div class="top">
+          <h1>仕訳一覧</h1>
         </div>
-        <div class="filters">
-          <div class="filter item">
-            <div class="selector">
-              <TransferCategorySelector
-                @select="addFilter"
-              ></TransferCategorySelector>
-            </div>
-            <div class="filter-items">
-              <div
-                class="f-item"
-                v-for="(filter, index) in filterItems"
-                :key="index"
-              >
-                <span class="name">{{ filter.name }}</span>
-                <div class="delete">
-                  <span
-                    class="delete-button enabled"
-                    @click="removeFilter(filter)"
-                  ></span>
+        <div class="config">
+          <div class="date-config">
+            <!-- 日付選択時に仕訳一覧が切り替わらないので一旦期間の自由選択は禁止する -->
+            <PeriodSelector :edit-period="false"></PeriodSelector>
+          </div>
+          <div class="filters">
+            <div class="filter item">
+              <div class="selector">
+                <TransferCategorySelector @select="addFilter"></TransferCategorySelector>
+              </div>
+              <div class="filter-items">
+                <div class="f-item" v-for="(filter, index) in filterItems" :key="index">
+                  <span class="name">{{ filter.name }}</span>
+                  <div class="delete">
+                    <span class="delete-button enabled" @click="removeFilter(filter)"></span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <paginate-links
-        for="journals"
-        :container="{
+        <paginate-links
+          for="journals"
+          :container="{
           state: paginate.journals,
           el: $refs.page,
         }"
-        :show-step-links="true"
-        v-if="journals.length > 20"
-      ></paginate-links>
-      <div class="actions" v-if="false">
-        <div class="action-content">
-          <input
-            class="item"
-            type="button"
-            @click="changeCategory"
-            :disabled="selectedJournals.length === 0"
-            value="科目変更"
-          />
+          :show-step-links="true"
+          v-if="journals.length > 20"
+        ></paginate-links>
+        <div class="actions" v-if="false">
+          <div class="action-content">
+            <input
+              class="item"
+              type="button"
+              @click="changeCategory"
+              :disabled="selectedJournals.length === 0"
+              value="科目変更"
+            />
+          </div>
         </div>
       </div>
       <div class="results">
@@ -138,15 +113,8 @@
           :container="this"
           :key="journalUpdateKey"
         >
-          <div
-            class="jnl"
-            v-for="(jnl, index) in paginated('journals')"
-            :key="index + 1"
-          >
-            <div
-              class="cell reality"
-              :class="{ virtual: !jnl.executeAt }"
-            ></div>
+          <div class="jnl" v-for="(jnl, index) in paginated('journals')" :key="index + 1">
+            <div class="cell reality" :class="{ virtual: !jnl.executeAt }"></div>
             <div class="cell check" v-if="false">
               <input type="checkbox" v-model="selectedJournals" :value="jnl" />
             </div>
@@ -156,22 +124,22 @@
               </div>
             </div>
             <div class="cell details debits">
-              <div
-                class="detail"
-                v-for="(detail, dIndex) in jnl.debits"
-                :key="-dIndex"
-              >
-                <div class="cell category">{{ detail.category.name }}</div>
+              <div class="detail" v-for="(detail, dIndex) in jnl.debits" :key="-dIndex">
+                <router-link
+                  :to="`/ledger/detail/${detail.category.id}`"
+                  tag="div"
+                  class="cell category"
+                >{{ detail.category.name }}</router-link>
                 <div class="cell amount">{{ detail.amount }}</div>
               </div>
             </div>
             <div class="cell details credits">
-              <div
-                class="detail"
-                v-for="(detail, dIndex) in jnl.credits"
-                :key="-dIndex"
-              >
-                <div class="cell category">{{ detail.category.name }}</div>
+              <div class="detail" v-for="(detail, dIndex) in jnl.credits" :key="-dIndex">
+                <router-link
+                  :to="`/ledger/detail/${detail.category.id}`"
+                  tag="div"
+                  class="cell category"
+                >{{ detail.category.name }}</router-link>
                 <div class="cell amount">{{ detail.amount }}</div>
               </div>
             </div>
@@ -210,6 +178,7 @@ import VirtualBook from "@/model/virtual/VirtualBook";
 import JournalDelete from "@/view/journal/JournalDelete.vue";
 import TransferCategorySelector from "@/view/register/components/TransferCategorySelector.vue";
 import { ICategoryItem } from "@/model/interface/ICategory";
+import PeriodSelector from "@/view/common/PeriodSelector.vue";
 
 @Component({
   components: {
@@ -218,6 +187,7 @@ import { ICategoryItem } from "@/model/interface/ICategory";
     HiddenActions,
     JournalDelete,
     TransferCategorySelector,
+    PeriodSelector,
   },
 })
 export default class Journals extends Vue {
@@ -226,15 +196,9 @@ export default class Journals extends Vue {
   public get periodBeginWith(): IJournalDate {
     return AppModule.periodBeginWith;
   }
-  public set periodBeginWith(date: IJournalDate) {
-    AppModule.setPeriodBeginWith(date);
-  }
 
   public get periodEndWith(): IJournalDate {
     return AppModule.periodEndWith;
-  }
-  public set periodEndWith(date: IJournalDate) {
-    AppModule.setPeriodEndWith(date);
   }
 
   /** 並び変え方法 */
@@ -270,7 +234,11 @@ export default class Journals extends Vue {
   }
 
   public get journals(): IJournal[] {
+    // console.log(this.virtualJournals.filter(jnl => !jnl.isVisible));
     const res = this.virtualJournals
+      // 可視性
+      .filter((jnl) => jnl.isVisible)
+      // 絞り込み
       .filter((jnl) => {
         if (this.filterItems.length === 0) {
           return true;
@@ -282,6 +250,7 @@ export default class Journals extends Vue {
           ).length > 0
         );
       })
+      // ソート
       .sort((a, b) => {
         switch (this.sortMethod) {
           case "by_date_asc":
@@ -310,18 +279,23 @@ export default class Journals extends Vue {
     return res;
   }
 
-  public get virtualBook(): VirtualBook {
-    return new VirtualBook(
+  public async updateJournals() {
+    const virtualBook = new VirtualBook(
       AppModule.journals,
       this.periodBeginWith,
       this.periodEndWith
     );
+    this.virtualJournals = await virtualBook.getVirtualJournals();
   }
 
-  @Watch("virtualBook")
-  public async updateJournals() {
-    while (this.virtualJournals.pop()) {}
-    this.virtualJournals.push(...(await this.virtualBook.getVirtualJournals()));
+  @Watch("periodBeginWith")
+  public onPeriodBeginWithChanged() {
+    this.updateJournals();
+  }
+
+  @Watch("periodEndWith")
+  public onPeriodEndWithChanged() {
+    this.updateJournals();
   }
 
   public selectedJournals: IJournal[] = [];
@@ -339,7 +313,6 @@ export default class Journals extends Vue {
   }
 
   public async mounted() {
-    // await AppModule.init();
     await this.updateJournals();
   }
 }
@@ -389,97 +362,98 @@ ul {
 </style>
 <style lang="scss" scoped>
 .journals-pp {
-  padding: 10px;
-  @include sm {
-    padding: 10px 0px;
-    h1 {
-      margin: 8px 0px;
-    }
-  }
-  .top {
-    h1 {
-      font-size: 2rem;
-      color: $color-main;
-    }
-  }
-  .config {
-    width: 99%;
-    box-shadow: 2px 2px 3px 3px rgba(120, 120, 120, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f6f6f6;
+  width: 100%;
+
+  $wide-main-width-per: 85%;
+  > .header {
+    padding: 10px;
     background-color: #ffffff;
-    margin: 15px 0px;
-    padding: 10px 6px;
+    width: calc(100% - 20px);
     display: flex;
-    @include sm {
-      flex-wrap: wrap;
+    flex-wrap: wrap;
+    justify-content: center;
+    > * {
+      width: $wide-main-width-per;
+      @include lg {
+        width: 100%;
+      }
     }
-    .date-config {
+    .top {
+      h1 {
+        font-size: 2rem;
+        color: $color-main;
+        margin: 8px 0px;
+        @include sm {
+          margin: 8px 0px;
+        }
+      }
+    }
+    .config {
+      // width: 99%;
+      // box-shadow: 2px 2px 3px 3px rgba(120, 120, 120, 0.25);
+      background-color: #ffffff;
+      margin-left: -5px;
+      margin-bottom: 10px;
+      padding: 0px;
       display: flex;
-      width: 50%;
-      @include sm {
-        width: 100%;
-      }
-      .date {
-        position: relative;
-        margin: 25px 5px 5px 5px;
-        min-width: 180px;
-        &:before {
-          content: "";
-          position: absolute;
-          top: -20px;
-          left: 0px;
-        }
-        &.from {
-          &:before {
-            content: "期首";
-          }
-        }
-        &.to {
-          &:before {
-            content: "期末";
-          }
+      flex-wrap: wrap;
+      align-items: flex-end;
+      // @include sm {
+      // }
+      .date-config {
+        width: calc(55% - 24px);
+        min-width: 580px;
+        @include sm {
+          min-width: auto;
+          width: 100%;
         }
       }
-    }
-    .filters {
-      width: 50%;
-      @include sm {
-        width: 100%;
-      }
-      .filter {
-        &.item {
-          position: relative;
-          margin: 25px 5px 5px 5px;
-          min-width: 150px;
-          &:before {
-            content: "勘定科目で絞り込み";
-            position: absolute;
-            top: -20px;
-            left: 0px;
-          }
-          .selector {
-            max-width: 140px;
-          }
-          .filter-items {
-            display: flex;
-            flex-wrap: wrap;
-            .f-item {
-              display: block;
-              padding: 0px 5px 4px;
-              border-radius: 3px;
-              background-color: #f6f6f6;
-              margin: 3px 3px;
+      .filters {
+        width: 45%;
+        @include sm {
+          width: 100%;
+        }
+        .filter {
+          padding-bottom: 10px;
+          &.item {
+            position: relative;
+            margin: 25px 5px 5px 5px;
+            min-width: 150px;
+            &:before {
+              content: "勘定科目で絞り込み";
+              position: absolute;
+              top: -20px;
+              left: 0px;
+            }
+            .selector {
+              max-width: 140px;
+            }
+            .filter-items {
               display: flex;
-              align-items: center;
-              .name {
+              flex-wrap: wrap;
+              .f-item {
                 display: block;
-                margin: 2px 4px 0px 0px;
-              }
-              .delete {
-                margin-top: -5px;
-                .delete-button {
-                  margin-top: -6px;
+                padding: 0px 5px 4px;
+                border-radius: 3px;
+                background-color: #f6f6f6;
+                margin: 3px 3px;
+                display: flex;
+                align-items: center;
+                .name {
                   display: block;
-                  @include round-delete-button;
+                  margin: 2px 4px 0px 0px;
+                }
+                .delete {
+                  margin-top: -5px;
+                  .delete-button {
+                    margin-top: -6px;
+                    display: block;
+                    @include round-delete-button;
+                  }
                 }
               }
             }
@@ -487,51 +461,54 @@ ul {
         }
       }
     }
-  }
-  .actions {
-    width: 100%;
-    display: flex;
-    border-bottom: 1px solid #c0c0c0;
-    margin: 20px 0px 10px;
-    padding: 8px 0px;
-    .action-content {
-      .item {
-        border: none;
-        background-color: transparent;
-        border-radius: 3px;
-        cursor: pointer;
-        transition-delay: 0.1s;
-        transition-duration: 0.25s;
-        padding: 5px 8px;
-        &:disabled {
-          color: #e0e0e0;
-          cursor: not-allowed;
-          &:hover {
-            background-color: transparent;
+    .actions {
+      // width: 100%;
+      display: flex;
+      margin: 20px 0px 10px;
+      padding: 8px 0px;
+      .action-content {
+        .item {
+          border: none;
+          background-color: transparent;
+          border-radius: 3px;
+          cursor: pointer;
+          transition-delay: 0.1s;
+          transition-duration: 0.25s;
+          padding: 5px 8px;
+          &:disabled {
             color: #e0e0e0;
+            cursor: not-allowed;
+            &:hover {
+              background-color: transparent;
+              color: #e0e0e0;
+            }
           }
-        }
-        &:hover {
-          background-color: #f0f0f0;
+          &:hover {
+            background-color: #f6f6f6;
+          }
         }
       }
     }
   }
+  @include sm {
+    padding: 10px 0px;
+    h1 {
+      margin: 8px 0px;
+    }
+  }
+
   .results {
-    width: 100%;
+    width: $wide-main-width-per;
+
+    @include lg {
+      width: 100%;
+    }
     .jnl {
       width: 100%;
       display: flex;
-      // border: 1px solid #c0c0c0;
-      border-width: 1px 0px 0px 0px;
-      &:last-child {
-        border-width: 1px 0px;
-      }
       flex-wrap: wrap;
-
-      &:nth-child(2n + 1) {
-        background-color: #f8f8f8;
-      }
+      background-color: #ffffff;
+      margin: 5px 0px;
 
       > .cell {
         $padding-y: 6px;
@@ -604,7 +581,7 @@ ul {
         }
         &.details {
           width: calc(40% - #{$padding-y * 2});
-          // background-color: #f0f0f0;
+          // background-color: #f6f6f6;
           margin-left: 7px;
           @include sm {
             width: calc(50% - 2px);
@@ -622,6 +599,7 @@ ul {
               padding: 5px $padding-y;
               &.category {
                 width: 70%;
+                cursor: pointer;
               }
               &.amount {
                 width: 30%;
@@ -647,7 +625,7 @@ ul {
           width: calc(90% - 22px - #{$padding-y * 4} - 13px);
           position: relative;
           @include sm {
-            margin-left: 20px;
+            margin-left: 25px;
             width: (100% - #{$padding-y * 2} - 20px);
             order: 5;
           }

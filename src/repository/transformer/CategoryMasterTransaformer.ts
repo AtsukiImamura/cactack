@@ -1,7 +1,7 @@
 import Transformer from "@/repository/transformer/Transformer";
 import { DCategoryMaster, ICategoryMaster } from "@/model/interface/ICategory";
 import { container } from "tsyringe";
-import CategoryItemMasterRepository from "../CategoryItemMasterRepository";
+import CategoryItemMasterRepository from "@/repository/CategoryItemMasterRepository";
 import AccountType from "@/model/AccountType";
 
 export default class CategoryMasterTransaformer extends Transformer<

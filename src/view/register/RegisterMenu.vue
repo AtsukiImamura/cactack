@@ -3,9 +3,6 @@
     <div class="register-menu">
       <div class="menu-contents">
         <div class="c frequently-used">
-          <!-- <div class="title">
-            <span>テンプレート</span>
-          </div>-->
           <div class="items">
             <router-link
               tag="input"
@@ -36,8 +33,17 @@
           <div class="title">
             <span>カスタムテンプレート</span>
           </div>
-          <div class="items">
-            <span class="empty-message">（ver2.0から導入予定）振替で登録したユーザー定義テンプレートがここに表示されます</span>
+          <div class="items templates">
+            <router-link
+              tag="input"
+              type="button"
+              class="item template"
+              v-for="template in templates"
+              :key="template.id"
+              :to="`/journalize/transfer/${template.id}`"
+              :value="template.name"
+            ></router-link>
+            <span class="empty-message" v-if="templates.length === 0">テンプレートはありません。振替メニューから作成できます。</span>
           </div>
         </div>
       </div>
@@ -48,9 +54,15 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import CommonFrame from "@/view/common/CommonFrame.vue";
+import ITemplate from "@/model/interface/ITemplate";
+import AppModule from "@/store/ApplicationStore";
 
 @Component({ components: { CommonFrame } })
-export default class RegisterMenu extends Vue {}
+export default class RegisterMenu extends Vue {
+  public get templates(): ITemplate[] {
+    return AppModule.templates;
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -63,10 +75,11 @@ export default class RegisterMenu extends Vue {}
     max-width: 700px;
     width: 80%;
     padding: 10px;
-    box-shadow: 2px 2px 2px 2px rgba(40, 40, 40, 0.15);
     margin: 15px 0px;
+    background-color: #ffffff;
     @include xs {
-      width: 100%;
+      padding: 6px;
+      width: calc(100% - 12px);
     }
     .title {
       padding: 10px;
@@ -87,10 +100,15 @@ export default class RegisterMenu extends Vue {}
         padding: 10px;
         cursor: pointer;
         text-align: center;
-        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.28);
         border-radius: 5px;
         @include xs {
           margin: 6px 1%;
+        }
+      }
+      &.templates {
+        .item {
+          padding: 5px 10px;
+          font-size: 1rem;
         }
       }
     }
@@ -103,9 +121,9 @@ export default class RegisterMenu extends Vue {}
         text-decoration: none;
         text-align: center;
         overflow: hidden;
-        background: linear-gradient(#ffda75 0%, #ffb702 100%);
+        background-color: $color-main;
         color: #ffffff;
-        font-size: 28px;
+        font-size: 1.2rem;
         border: none;
         margin-top: 15px;
         @include xs {
@@ -115,10 +133,9 @@ export default class RegisterMenu extends Vue {}
         &:hover {
           transition-delay: 0.08s;
           transition-duration: 0.25s;
-          text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.66);
         }
         &:disabled {
-          background: linear-gradient(#fff4d9 0%, #ffe298 100%);
+          background-color: #fff4d9;
         }
         &.full-width {
           width: 100%;
@@ -126,12 +143,6 @@ export default class RegisterMenu extends Vue {}
             width: calc(100% - 10px);
           }
         }
-      }
-    }
-    &.register-manually {
-      .item {
-        width: calc(98% - 22px);
-        background: linear-gradient(#f3f3f3 0%, #d8d8d8 100%);
       }
     }
   }

@@ -49,11 +49,13 @@ export default class LedgerSummary extends Vue {
 
 <style lang="scss" scoped>
 .ledger-smr {
-  border: 1px solid #c0c0c0;
+  // border: 1px solid #c0c0c0;
   border-radius: 3px;
+  background-color: #ffffff;
   width: 100%;
   cursor: pointer;
   .header {
+    border-radius: 3px 3px 0px 0px;
     padding: 0px 8px;
     display: flex;
     .title {

@@ -49,12 +49,12 @@ console.log("scssPath: " + scssPath + "\n");
 module.exports = {
   target: target,
   mode: env,
-  devtool: "inline-source-map",
+  devtool: env === "production" ? "" : "inline-source-map",
   entry: `./src/${fileName}.ts`,
   output: {
     path: path.join(__dirname, destDir),
-    filename: `${outFileName ? outFileName : fileName}.js`,
-    chunkFilename: `${random}.[name].bundle.js`,
+    filename: `${outFileName ? outFileName : fileName}.[name].js`,
+    chunkFilename: `[name].bundle.js`,
   },
   module: {
     rules: [
@@ -119,6 +119,18 @@ module.exports = {
     ],
   },
 
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        commons: {
+          test: /[\\/]node_modules[\\/]/,
+          name: "vendors",
+          chunks: "all",
+        },
+      },
+    },
+  },
+
   //   externals: ["axios"],
   resolve: {
     extensions: [".ts", ".js", ".vue", ".scss"],
@@ -127,7 +139,6 @@ module.exports = {
       config$: path.resolve(`src/env/${target}.ts`),
       "@": path.resolve(__dirname, "./src"),
     },
-    // root: [path.resolve("./src")]
   },
 
   plugins: [

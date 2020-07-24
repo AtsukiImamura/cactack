@@ -44,6 +44,10 @@ export default class JournalDate implements IJournalDate {
     return new JournalDate(`${year}/${month}`);
   }
 
+  public static lastDayOf(year: number, month: number) {
+    return JournalDate.byDay(year, month, 32);
+  }
+
   public static fromToken(token: string): IJournalDate {
     return new JournalDate(token);
   }

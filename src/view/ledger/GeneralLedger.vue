@@ -1,40 +1,42 @@
 <template>
   <CommonFrame>
     <div class="general-ledger">
-      <div class="top">
-        <h1>総勘定元帳</h1>
-      </div>
-      <div class="config">
-        <div class="date-config" :key="periodBeginWith.toString()">
-          <DatePicker
-            class="date from"
-            format="yyyy/MM/dd"
-            :value="periodBeginWith.toDate()"
-            @selected="
-              periodBeginWith.setDate($event);
-              udpateLedgers();
-            "
-          ></DatePicker>
-          <DatePicker
-            class="date to"
-            format="yyyy/MM/dd"
-            :value="periodEndWith.toDate()"
-            :disabled-dates="{ to: periodBeginWith.toDate() }"
-            @selected="
-              periodEndWith.setDate($event);
-              udpateLedgers();
-            "
-          ></DatePicker>
+      <div class="h">
+        <div class="top">
+          <h1>総勘定元帳</h1>
+        </div>
+        <div class="config">
+          <div class="period-config">
+            <PeriodSelector></PeriodSelector>
+          </div>
+          <div class="type-selections">
+            <div
+              v-for="type in allTypes"
+              :key="type.code"
+              class="selection"
+              :class="{ selected: dispTypes.includes(type.code) }"
+            >
+              <input
+                :id="`type-selection-${type.code}`"
+                class="check"
+                type="checkbox"
+                :value="type.code"
+                v-model="dispTypes"
+                @click="dispType = type.code"
+              />
+              <label :for="`type-selection-${type.code}`">{{ type.name }}</label>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="results" :key="ledgerKey">
+      <div class="results" :key="ledgerKey + dispTypes.length">
         <div
           class="ledgers"
-          v-masonry="'ledgers'"
+          v-masonry="'dispLedgers'"
           transition-duration="0.1s"
           item-selector=".ledger"
         >
-          <div v-masonry-tile class="ledger" v-for="(led, index) in ledgers" :key="index">
+          <div v-masonry-tile class="ledger" v-for="(led, index) in dispLedgers" :key="index">
             <LedgerSummary :ledger="led" @detail="toLedgerDetail"></LedgerSummary>
           </div>
         </div>
@@ -50,34 +52,52 @@ import LedgerSummary from "@/view/ledger/LedgerSummary.vue";
 import AccountLedger from "@/model/virtual/AccountLedger";
 import VirtualBook from "@/model/virtual/VirtualBook";
 import DatePicker from "vuejs-datepicker";
+import MonthPicker from "@/view/common/MonthPicker.vue";
 import IJournalDate from "@/model/interface/IJournalDate";
 import hash from "object-hash";
 import AppModule from "@/store/ApplicationStore";
 import IJournal from "@/model/interface/IJournal";
+import AccountType from "@/model/AccountType";
+import PeriodSelector from "@/view/common/PeriodSelector.vue";
+import { container } from "tsyringe";
+import UserConfigFlyweight from "@/repository/flyweight/UserConfigFlyweight";
+import { UserConfigKey } from "@/model/interface/IUserConfig";
 
 @Component({
   components: {
     CommonFrame,
     LedgerSummary,
-    DatePicker
-  }
+    DatePicker,
+    MonthPicker,
+    PeriodSelector,
+  },
 })
 export default class GeneralLedger extends Vue {
+  public dispTypes: number[] = [AccountType.TYPE_ASSET];
+
+  public allTypes: AccountType[] = [
+    new AccountType(AccountType.TYPE_ASSET),
+    new AccountType(AccountType.TYPE_DEBT),
+    new AccountType(AccountType.TYPE_SPENDING),
+    new AccountType(AccountType.TYPE_INCOME),
+    new AccountType(AccountType.TYPE_OTHER),
+  ];
+
   public get periodBeginWith(): IJournalDate {
     return AppModule.periodBeginWith;
-  }
-  public set periodBeginWith(date: IJournalDate) {
-    AppModule.setPeriodBeginWith(date);
   }
 
   public get periodEndWith(): IJournalDate {
     return AppModule.periodEndWith;
   }
-  public set periodEndWith(date: IJournalDate) {
-    AppModule.setPeriodEndWith(date);
-  }
 
   public ledgers: AccountLedger[] = [];
+
+  public get dispLedgers(): AccountLedger[] {
+    return this.ledgers.filter((led) =>
+      this.dispTypes.includes(led.category.type.code)
+    );
+  }
 
   public get ledgerKey(): string {
     return hash(this.ledgers);
@@ -87,8 +107,24 @@ export default class GeneralLedger extends Vue {
     return AppModule.journals;
   }
 
+  @Watch("periodBeginWith")
+  public onPeriodBeginWithChanged() {
+    this.updateLedgers();
+  }
+
+  @Watch("periodEndWith")
+  public onPeriodEndWithChanged() {
+    const monthlyDisp = container
+      .resolve(UserConfigFlyweight)
+      .getByConfigKey(UserConfigKey.ENABLE_MONTHLY_DISP);
+    if (monthlyDisp && monthlyDisp.value > 0) {
+      return;
+    }
+    this.updateLedgers();
+  }
+
   @Watch("journals")
-  public async udpateLedgers() {
+  public async updateLedgers() {
     const book = new VirtualBook(
       this.journals,
       this.periodBeginWith,
@@ -98,65 +134,96 @@ export default class GeneralLedger extends Vue {
   }
 
   public toLedgerDetail(ledger: AccountLedger) {
-    this.$router.push(
-      `/ledger/detail/${
-        ledger.id
-      }?begin=${this.periodBeginWith.toString()}&end=${this.periodEndWith.toString()}`
-    );
+    this.$router.push(`/ledger/detail/${ledger.id}`);
   }
 
   public mounted(): void {
-    this.udpateLedgers();
+    this.updateLedgers();
   }
 }
 </script>
 
 <style lang="scss" scoped>
 .general-ledger {
-  padding: 10px;
+  .h {
+    padding: 10px 0px 0px 10px;
+    background-color: #ffffff;
+  }
+  > div {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
   .top {
     h1 {
       font-size: 2rem;
       color: $color-main;
+      margin: 10px 0px;
+      @include sm {
+        margin: 8px 0px;
+      }
     }
   }
   .config {
-    width: 99%;
-    box-shadow: 2px 2px 3px 3px rgba(120, 120, 120, 0.25);
-    background-color: #ffffff;
-    margin: 15px 0px;
-    padding: 10px 6px;
-    .date-config {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    width: 100%;
+    .period-config {
+      width: 45%;
+      min-width: 500px;
+      @include sm {
+        width: 100%;
+        min-width: auto;
+      }
+    }
+    .type-selections {
       display: flex;
-      .date {
-        position: relative;
-        margin: 25px 5px 5px 5px;
-        &:before {
-          content: "";
-          position: absolute;
-          top: -20px;
-          left: 0px;
+      margin: 12px 0px;
+      width: 50%;
+      max-height: 36px;
+      @include sm {
+        width: 100%;
+        margin: 7px 0px;
+      }
+      .selection {
+        display: flex;
+        align-items: center;
+        margin-right: 5px;
+        padding: 3px 10px 3px 6px;
+        border-radius: 3px;
+        max-width: 60px;
+        @include sm {
+          padding: 3px 7px 3px 2px;
         }
-        &.from {
-          &:before {
-            content: "期首";
-          }
+        &.selected {
+          background-color: $color-main-skeleton;
         }
-        &.to {
-          &:before {
-            content: "期末";
-          }
+        .check {
+          width: 22px;
+          height: 22px;
+          position: relative;
+          margin-right: 4px;
+        }
+        label {
+          display: block;
+          margin-left: 4px;
         }
       }
     }
   }
   .results {
+    background-color: #f6f6f6;
+    min-height: calc(100vh - 183px);
+    padding-top: 8px;
+    @include sm {
+      min-height: calc(100vh - 237px);
+    }
     .ledgers {
       display: flex;
       flex-wrap: wrap;
       .ledger {
-        width: calc(33% - 10px);
-        margin: 4px 0px 4px 10px;
+        width: calc(33% - 7px);
+        margin: 4px 10px 4px 0px;
         @include xs {
           width: 100%;
         }

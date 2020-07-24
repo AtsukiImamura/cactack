@@ -16,9 +16,7 @@
           </div>
         </div>
         <div class="contents">
-          <UnExecutedJournals
-            :journals="unExecutedJournals"
-          ></UnExecutedJournals>
+          <UnExecutedJournals :journals="unExecutedJournals"></UnExecutedJournals>
         </div>
       </div>
     </div>
@@ -75,7 +73,7 @@ export default class Notices extends Vue {
   width: 100%;
   padding-top: 100px;
   min-height: 100vh;
-  background-color: #f0f0f0;
+  background-color: #f6f6f6;
   .main {
     display: flex;
     @include sm {

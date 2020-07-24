@@ -1,37 +1,32 @@
 <template>
   <CommonFrame>
     <div class="ledger-detail">
-      <div class="top">
-        <h1>{{ title }}</h1>
-      </div>
-      <div class="config">
-        <div class="date-config" :key="periodBeginWith.toString()">
-          <DatePicker
-            class="date from"
-            format="yyyy/MM/dd"
-            :value="periodBeginWith.toDate()"
-            @selected="
-              periodBeginWith = periodBeginWith.setDate($event);
-              updateLedger();
-            "
-          ></DatePicker>
-          <DatePicker
-            class="date to"
-            format="yyyy/MM/dd"
-            :value="periodEndWith.toDate()"
-            :disabled-dates="{ to: periodBeginWith.toDate() }"
-            @selected="
-              periodEndWith = periodEndWith.setDate($event);
-              updateLedger();
-            "
-          ></DatePicker>
-          <div class="only-current-period">
-            <input type="checkbox" v-model="onlyCurrentPeriod" />
-            <label class="lab">期中のみを表示する</label>
+      <div class="h">
+        <div class="top">
+          <h1>{{ title }}</h1>
+        </div>
+        <div class="config">
+          <div class="period-config">
+            <PeriodSelector :edit-period="true"></PeriodSelector>
+          </div>
+          <div class="amount-config">
+            <input id="only-current-period" type="checkbox" v-model="onlyCurrentPeriod" />
+            <label for="only-current-period">今期累積額のみ表示</label>
           </div>
         </div>
       </div>
       <div class="main">
+        <div class="graphs">
+          <div class="amount-graph" :key="chartKey">
+            <LedgerChart
+              v-if="isReady"
+              :ledger="ledger"
+              :begin-with="periodBeginWith"
+              :end-with="periodEndWith"
+              :start-value="graphStartValue"
+            ></LedgerChart>
+          </div>
+        </div>
         <div class="details">
           <div class="sum">
             <span>{{ ledger ? ledger.debitAmount : 0 }}</span>
@@ -47,24 +42,14 @@
             >
               <div class="row" v-for="(detail, index) in details" :key="-index">
                 <div class="cell date">{{ detail.accountAt.toString() }}</div>
-                <div class="cell name">{{ detail.category ? detail.category.name : "" }}</div>
+                <div class="cell name">
+                  <router-link
+                    :to="`/journalize/edit/${detail.origin.id}`"
+                  >{{ detail.category ? detail.category.name : "" }}</router-link>
+                </div>
                 <div class="cell amount">{{ detail.amount }}</div>
               </div>
             </div>
-          </div>
-        </div>
-        <div class="graphs">
-          <div class="amount-graph">
-            <LedgerChart
-              v-if="isReady"
-              :ledger="ledger"
-              :begin-with="periodBeginWith"
-              :end-with="periodEndWith"
-              :start-value="graphStartValue"
-              :key="
-                `${graphStartValue}${periodBeginWith.toString()}${periodEndWith.toString()}`
-              "
-            ></LedgerChart>
           </div>
         </div>
       </div>
@@ -82,59 +67,69 @@ import AppModule from "@/store/ApplicationStore";
 import DatePicker from "vuejs-datepicker";
 import IJournalDate from "@/model/interface/IJournalDate";
 import LedgerChart from "@/view/ledger/components/LedgerChart.vue";
+import PeriodSelector from "@/view/common/PeriodSelector.vue";
+
 @Component({
   components: {
     CommonFrame,
     LedgerSummary,
     DatePicker,
-    LedgerChart
-  }
+    LedgerChart,
+    PeriodSelector,
+  },
 })
 export default class GeneralLedger extends Vue {
   public get periodBeginWith(): IJournalDate {
     return AppModule.periodBeginWith;
   }
-  public set periodBeginWith(date: IJournalDate) {
-    AppModule.setPeriodBeginWith(date);
-  }
 
   public get periodEndWith(): IJournalDate {
     return AppModule.periodEndWith;
   }
-  public set periodEndWith(date: IJournalDate) {
-    AppModule.setPeriodEndWith(date);
-  }
 
   public categoryItemId: string = "";
 
-  public onlyCurrentPeriod: boolean = true;
+  public onlyCurrentPeriod: boolean = false;
 
   public graphStartValue: number = 0;
+
+  public chartKey: number = 0;
 
   @Watch("onlyCurrentPeriod")
   public onGraphConditionChanged() {
     this.updateLedger();
   }
+  @Watch("periodBeginWith")
+  public onPeriodBeginWithChanged() {
+    this.updateLedger();
+  }
+  @Watch("periodEndWith")
+  public onPeriodEndWithChanged() {
+    this.updateLedger();
+  }
 
-  public async updateLedger() {
-    const book = new VirtualBook(
+  public get book(): VirtualBook {
+    return new VirtualBook(
       AppModule.journals,
       this.periodBeginWith,
       this.periodEndWith
     );
-    const ledgers = (await book.getVirtualLedgers())
-      .reduce((acc, cur) => [...acc, cur, ...cur.children], [])
-      .filter(led => led.category.id === this.categoryItemId);
-    const ledger = ledgers.shift();
-    this.ledger = ledger ? ledger : null;
+  }
 
+  public async updateLedger() {
     if (this.onlyCurrentPeriod) {
       this.graphStartValue = 0;
-      return;
+    } else {
+      const balance = await this.book.generateBalanceOfBeginning();
+      this.graphStartValue = balance.getItemValueOf(this.categoryItemId);
     }
-    const balance = await book.generateBalanceOfBeginning();
-    // balance.le
-    this.graphStartValue = balance.getItemValueOf(this.categoryItemId);
+
+    const ledgers = (await this.book.getVirtualLedgers())
+      .reduce((acc, cur) => [...acc, cur, ...cur.children], [])
+      .filter((led) => led.category.id === this.categoryItemId);
+    const ledger = ledgers.shift();
+    this.ledger = ledger ? ledger : null;
+    this.chartKey++;
   }
 
   public ledger: AccountLedger | null = null;
@@ -147,28 +142,23 @@ export default class GeneralLedger extends Vue {
     return this._title;
   }
 
-  //   public canDisplayDetail: boolean = false;
   public get isReady(): boolean {
     return !!this.ledger;
   }
 
-  public mounted(): void {
+  public async mounted() {
     // 勘定元帳の引き当て
-    const categoryItemId = this.$route.params.categoryItemId;
+    let categoryItemId = this.$route.params.categoryItemId;
     if (!categoryItemId) {
       this.$router.push("/ledger/general");
       return;
     }
     this.categoryItemId = categoryItemId;
-    console.log(`categoryItemId: ${categoryItemId}`);
-
-    setTimeout(() => {
-      if (!this.ledger) {
-        this.$router.push("/ledger/general");
-        return;
-      }
-    }, 500);
-    this.updateLedger();
+    await this.updateLedger();
+    if (!this.ledger) {
+      this.$router.push("/ledger/general");
+      return;
+    }
   }
 }
 </script>
@@ -176,51 +166,40 @@ export default class GeneralLedger extends Vue {
 <style lang="scss" scoped>
 .ledger-detail {
   padding: 10px 0px;
-  .top {
-    h1 {
-      font-size: 2rem;
-      color: $color-main;
-      @include sm {
+  .h {
+    background-color: #ffffff;
+    .top {
+      h1 {
+        font-size: 2rem;
+        color: $color-main;
         margin: 8px 4px;
+        @include sm {
+          margin: 8px 4px;
+        }
       }
     }
-  }
-  .config {
-    width: 99%;
-    box-shadow: 2px 2px 3px 3px rgba(120, 120, 120, 0.25);
-    background-color: #ffffff;
-    margin: 15px 0px;
-    padding: 10px 6px;
-    .date-config {
+    .config {
+      width: calc(100% - 12px);
+      background-color: #ffffff;
+      margin: 0px 0px;
+      padding: 0px 6px;
       display: flex;
-      @include sm {
-        flex-wrap: wrap;
+      flex-wrap: wrap;
+      .period-config {
+        max-width: 620px;
       }
-      .date {
-        position: relative;
-        margin: 25px 5px 5px 5px;
+      .amount-config {
+        width: calc(35% - 12px);
+        padding: 12px 0px;
+        display: flex;
+        align-items: flex-end;
         @include sm {
-          width: calc(50% - 10px);
+          width: 100%;
         }
-        &:before {
-          content: "";
-          position: absolute;
-          top: -20px;
-          left: 0px;
+        label {
+          display: inline-block;
+          padding: 4px 0px 4px 5px;
         }
-        &.from {
-          &:before {
-            content: "期首";
-          }
-        }
-        &.to {
-          &:before {
-            content: "期末";
-          }
-        }
-      }
-      .only-current-period {
-        margin-left: 5px;
       }
     }
   }
@@ -229,6 +208,7 @@ export default class GeneralLedger extends Vue {
       display: flex;
       margin: 20px 0px;
       flex-wrap: wrap;
+      background-color: #ffffff;
       .sum {
         width: calc(50% - 17px);
         border-bottom: 1px solid #c0c0c0;

@@ -40,7 +40,7 @@ export default class HiddenActions extends Vue {
     transition-delay: 0.1s;
     transition-duration: 0.25s;
     &:hover {
-      background-color: #f0f0f0;
+      background-color: #f6f6f6;
     }
     &:after {
       content: "";

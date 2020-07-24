@@ -1,6 +1,5 @@
 import hash from "object-hash";
 export default class RepositoryCache<T> {
-  // protected mapping: { [index: string]: { [key: string]: Set<T> } } = {};
   protected cacheItemMap: Map<
     /* index */ string,
     Map</* key */ string, Map</* obj-hash */ string, T>>
@@ -52,13 +51,11 @@ export default class RepositoryCache<T> {
       }
       const keyValues = indexValues.get(key)!;
       keyValues.set(hash(value), value);
-      // console.log(hash(value), value);
     }
   }
 
   public addAll(values: T[]) {
     values.forEach((v) => this.add(v));
-    // console.log(this.cacheItemMap);
   }
 
   public get(index: string, key: string): T[] | undefined {
@@ -69,7 +66,6 @@ export default class RepositoryCache<T> {
     if (!targets) {
       return targets;
     }
-    // console.log(`HIT ${index} ${key}`);
     return Array.from(targets.values());
   }
 

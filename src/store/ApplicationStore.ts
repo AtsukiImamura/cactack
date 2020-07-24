@@ -15,10 +15,15 @@ import JournalDate from "@/model/common/JournalDate";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
 import UserTagFlyweight from "@/repository/flyweight/UserTagFlyweight";
+import ITemplate from "@/model/interface/ITemplate";
+import TemplateRepository from "@/repository/TemplateRepository";
+import UserConfigFlyweight from "@/repository/flyweight/UserConfigFlyweight";
 
 @Module({ dynamic: true, store, name: "app", namespaced: true })
 class AppStore extends VuexModule {
   private _journals: IJournal[] = [];
+
+  private _templates: ITemplate[] = [];
 
   private _periodBeginWith: IJournalDate = JournalDate.today().getPreviousMonth();
 
@@ -78,6 +83,10 @@ class AppStore extends VuexModule {
     return new CategoryList(container.resolve(UserCategoryFlyweight).values);
   }
 
+  public get templates(): ITemplate[] {
+    return this._templates;
+  }
+
   /**
    * Getter journals
    * @return {IJournal[] }
@@ -97,13 +106,17 @@ class AppStore extends VuexModule {
 
   @Action({ rawError: true })
   public async init() {
-    Promise.all([
-      await container.resolve(UserTagFlyweight).import(),
-      await container.resolve(UserCategoryItemFlyweight).import(),
-      await container.resolve(UserCategoryFlyweight).import(),
+    await Promise.all([
+      container.resolve(UserTagFlyweight).import(),
+      container.resolve(UserCategoryItemFlyweight).import(),
+      container.resolve(UserCategoryFlyweight).import(),
+      container.resolve(UserConfigFlyweight).import(),
     ]);
     const journals = await container.resolve(JournalRepository).getUsersAll();
     this.INIT(journals);
+
+    const tempaltes = await container.resolve(TemplateRepository).getUsersAll();
+    this._templates.splice(0, this._templates.length, ...tempaltes);
   }
 
   @Mutation

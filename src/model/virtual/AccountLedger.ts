@@ -1,6 +1,7 @@
-import { IAccountCategory, ICategoryItem } from "../interface/ICategory";
-import IJournalDate from "../interface/IJournalDate";
+import { IAccountCategory, ICategoryItem } from "@/model/interface/ICategory";
+import IJournalDate from "@/model/interface/IJournalDate";
 import LedgerCategory from "./LedgerCategory";
+import IJournal from "@/model/interface/IJournal";
 
 export interface ILedgerDetail {
   category: LedgerCategory;
@@ -8,6 +9,8 @@ export interface ILedgerDetail {
   amount: number;
 
   accountAt: IJournalDate;
+
+  origin?: IJournal;
 }
 
 export default class AccountLedger {

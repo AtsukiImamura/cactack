@@ -43,19 +43,36 @@ import JournalRepository from "@/repository/JournalRepository";
 import Journal from "@/model/Journal";
 import AppModule from "@/store/ApplicationStore";
 import JournalEditor from "@/view/register/JournalEditor.vue";
-import JournalDetail from "@/model/JournalDetail";
+// import JournalDetail from "@/model/JournalDetail";
+import JournalDate from "@/model/common/JournalDate";
 
 @Component({ components: { ProcessButton, JournalEditor } })
 export default class UnExecutedJournals extends Vue {
   @Prop() journals!: IJournal[];
 
-  public get targets(): IJournal[] {
-    return this.journals.map(jnl =>
-      this.handling && jnl.id === (this.handling as IJournal).id
-        ? (this.handling as IJournal)
-        : jnl
-    );
-  }
+  // public get targetJournals(): IJournal[] {
+  //   // 同日付で借方・貸方の同じものをまとめる
+  //   const jnlMap = new Map<string, IJournal>();
+  //   for (const jnl of this.journals) {
+  //     const patternId = jnl.patternId;
+  //     if (jnlMap.has(patternId)) {
+  //       const target = jnlMap.get(patternId)!;
+  //       target.addCredit(Object.assign(jnl.credits[0], { origin: jnl }));
+  //       target.addDebit(Object.assign(jnl.debits[0], { origin: jnl }));
+  //       continue;
+  //     }
+  //     jnlMap.set(vid, jnl);
+  //   }
+  //   return Array.from(jnlMap.values());
+  // }
+
+  // public get targets(): IJournal[] {
+  //   return this.journals.map(jnl =>
+  //     this.handling && jnl.id === (this.handling as IJournal).id
+  //       ? (this.handling as IJournal)
+  //       : jnl
+  //   );
+  // }
 
   public handling: IJournal | {} = {};
 
@@ -69,39 +86,34 @@ export default class UnExecutedJournals extends Vue {
 
   public settle(jnl: IJournal): () => Promise<void> {
     return async () => {
-      const targetJournal = !(this.handling as any).id
-        ? jnl
-        : (this.handling as IJournal);
-      const relatedJournal = await container
-        .resolve(JournalRepository)
-        .getById(
-          /* 仮想仕訳のIDには一旦もとの仕訳のIDを入れてある */ targetJournal.id
+      let targetJournal = jnl;
+      if ((this.handling as any).id && (this.handling as any).id === jnl.id) {
+        targetJournal = this.handling as IJournal;
+      }
+      for (const detail of targetJournal.rawDetails) {
+        const origin = detail.origin;
+        if (!origin) {
+          continue;
+        }
+
+        const jnl = new Journal(
+          "",
+          origin.userId,
+          origin.title,
+          JournalDate.today(),
+          JournalDate.today(),
+          JournalDate.today(),
+          origin.credits,
+          origin.debits,
+          false
         );
-      if (!relatedJournal) {
-        throw new Error("related journal not found.");
+        jnl.ancestorId = origin.ancestorId;
+        jnl.execute();
+        await container.resolve(JournalRepository).insert(jnl);
       }
 
-      await container.resolve(JournalRepository).update(
-        new Journal(
-          relatedJournal.id,
-          relatedJournal.userId,
-          relatedJournal.title,
-          relatedJournal.createdAt,
-          relatedJournal.accountAt,
-          relatedJournal.executeAt,
-          // FIXME: 本来は必要な補助科目の分に対してだけクリアする必要がある
-          relatedJournal.credits.map(d => {
-            return new JournalDetail(d.category, d.amount);
-          }),
-          relatedJournal.debits.map(d => {
-            return new JournalDetail(d.category, d.amount);
-          }),
-          relatedJournal.period
-        )
-      );
-      jnl.execute();
-      jnl.ancestorId = targetJournal.id;
-      await container.resolve(JournalRepository).insert(jnl);
+      targetJournal.execute();
+      await container.resolve(JournalRepository).insert(targetJournal);
       await AppModule.init();
     };
   }

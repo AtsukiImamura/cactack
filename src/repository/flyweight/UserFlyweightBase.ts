@@ -1,4 +1,4 @@
-import Identifiable, { UserIdentifiable } from "@/model/interface/Identifiable";
+import { UserIdentifiable } from "@/model/interface/Identifiable";
 import * as firebase from "firebase/app";
 import Strable from "@/model/interface/common/Strable";
 import { container } from "tsyringe";
@@ -8,7 +8,7 @@ import Treatable from "@/model/interface/common/Treatable";
 
 export default abstract class UserFlyweightBase<
   S extends UserIdentifiable & Strable,
-  T extends Identifiable & Treatable<S>
+  T extends UserIdentifiable & Treatable<S>
 > {
   public get values(): T[] {
     return Array.from(this.mapping.values()).map((v) => this.aggregate(v));
@@ -30,8 +30,6 @@ export default abstract class UserFlyweightBase<
   protected key: string = "";
 
   protected abstract aggregate(data: S): T;
-
-  // protected abstract aggregate(raw: S): T;
 
   protected putReal(value: S): void {
     this.realMapping.set(value.id, value);
@@ -101,6 +99,12 @@ export default abstract class UserFlyweightBase<
     const mapValue = this.mapping.get(value.id);
     if (mapValue) {
       throw new Error("there is a value which has an id same as given value.");
+    }
+    if (!value.userId) {
+      (value as any)._userId = container.resolve(UserAuthService).userId;
+    }
+    if (!value.userId) {
+      throw new Error("user id must be included on the properties.");
     }
     const id = (await this.connection().add(value.simplify())).id;
     value.id = id;

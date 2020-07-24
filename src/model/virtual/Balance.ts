@@ -1,7 +1,7 @@
-import IJournal, { IJournalDetail } from "../interface/IJournal";
-import { IAccountCategory, ICategoryItem } from "../interface/ICategory";
+import IJournal, { IJournalDetail } from "@/model/interface/IJournal";
+import { IAccountCategory, ICategoryItem } from "@/model/interface/ICategory";
 import { IBalanceSheetSummary } from "@/view/interface/IDiffGragh";
-import AccountType from "../AccountType";
+import AccountType from "@/model/AccountType";
 
 /** 貸借対照表 */
 export default class Balance {
@@ -130,7 +130,16 @@ export default class Balance {
     if (categorySmr.has(categoryItemId)) {
       return categorySmr.get(categoryItemId)!.amount;
     }
-    return 0;
+
+    /** タグ */
+    const targetTagId = categoryItemId.replace("&tag&", "");
+    return items.reduce(
+      (acc, cur) =>
+        cur.category.tags.map((tag) => tag.id).includes(targetTagId)
+          ? (acc += cur.amount)
+          : acc,
+      0
+    );
   }
 
   private get creditBalanceItems(): IJournalDetail[] {
@@ -176,7 +185,6 @@ export default class Balance {
     const itemMap = new Map<string, IBalanceItem>();
     for (const detail of details) {
       const categoryId = getItem(detail).id;
-      // console.log(`${detail.category.id}  ${detail.category.name}`);
       if (!itemMap.has(categoryId)) {
         itemMap.set(categoryId, { item: getItem(detail), amount: 0 });
       }

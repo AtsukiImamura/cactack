@@ -5,7 +5,7 @@ import {
   ICategoryMaster,
 } from "@/model/interface/ICategory";
 import { container } from "tsyringe";
-import CategoryMasterRepository from "../CategoryMasterRepository";
+import CategoryMasterRepository from "@/repository/CategoryMasterRepository";
 import AccountType from "@/model/AccountType";
 
 export default class CategoryItemMasterTransaformer extends Transformer<

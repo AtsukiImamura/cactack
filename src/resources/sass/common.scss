@@ -17,7 +17,6 @@
       display: inline-block;
       color: rgb(0, 160, 84);
       transition-duration: 0.35s;
-      // margin-top: -2px;
     }
     .attr {
       &.positive {
@@ -25,7 +24,6 @@
           background-image: url("image/puls.svg");
         }
         .value {
-          // transition-duration: 0.s;
           color: rgb(255, 78, 78);
         }
       }
@@ -82,11 +80,9 @@
 }
 
 .btn {
-  // box-shadow: 0 1px 1px rgba(0, 0, 0, 0.28);
   border-radius: 3px;
   border: transparent;
   padding: 6px 10px;
-  // margin-left: 10px;
   min-width: 90px;
   outline: none;
   cursor: pointer;
@@ -123,7 +119,6 @@
     &:disabled {
       color: #f0f0f0;
       background-color: #ffa79b;
-      // background: linear-gradient(#f1dbd8 0%, #f3ada4 100%);
     }
   }
   &.cancel-btn {
@@ -143,6 +138,7 @@ body {
   margin: 0;
   font-size: 12px;
   padding: 0;
+  background-color: #f6f6f6;
   * {
     font-family: sans-serif, "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3",
       "メイリオ", Meiryo, "ＭＳ Ｐゴシック";
@@ -156,55 +152,63 @@ body {
     }
   }
   #app {
-    #menu {
-      position: fixed;
-      top: -30px;
-      left: 0;
-      top: 0px;
-      height: 100vh;
-      width: 230px;
-      @include responsive-width(200px, 180px, 100vw, 100vw);
-      @include sm {
-        position: fixed;
-        top: 0px;
-        left: 0px;
-        height: 73px;
-        width: 100vw;
-        border-top: 1px solid $color-main;
-        background-color: #ffffff;
-        z-index: 1;
-        padding-top: 0px;
+    #common {
+      display: flex;
+      width: 100%;
+      #menu {
+        height: 100vh;
+        width: 230px;
+        @include responsive-width(200px, 180px, 0px, 0px);
+        .menu-wrp {
+          position: fixed;
+          left: 0;
+          top: 0px;
+          height: 100%;
+          width: 230px;
+          @include responsive-width(200px, 180px, 100vw, 100vw);
+          @include sm {
+            position: fixed;
+            top: 0px;
+            left: 0px;
+            height: 73px;
+            border-top: 1px solid $color-main;
+            background-color: #ffffff;
+            z-index: 3;
+            padding-top: 0px;
+          }
+          @include xs {
+            height: 48px;
+            box-shadow: none;
+          }
+        }
       }
-      @include xs {
-        height: 48px;
-        box-shadow: none;
+      #main {
+        // margin-left: 231px;
+        // @include lg {
+        //   margin-left: 201px;
+        // }
+        // @include md {
+        //   margin-left: 181px;
+        // }
+        @include sm {
+          // margin-left: 0px;
+          margin-top: 73px;
+          margin-bottom: 30px;
+        }
+        @include xs {
+          margin-top: 48px;
+        }
+        width: calc(100% - 230px);
+        @include responsive-width(
+          calc(99.2% - 200px),
+          calc(99.2% - 180px),
+          100%,
+          100%
+        );
+        height: auto;
+        // overflow-x: hidden;
+        // width: auto;
       }
-    }
-    #main {
-      margin-left: 231px;
-      @include lg {
-        margin-left: 201px;
-      }
-      @include md {
-        margin-left: 181px;
-      }
-      @include sm {
-        margin-left: 0px;
-        margin-top: 73px;
-        margin-bottom: 65px;
-      }
-      @include xs {
-        margin-top: 48px;
-      }
-      // margin-right: 10px;
-      width: calc(99.2vw - 240px - 9px);
-      @include responsive-width(
-        calc(99.2vw - 200px - 9px),
-        calc(99.2vw - 180px - 9px),
-        100vw,
-        100vw
-      );
-      height: auto;
     }
   }
 
@@ -214,6 +218,28 @@ body {
   textarea,
   /deep/input[type="password"] {
     width: calc(100% - 16px);
+    padding: 6px 8px 6px 8px;
+    border: none;
+    border-bottom: 1px solid $color-main;
+    outline: none;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    border-bottom: 1px solid $color-main;
+    display: inline-block;
+    &:focus {
+      transition-delay: 0.05s;
+      transition-duration: 0.18s;
+      transition-timing-function: ease-in-out;
+      border-bottom: 2px solid $color-main;
+      padding: 6px 8px 5px 8px;
+    }
+    @include sm {
+      padding: 4px 3px;
+    }
+  }
+
+  textarea {
+    width: calc(100% - 16px);
     padding: 4px 8px;
     border: 1px solid #c0c0c0;
     outline: none;
@@ -221,7 +247,6 @@ body {
     font-size: 0.85rem;
     &:focus {
       transition-delay: 0.1s;
-      // transition-duration: 0.3s;
       transition-timing-function: ease-in-out;
       border-width: 2px;
       padding: 3px 7px;
@@ -232,27 +257,29 @@ body {
   }
   input[type="checkbox"] {
     position: relative;
-    $box-size: 18px;
+    $box-size: 21px;
+    width: $box-size;
+    height: $box-size;
     &:after {
       position: absolute;
       content: "";
-      width: $box-size;
-      height: $box-size;
+      width: 100%;
+      height: 100%;
       background-color: #ffffff;
       z-index: 1;
       border-radius: 3px;
       border: 1px solid #c0c0c0;
       top: -2px;
-      left: -5px;
+      left: -1px;
     }
     &:checked {
       &:before {
         position: absolute;
         content: "";
-        width: $box-size;
-        height: $box-size;
+        width: 100%;
+        height: 100%;
         top: -1px;
-        left: -4px;
+        left: 0px;
         background-image: url("image/check.svg");
         z-index: 2;
       }
@@ -318,9 +345,7 @@ body {
 }
 
 @mixin add-mark($width, $height) {
-  // border: 1px solid #c0c0c0;
   border: none;
-  // background-color: #ffffff;
   background-color: $color-main;
   position: relative;
   $mark-size: 18px;
@@ -518,7 +543,6 @@ body {
       position: absolute;
       width: 14px;
       height: 1.5px;
-      // background-color: $delete-button-color;
       background-color: #ffffff;
       top: 9px;
       left: 3px;
@@ -551,17 +575,6 @@ body {
         padding: 2px;
         z-index: 2;
       }
-      // &:before {
-      //   content: "";
-      //   position: absolute;
-      //   top: $padding-y + 1px;
-      //   left: 2px;
-      //   width: $size;
-      //   height: $size;
-      //   z-index: 2;
-      //   border: 2px solid #c0c0c0;
-      //   border-radius: 3px;
-      // }
     }
   }
 }
@@ -596,17 +609,6 @@ body {
         left: 10px;
         z-index: 2;
       }
-      // &:before {
-      //   content: "";
-      //   position: absolute;
-      //   top: $padding-y + 1px;
-      //   left: 2px;
-      //   width: $size;
-      //   height: $size;
-      //   z-index: 2;
-      //   border: 2px solid #c0c0c0;
-      //   border-radius: 3px;
-      // }
     }
   }
 }
@@ -630,7 +632,7 @@ body {
       top: 0px;
       left: 0px;
       background-color: rgba(0, 0, 172, 0.5);
-      @keyframes loading {
+      @keyframes loading-linear {
         0% {
           left: 0%;
           width: 12%;
@@ -644,7 +646,7 @@ body {
           width: 0%;
         }
       }
-      animation: loading 1.2s 0s linear infinite running;
+      animation: loading-linear 1.2s 0s linear infinite running;
     }
   }
 }

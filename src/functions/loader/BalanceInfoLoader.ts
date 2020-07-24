@@ -1,12 +1,12 @@
 import IJournalDate from "@/model/interface/IJournalDate";
-import IApiResponse from "../base/IApiResponse";
+import IApiResponse from "@/functions/base/IApiResponse";
 
-import firebase from "firebase";
+import * as firebase from "firebase";
 import { container } from "tsyringe";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
 import { BalanceSummaryDto } from "@/model/dto/BalanceSummaryDto";
-import { BalanceSummaryResponseItem } from "../base/balance/BalanceResponse";
+import { BalanceSummaryResponseItem } from "@/functions/base/balance/BalanceResponse";
 import { ICategoryItem } from "@/model/interface/ICategory";
 export default class BalanceInfoLoader {
   public static async load(date: IJournalDate) {
@@ -23,16 +23,21 @@ export default class BalanceInfoLoader {
     }
 
     return new BalanceInfoLoader(
-      ledgersResult.data.data.map((info) => ({
-        item: container.resolve(UserCategoryItemFlyweight).get(info.itemId)!,
-        amount: info.amount,
-      }))
+      ledgersResult.data.data.map((info) => {
+        const item = container
+          .resolve(UserCategoryItemFlyweight)
+          .get(info.itemId)!;
+        return {
+          item: item,
+          amount: (item.type.isDebit ? 1 : -1) * info.amount,
+        };
+      })
     );
   }
 
   private values: BalanceSummaryDto[] = [];
 
-  public get list() {
+  public get list(): BalanceSummaryDto[] {
     return this.values;
   }
 

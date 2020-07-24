@@ -67,16 +67,16 @@ import { Component, Vue, Prop } from "vue-property-decorator";
 import OpenableModal from "@/view/common/OpenableModal.vue";
 import {
   IAccountCategory,
-  IUserCategoryItem
+  IUserCategoryItem,
 } from "@/model/interface/ICategory";
 import Selector from "@/view/common/Selector.vue";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import CreditCardTemplateSelector from "@/view/common/action/CreditCardTemplateSelector.vue";
 import TagSelector from "@/view/category/TagSelector.vue";
-import { IUserTag } from "../../model/interface/ITag";
+import { IUserTag } from "@/model/interface/ITag";
 import { container } from "tsyringe";
-import UserTagFlyweight from "../../repository/flyweight/UserTagFlyweight";
-import UserTag from "../../model/UserTag";
+import UserTagFlyweight from "@/repository/flyweight/UserTagFlyweight";
+import UserTag from "@/model/UserTag";
 
 @Component({
   components: {
@@ -84,8 +84,8 @@ import UserTag from "../../model/UserTag";
     Selector,
     ProcessButton,
     CreditCardTemplateSelector,
-    TagSelector
-  }
+    TagSelector,
+  },
 })
 export default class ItemEditor extends Vue {
   @Prop()
@@ -146,23 +146,23 @@ export default class ItemEditor extends Vue {
   }
 
   public onTagSelected(tag: IUserTag) {
-    if (tag.id && this.tags.map(t => t.id).includes(tag.id)) {
+    if (tag.id && this.tags.map((t) => t.id).includes(tag.id)) {
       return;
     }
     this.tags.push(tag);
   }
 
   public removeTag(tag: IUserTag) {
-    this.tags = this.tags.filter(t => t.name !== tag.name);
+    this.tags = this.tags.filter((t) => t.name !== tag.name);
   }
 
   protected async addTagsIfNotExist() {
-    const tags = this.tags.filter(t => t.id);
+    const tags = this.tags.filter((t) => t.id);
     tags.push(
       ...(await Promise.all(
         this.tags
-          .filter(t => !t.id)
-          .map(t =>
+          .filter((t) => !t.id)
+          .map((t) =>
             container
               .resolve(UserTagFlyweight)
               .insert(new UserTag("", t.userId, t.name))
@@ -216,7 +216,7 @@ export default class ItemEditor extends Vue {
       display: flex;
       .tag {
         display: flex;
-        background-color: #f0f0f0;
+        background-color: #f6f6f6;
         border-radius: 3px;
         padding: 3px 6px;
         max-width: 110px;

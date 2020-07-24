@@ -26,7 +26,8 @@ export default class VirtualJournal extends JournalBase {
       accountAt,
       undefined,
       credits,
-      debits
+      debits,
+      true
     );
   }
 }
