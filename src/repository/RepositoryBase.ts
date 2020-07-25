@@ -98,6 +98,7 @@ export default abstract class RepositoryBase<
         throw new Error("user not found.");
       }
       (simplyfied as any).userId = currentUser.uid;
+      (value as any)._userId = currentUser.uid;
     }
 
     simplyfied.id = "";

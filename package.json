@@ -14,6 +14,8 @@
     "watch:dev": "cross-env NODE_ENV=development webpack --watch",
     "watch:functions": "cross-env NODE_ENV=functions webpack --watch",
     "test": "jest",
+    "test:journal": "jest journal",
+    "test:category": "jest category",
     "test:coverage": "jest --coverage",
     "test:local": "node ./dist/test.js",
     "sass:build": "node-sass ./src/resources/sass/ -r -o ./dist/ --output-style compressed",
@@ -37,7 +39,11 @@
     },
     "testMatch": [
       "**/__tests__/*.spec.+(ts|tsx|js)"
-    ]
+    ],
+    "moduleNameMapper": {
+      "^@/(.+)": "<rootDir>/src/$1",
+      "^config$": "<rootDir>/src/env/web.ts"
+    }
   },
   "repository": {
     "type": "git",
@@ -93,7 +99,7 @@
     "sass-loader": "^7.2.0",
     "sass-resources-loader": "^2.0.1",
     "style-loader": "^0.23.1",
-    "ts-jest": "^25.2.1",
+    "ts-jest": "^25.5.1",
     "ts-loader": "^6.0.4",
     "tslint": "^5.18.0",
     "tslint-loader": "^3.5.4",
