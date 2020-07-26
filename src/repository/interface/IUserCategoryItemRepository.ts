@@ -1,5 +1,8 @@
-import { IUserCategoryItem } from "@/model/interface/ICategory";
+import {
+  IUserCategoryItem,
+  DUserCategoryItem,
+} from "@/model/interface/ICategory";
 import IUserIdentifiedBaseRepository from "./IUserIdentifiedBaseRepository";
 
 export default interface IUserCategoryItemRepository
-  extends IUserIdentifiedBaseRepository<IUserCategoryItem> {}
+  extends IUserIdentifiedBaseRepository<DUserCategoryItem, IUserCategoryItem> {}

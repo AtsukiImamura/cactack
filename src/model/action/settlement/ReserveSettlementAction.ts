@@ -5,7 +5,7 @@ import { container } from "tsyringe";
 import IJournalDate from "@/model/interface/IJournalDate";
 import JournalDate from "@/model/common/JournalDate";
 import VirtualJournal from "@/model/VirtualJournal";
-import JournalRepository from "@/repository/JournalRepository";
+import IJournalRepository from "@/repository/interface/IJournalRepository";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 import JournalDetail from "@/model/JournalDetail";
 import { DJournal } from "@/model/interface/DJournal";
@@ -91,7 +91,7 @@ export default class ReserveSettlementAction extends SettlementAction {
       ancestor &&
       (
         await container
-          .resolve(JournalRepository)
+          .resolve<IJournalRepository>("JournalRepository")
           .getByAncestorId(ancestor ? ancestor.id : "")
       ).length > 0
     ) {

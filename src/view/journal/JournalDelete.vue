@@ -19,17 +19,8 @@
     </template>
     <template #f>
       <div class="actions">
-        <input
-          type="button"
-          class="btn cancel-btn"
-          value="キャンセル"
-          @click="close"
-        />
-        <ProcessButton
-          value="OK"
-          :click="onClickOk"
-          :disabled="!canExecute"
-        ></ProcessButton>
+        <input type="button" class="btn cancel-btn" value="キャンセル" @click="close" />
+        <ProcessButton value="OK" :click="onClickOk" :disabled="!canExecute"></ProcessButton>
       </div>
     </template>
   </OpenableModal>
@@ -42,7 +33,7 @@ import ProcessButton from "@/view/common/ProcessButton.vue";
 import IJournal from "@/model/interface/IJournal";
 import AppModule from "@/store/ApplicationStore";
 import { container } from "tsyringe";
-import JournalRepository from "@/repository/JournalRepository";
+import IJournalRepository from "@/repository/JournalRepository";
 
 @Component({ components: { OpenableModal, ProcessButton } })
 export default class JournalDelete extends Vue {
@@ -67,7 +58,9 @@ export default class JournalDelete extends Vue {
   }
 
   public async execute(): Promise<void> {
-    await container.resolve(JournalRepository).delete(this.journal);
+    await container
+      .resolve<IJournalRepository>("JournalRepository")
+      .delete(this.journal);
     await AppModule.init();
   }
 }

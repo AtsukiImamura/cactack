@@ -1,7 +1,7 @@
 import Transformer from "@/repository/transformer/Transformer";
 import { DCategoryMaster, ICategoryMaster } from "@/model/interface/ICategory";
 import { container } from "tsyringe";
-import CategoryItemMasterRepository from "@/repository/CategoryItemMasterRepository";
+import ICategoryItemMasterRepository from "@/repository/interface/ICategoryItemMasterRepository";
 import AccountType from "@/model/AccountType";
 
 export default class CategoryMasterTransaformer extends Transformer<
@@ -17,20 +17,22 @@ export default class CategoryMasterTransaformer extends Transformer<
     } as any) as ICategoryMaster;
     const items = (
       await container
-        .resolve(CategoryItemMasterRepository)
+        .resolve<ICategoryItemMasterRepository>("CategoryItemMasterRepository")
         .getByParentId(category.id)
     ).map((item) => {
       item.parent = master;
       return item;
     });
-    container.resolve(CategoryItemMasterRepository).addToCache(
-      items.map((item) => ({
-        id: item.id,
-        parentId: item.parent.id,
-        name: item.name,
-        type: item.type.code,
-      }))
-    );
+    container
+      .resolve<ICategoryItemMasterRepository>("CategoryItemMasterRepository")
+      .addToCache(
+        items.map((item) => ({
+          id: item.id,
+          parentId: item.parent.id,
+          name: item.name,
+          type: item.type.code,
+        }))
+      );
 
     master.items = items;
     return master;

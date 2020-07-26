@@ -7,10 +7,20 @@ import Treatable from "@/model/interface/common/Treatable";
 export default abstract class StabRepositoryBase<
   S extends Strable & Identifiable,
   T extends Identifiable & Treatable<S>
-> implements IBaseRepository<T> {
+> implements IBaseRepository<S, T> {
   protected dbKey: string = "";
 
   public abstract aggregate(value: S): Promise<T>;
+
+  constructor() {
+    JsonUtil.clear(this.dbKey);
+  }
+
+  public async getData(id: string): Promise<S | undefined> {
+    return ((await JsonUtil.read(this.dbKey)) as S[])
+      .filter((v) => v.id === id)
+      .shift();
+  }
 
   public getById(id: string): Promise<T | undefined> {
     return this.getAllWithoutConvert().then((values) => {

@@ -39,7 +39,7 @@ import { Component, Vue, Prop } from "vue-property-decorator";
 import IJournal from "@/model/interface/IJournal";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import { container } from "tsyringe";
-import JournalRepository from "@/repository/JournalRepository";
+import IJournalRepository from "@/repository/interface/IJournalRepository";
 import Journal from "@/model/Journal";
 import AppModule from "@/store/ApplicationStore";
 import JournalEditor from "@/view/register/JournalEditor.vue";
@@ -109,11 +109,15 @@ export default class UnExecutedJournals extends Vue {
         );
         jnl.ancestorId = origin.ancestorId;
         jnl.execute();
-        await container.resolve(JournalRepository).insert(jnl);
+        await container
+          .resolve<IJournalRepository>("JournalRepository")
+          .insert(jnl);
       }
 
       targetJournal.execute();
-      await container.resolve(JournalRepository).insert(targetJournal);
+      await container
+        .resolve<IJournalRepository>("JournalRepository")
+        .insert(targetJournal);
       await AppModule.init();
     };
   }

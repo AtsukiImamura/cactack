@@ -16,21 +16,21 @@ import {
 import UserCategoryItemFlyweight from "../src/repository/flyweight/UserCategoryItemFlyweight";
 import UserCategoryItem from "../src/model/UserCategoryItem";
 
-beforeAll(() => {
-  DependencyInjectionConfig.run();
-  return container
-    .resolve(UserAuthService)
-    .createUserIfNotExist("test@test.com", "testtest")
-    .finally(() =>
-      container
-        .resolve(UserAuthService)
-        .signIn("test@test.com", "testtest")
-        .then(() => AppModule.init())
-    )
-    .catch((e) => {});
-});
+// beforeAll(() => {
+//   DependencyInjectionConfig.run();
+//   return container
+//     .resolve(UserAuthService)
+//     .createUserIfNotExist("test@test.com", "testtest")
+//     .finally(() =>
+//       container
+//         .resolve(UserAuthService)
+//         .signIn("test@test.com", "testtest")
+//         .then(() => AppModule.init())
+//     )
+//     .catch((e) => {});
+// });
 
-afterAll(() => container.resolve(UserAuthService).signOut());
+// afterAll(() => container.resolve(UserAuthService).signOut());
 
 let category: IUserCategory | null = null;
 

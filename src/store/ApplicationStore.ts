@@ -9,14 +9,14 @@ import store from ".";
 import IJournal, { IJournalDetail } from "@/model/interface/IJournal";
 import IJournalDate from "@/model/interface/IJournalDate";
 import { container } from "tsyringe";
-import JournalRepository from "@/repository/JournalRepository";
+import IJournalRepository from "@/repository/interface/IJournalRepository";
 import CategoryList from "@/model/category/CategoryList";
 import JournalDate from "@/model/common/JournalDate";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
 import UserTagFlyweight from "@/repository/flyweight/UserTagFlyweight";
 import ITemplate from "@/model/interface/ITemplate";
-import TemplateRepository from "@/repository/TemplateRepository";
+import ITemplateRepository from "@/repository/interface/ITemplateRepository";
 import UserConfigFlyweight from "@/repository/flyweight/UserConfigFlyweight";
 
 @Module({ dynamic: true, store, name: "app", namespaced: true })
@@ -28,8 +28,6 @@ class AppStore extends VuexModule {
   private _periodBeginWith: IJournalDate = JournalDate.today().getPreviousMonth();
 
   private _periodEndWith: IJournalDate = JournalDate.today();
-
-  // private _categories: IUserCategory[] = [];
 
   private _initCount: number = 0;
 
@@ -67,19 +65,6 @@ class AppStore extends VuexModule {
    * @return {CategoryList }
    */
   public get categories(): CategoryList {
-    // console.log(
-    //   container
-    //     .resolve(UserCategoryFlyweight)
-    //     .values.filter((v) => v.type.code === AccountType.TYPE_DEBT)
-    //     .map((category) =>
-    //       category.items.map(
-    //         (item) =>
-    //           `name:${item.name} disabled:${
-    //             (item as IUserCategoryItem).disabled
-    //           }`
-    //       )
-    //     )
-    // );
     return new CategoryList(container.resolve(UserCategoryFlyweight).values);
   }
 
@@ -112,10 +97,14 @@ class AppStore extends VuexModule {
       container.resolve(UserCategoryFlyweight).import(),
       container.resolve(UserConfigFlyweight).import(),
     ]);
-    const journals = await container.resolve(JournalRepository).getUsersAll();
+    const journals = await container
+      .resolve<IJournalRepository>("JournalRepository")
+      .getUsersAll();
     this.INIT(journals);
 
-    const tempaltes = await container.resolve(TemplateRepository).getUsersAll();
+    const tempaltes = await container
+      .resolve<ITemplateRepository>("TemplateRepository")
+      .getUsersAll();
     this._templates.splice(0, this._templates.length, ...tempaltes);
   }
 
@@ -127,12 +116,6 @@ class AppStore extends VuexModule {
     }
     this._initCount++;
   }
-
-  // @Mutation
-  // private CATEGORIES(categories: IUserCategory[]) {
-  //   while (this._categories.pop()) {}
-  //   this._categories.push(...categories);
-  // }
 
   @Action({ rawError: true })
   public appendNew(journals: IJournal[]) {

@@ -6,7 +6,7 @@ import Journal from "../src/model/Journal";
 import AppModule from "../src/store/ApplicationStore";
 import CategoryList from "../src/model/category/CategoryList";
 import JournalDetail from "../src/model/JournalDetail";
-import JournalRepository from "../src/repository/JournalRepository";
+import IJournalRepository from "../src/repository/interface/IJournalRepository";
 import { IUserCategoryItem } from "../src/model/interface/ICategory";
 
 import * as firebase from "firebase/app";
@@ -48,7 +48,7 @@ describe("journal insertion", () => {
         [new JournalDetail(item, 1800)]
       );
       const inserted = await container
-        .resolve(JournalRepository)
+        .resolve<IJournalRepository>("JournalRepository")
         .insert(journal);
 
       expect(inserted.id).not.toBe("");

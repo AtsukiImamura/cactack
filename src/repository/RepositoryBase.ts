@@ -16,7 +16,7 @@ import UserAuthService from "@/service/UserAuthService";
 export default abstract class RepositoryBase<
   S extends Strable & Identifiable,
   T extends Identifiable & Treatable<S>
-> implements IBaseRepository<T> {
+> implements IBaseRepository<S, T> {
   protected dbKey: string = "";
 
   protected readonly cache: IdCache<S> = new IdCache<S>();

@@ -86,11 +86,7 @@
       </div>
     </div>
     <div class="actions">
-      <ProcessButton
-        value="OK"
-        :click="exec"
-        :disabled="!canExecute"
-      ></ProcessButton>
+      <ProcessButton value="OK" :click="exec" :disabled="!canExecute"></ProcessButton>
     </div>
   </CommonFrame>
 </template>
@@ -110,7 +106,7 @@ import { BalanceSummaryDto } from "@/model/dto/BalanceSummaryDto";
 import BalanceInfoLoader from "@/functions/loader/BalanceInfoLoader";
 import JournalDate from "@/model/common/JournalDate";
 import JournalDetail from "@/model/JournalDetail";
-import JournalRepository from "@/repository/JournalRepository";
+import IJournalRepository from "@/repository/interface/IJournalRepository";
 import Journal from "@/model/Journal";
 import AppModule from "@/store/ApplicationStore";
 
@@ -212,7 +208,9 @@ export default class BalanceCorrection extends Vue {
     }
     const journal = Journal.simple("修正", creditDetails, debitDetails);
     journal.execute();
-    const inserted = await container.resolve(JournalRepository).insert(journal);
+    const inserted = await container
+      .resolve<IJournalRepository>("JournalRepository")
+      .insert(journal);
     await AppModule.init().then(() =>
       this.$router.push(`/journalize/edit/${inserted.id}`)
     );

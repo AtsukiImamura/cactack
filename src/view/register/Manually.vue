@@ -4,19 +4,12 @@
       <div class="title">
         <h2>{{ title }}</h2>
       </div>
-      <JournalEditor
-        :journal="defaultJournal"
-        @commit="commitJournal"
-      ></JournalEditor>
+      <JournalEditor :journal="defaultJournal" @commit="commitJournal"></JournalEditor>
       <div v-if="canSaveAsTemplate">
         <div class="template">
           <div class="section">
             <div class="section template-selection">
-              <input
-                id="need-tempalte"
-                type="checkbox"
-                v-model="needTemplate"
-              />
+              <input id="need-tempalte" type="checkbox" v-model="needTemplate" />
               <label for="need-tempalte">テンプレートに登録</label>
             </div>
             <div class="section template-selection" v-show="needTemplate">
@@ -37,19 +30,12 @@
         <div class="template">
           <div class="section">
             <div class="section continuous-jnl-selection">
-              <input
-                id="continuous-jnl"
-                type="checkbox"
-                v-model="isContinuous"
-              />
+              <input id="continuous-jnl" type="checkbox" v-model="isContinuous" />
               <label for="continuous-jnl">周期的に作成</label>
             </div>
             <div class="section continuous-unit" v-show="isContinuous">
               <div :style="{ width: '100px' }">
-                <Selector
-                  :items="continuousUnitSelections"
-                  @select="continuousUnit = $event.seq"
-                ></Selector>
+                <Selector :items="continuousUnitSelections" @select="continuousUnit = $event.seq"></Selector>
               </div>
               <div v-show="continuousUnit >= 0" :style="{ width: '100px' }">
                 <Selector :items="continuousJournalDaySelections"></Selector>
@@ -59,11 +45,7 @@
         </div>
       </div>
       <div class="actions">
-        <ProcessButton
-          value="OK"
-          :click="register"
-          :disabled="!canRegister"
-        ></ProcessButton>
+        <ProcessButton value="OK" :click="register" :disabled="!canRegister"></ProcessButton>
       </div>
     </div>
   </CommonFrame>
@@ -75,13 +57,13 @@ import RegisterFrame from "@/view/register/RegisterFrame.vue";
 import CommonFrame from "@/view/common/CommonFrame.vue";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import IJournal, { ContinuousUnit } from "@/model/interface/IJournal";
-import JournalRepository from "@/repository/JournalRepository";
+import IJournalRepository from "@/repository/interface/IJournalRepository";
 import AppModule from "@/store/ApplicationStore";
 import JournalEditor from "@/view/register/JournalEditor.vue";
 import { container } from "tsyringe";
 import UserAuthService from "@/service/UserAuthService";
 import UserTemplate from "@/model/UserTemplate";
-import TemplateRepository from "@/repository/TemplateRepository";
+import ITemplateRepository from "@/repository/interface/ITemplateRepository";
 import Journal from "@/model/Journal";
 import JournalDetail from "@/model/JournalDetail";
 import { IUserCategoryItem } from "@/model/interface/ICategory";
@@ -255,16 +237,22 @@ export default class Manually extends Vue {
       throw new Error("Put required information first!");
     }
     if (this.isCopy) {
-      await container.resolve(JournalRepository).insert(this.journal);
+      await container
+        .resolve<IJournalRepository>("JournalRepository")
+        .insert(this.journal);
     } else if (this.isEdit) {
-      await container.resolve(JournalRepository).update(this.journal);
+      await container
+        .resolve<IJournalRepository>("JournalRepository")
+        .update(this.journal);
     } else {
-      await container.resolve(JournalRepository).insert(this.journal);
+      await container
+        .resolve<IJournalRepository>("JournalRepository")
+        .insert(this.journal);
     }
 
     if (this.needTemplate) {
       await container
-        .resolve(TemplateRepository)
+        .resolve<ITemplateRepository>("TemplateRepository")
         .insert(
           UserTemplate.fromJournal(
             this.journal,

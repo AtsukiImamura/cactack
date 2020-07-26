@@ -34,7 +34,7 @@ import ProcessButton from "@/view/common/ProcessButton.vue";
 import AppModule from "@/store/ApplicationStore";
 import TransferCategorySelector from "@/view/register/components/TransferCategorySelector.vue";
 import { container } from "tsyringe";
-import JournalRepository from "@/repository/JournalRepository";
+import IJournalRepository from "@/repository/interface/IJournalRepository";
 import Journal from "@/model/Journal";
 import JournalDetail from "@/model/JournalDetail";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
@@ -44,8 +44,8 @@ import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFl
     OpenableModal,
     Selector,
     ProcessButton,
-    TransferCategorySelector
-  }
+    TransferCategorySelector,
+  },
 })
 export default class ItemDelete extends Vue {
   @Prop()
@@ -99,12 +99,12 @@ export default class ItemDelete extends Vue {
       for (const jnl of AppModule.journals) {
         if (
           [...jnl.credits, ...jnl.debits].filter(
-            d => d.category.id === this.item.id
+            (d) => d.category.id === this.item.id
           ).length === 0
         ) {
           continue;
         }
-        await container.resolve(JournalRepository).update(
+        await container.resolve<IJournalRepository>("JournalRepository").update(
           new Journal(
             jnl.id,
             jnl.userId,
@@ -112,7 +112,7 @@ export default class ItemDelete extends Vue {
             jnl.createdAt,
             jnl.accountAt,
             jnl.executeAt,
-            jnl.credits.map(item => {
+            jnl.credits.map((item) => {
               if (item.category.id !== this.item.id) {
                 return item;
               }
@@ -122,7 +122,7 @@ export default class ItemDelete extends Vue {
                 item.action
               );
             }),
-            jnl.debits.map(item => {
+            jnl.debits.map((item) => {
               if (item.category.id !== this.item.id) {
                 return item;
               }

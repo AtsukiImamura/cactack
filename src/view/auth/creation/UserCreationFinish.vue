@@ -26,7 +26,7 @@ import { Component, Vue } from "vue-property-decorator";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import PublicFrame from "@/view/common/PublicFrame.vue";
 import { container } from "tsyringe";
-import CategoryMasterRepository from "@/repository/CategoryMasterRepository";
+import ICategoryMasterRepository from "@/repository/interface/ICategoryMasterRepository";
 import CategoryService from "@/service/CategoryService";
 import UserCategory from "@/model/UserCategory";
 import UserAuthService from "@/service/UserAuthService";
@@ -51,7 +51,7 @@ export default class UserCreationFinish extends Vue {
     }
     try {
       const categoryMasters = await container
-        .resolve(CategoryMasterRepository)
+        .resolve<ICategoryMasterRepository>("CategoryMasterRepository")
         .getAll();
       this.pros.push({
         disp: "デフォルト勘定科目データの読み込みが完了しました。",

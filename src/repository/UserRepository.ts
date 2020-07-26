@@ -18,6 +18,6 @@ export default class UserRepository extends RepositoryBase<DUser, IUser>
   }
 
   public async getByUserId(uid: string): Promise<IUser | undefined> {
-    return container.resolve(UserRepository).getById(uid);
+    return container.resolve<IUserRepository>("UserRepository").getById(uid);
   }
 }

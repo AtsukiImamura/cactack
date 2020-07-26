@@ -5,7 +5,7 @@ import {
   ICategoryMaster,
 } from "@/model/interface/ICategory";
 import { container } from "tsyringe";
-import CategoryMasterRepository from "@/repository/CategoryMasterRepository";
+import ICategoryMasterRepository from "@/repository/interface/ICategoryMasterRepository";
 import AccountType from "@/model/AccountType";
 
 export default class CategoryItemMasterTransaformer extends Transformer<
@@ -16,7 +16,7 @@ export default class CategoryItemMasterTransaformer extends Transformer<
     item: DCategoryItemMaster
   ): Promise<ICategoryItemMaster> {
     const categoryData = await container
-      .resolve(CategoryMasterRepository)
+      .resolve<ICategoryMasterRepository>("CategoryMasterRepository")
       .getData(item.parentId);
     if (!categoryData) {
       throw new Error("parent not found.");

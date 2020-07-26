@@ -1,9 +1,10 @@
 import IJournal from "@/model/interface/IJournal";
 import IJournalDate from "@/model/interface/IJournalDate";
 import IUserIdentifiedBaseRepository from "./IUserIdentifiedBaseRepository";
+import { DJournal } from "@/model/interface/DJournal";
 
 export default interface IJournalRepository
-  extends IUserIdentifiedBaseRepository<IJournal> {
+  extends IUserIdentifiedBaseRepository<DJournal, IJournal> {
   getByAccountedAt: (
     from: IJournalDate,
     to: IJournalDate

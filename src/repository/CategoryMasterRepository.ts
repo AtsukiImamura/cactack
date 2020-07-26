@@ -9,8 +9,8 @@ import {
 import ICategoryMasterRepository from "./interface/ICategoryMasterRepository";
 import CategoryMasterTransaformer from "./transformer/CategoryMasterTransaformer";
 import AccountType from "@/model/AccountType";
-import CategoryItemMasterRepository from "./CategoryItemMasterRepository";
 import CategoryMaster from "@/model/CategoryMaster";
+import ICategoryItemMasterRepository from "./interface/ICategoryItemMasterRepository";
 
 @singleton()
 export default class CategoryMasterRepository
@@ -142,10 +142,17 @@ export default class CategoryMasterRepository
         continue;
       }
       for (const item of data.items) {
-        await container.resolve(CategoryItemMasterRepository).insert({
-          simplify: () =>
-            ({ name: item.name, parentId: inserted.id } as DCategoryItemMaster),
-        } as ICategoryItemMaster);
+        await container
+          .resolve<ICategoryItemMasterRepository>(
+            "CategoryItemMasterRepository"
+          )
+          .insert({
+            simplify: () =>
+              ({
+                name: item.name,
+                parentId: inserted.id,
+              } as DCategoryItemMaster),
+          } as ICategoryItemMaster);
       }
     }
   }

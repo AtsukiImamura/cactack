@@ -2,7 +2,7 @@ import { singleton, container } from "tsyringe";
 import * as firebase from "firebase/app";
 // import "firebase/firestore";
 import "firebase/auth";
-import UserRepository from "@/repository/UserRepository";
+import IUserRepository from "@/repository/interface/IUserRepository";
 import User from "@/model/User";
 import JournalDate from "@/model/common/JournalDate";
 import IUser from "@/model/interface/IUser";
@@ -35,7 +35,7 @@ export default class UserAuthService {
       .doc(uid)
       .set(new User(name, uid, JournalDate.today()).simplify());
     // return await container
-    //   .resolve(UserRepository)
+    //   .resolve<IUserRepository>("UserRepository")
     //   .insert(new User(name, uid, JournalDate.today()));
   }
 
@@ -63,7 +63,9 @@ export default class UserAuthService {
     if (!fbUser) {
       return undefined;
     }
-    return container.resolve(UserRepository).getByUserId(fbUser.uid);
+    return container
+      .resolve<IUserRepository>("UserRepository")
+      .getByUserId(fbUser.uid);
   }
 
   public getFirebaseUser(): firebase.User | null {

@@ -9,7 +9,7 @@ import UserAuthService from "@/service/UserAuthService";
 import UserCreationMaster from "@/model/UserCreationMaster";
 import UserCategoryItem from "@/model/UserCategoryItem";
 import AccountType from "@/model/AccountType";
-import JournalRepository from "@/repository/JournalRepository";
+import IJournalRepository from "@/repository/interface/IJournalRepository";
 import Journal from "@/model/Journal";
 import JournalDetail from "@/model/JournalDetail";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
@@ -82,7 +82,9 @@ class UserCreationStore extends VuexModule {
           [new JournalDetail(item, balance.amount)]
         );
         journal.execute();
-        await container.resolve(JournalRepository).insert(journal);
+        await container
+          .resolve<IJournalRepository>("JournalRepository")
+          .insert(journal);
         userCategoryItems.push(item);
       }
       this.userBalanceInfoMap[type] = inserted;

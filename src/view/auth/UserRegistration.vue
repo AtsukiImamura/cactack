@@ -54,11 +54,11 @@ export default class UserRegistration extends Vue {
 
   public mounted(): void {
     // container
-    //   .resolve(UserCreationMasterRepository)
+    //   .resolve<IUserCreationMasterRepository>("UserCreationMasterRepository")
     //   .insertAll()
     //   .then(() => console.log(":OK"));
     // container
-    //   .resolve(CategoryMasterRepository)
+    //   .resolve<ICategoryMasterRepository>("CategoryMasterRepository")
     //   .insertAll()
     //   .then(() => console.log(":OK"));
   }
@@ -87,13 +87,13 @@ export default class UserRegistration extends Vue {
     container
       .resolve(UserAuthService)
       .createUserIfNotExist(this.email, this.password)
-      .then(user => {
+      .then((user) => {
         return container
           .resolve(UserAuthService)
           .signIn(this.email, this.password);
       })
       .then(() => this.$router.push("/user/create/email-verification"))
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
         this.message = "エラーが発生しました";
       });
