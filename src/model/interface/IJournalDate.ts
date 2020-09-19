@@ -33,13 +33,27 @@ export default interface IJournalDate {
 
   getPreviousMonth: () => IJournalDate;
 
+  getPreviousYear: () => IJournalDate;
+
   getBeforeMonthOf: (val: number) => IJournalDate;
 
   isInMonthOf: (date: IJournalDate) => boolean;
 
+  isInYearOf: (date: IJournalDate) => boolean;
+
   getMonthsOfAfter: (num: number) => IJournalDate[];
 
   firstDay: IJournalDate;
+
+  lastDay: IJournalDate;
+  /** （月ごとの表示を行う場合）属する月の最初とみなされる日 */
+  firstDayOfUser: IJournalDate;
+  /** （月ごとの表示を行う場合）属する月の最後とみなされる日 */
+  lastDayOfUser: IJournalDate;
+
+  yearOfUser: number;
+
+  monthOfUser: number;
 
   toDate: () => Date;
 

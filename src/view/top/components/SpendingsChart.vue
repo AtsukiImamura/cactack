@@ -5,8 +5,9 @@ import { ChartData } from "chart.js";
 import IJournalDate from "@/model/interface/IJournalDate";
 import JournalDate from "@/model/common/JournalDate";
 import Color from "color";
-import LedgerLoader from "@/functions/loader/LedgerLoader";
+// import LedgerLoader from "@/functions/loader/LedgerLoader";
 import { BalanceSummaryDto } from "@/model/dto/BalanceSummaryDto";
+import LedgerLoader from "@/functions/loader/LedgerLoader";
 
 @Component
 export default class BalanceChart extends Mixins(Doughnut) {
@@ -15,18 +16,23 @@ export default class BalanceChart extends Mixins(Doughnut) {
 
   @Prop({ default: () => JournalDate.today() }) endWith!: IJournalDate;
 
-  @Prop({ default: () => [] }) values!: BalanceSummaryDto[];
+  values: BalanceSummaryDto[] = [];
 
-  private currentValues: BalanceSummaryDto[] = [];
+  private loader: LedgerLoader = new LedgerLoader();
 
-  @Watch("values")
+  @Watch("beginWith")
+  public onBeginWithChanged() {
+    this.updateGrapgh();
+  }
+
+  @Watch("endWith")
+  public onEndWithChanged() {
+    this.updateGrapgh();
+  }
+
   public async updateGrapgh() {
-    const summaries = await this.loadSummaries();
-    if (!this.needDraw(summaries)) {
-      return;
-    }
-    this.currentValues = summaries;
-    this.renderChart(this.createChartData(summaries), {
+    await this.loadSummaries();
+    this.renderChart(this.createChartData(this.values), {
       responsive: true,
       maintainAspectRatio: false,
     });
@@ -36,27 +42,21 @@ export default class BalanceChart extends Mixins(Doughnut) {
     this.updateGrapgh();
   }
 
-  private needDraw(values: BalanceSummaryDto[]): boolean {
-    if (this.currentValues.length !== values.length) {
-      return true;
-    }
-    const sortedValues = values.sort((a, b) => a.amount - b.amount);
-    const sortedCurrentValues = this.currentValues.sort(
-      (a, b) => a.amount - b.amount
-    );
-    for (const [index, value] of sortedValues.entries()) {
-      if (sortedCurrentValues[index].item.id !== value.item.id) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   private async loadSummaries() {
-    return (this.values.length > 0
-      ? this.values
-      : (await LedgerLoader.load(this.beginWith, this.endWith)).bandled
-    ).filter((info) => info.item.type.isDebit && info.item.type.isVirtual);
+    this.values = await (async () => {
+      try {
+        const loadRes = await this.loader.load(this.beginWith, this.endWith);
+        if (!loadRes) {
+          return [];
+        }
+        const data = loadRes.bandled;
+        return data.filter(
+          (info) => info.item.type.isDebit && info.item.type.isVirtual
+        );
+      } catch (e) {
+        return [];
+      }
+    })();
   }
 
   public createChartData(summaries: BalanceSummaryDto[]): ChartData {

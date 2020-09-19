@@ -7,9 +7,30 @@
         </div>
         <div class="config">
           <div class="period-config">
-            <PeriodSelector :edit-period="true"></PeriodSelector>
+            <PeriodSelector
+              :edit-period="true"
+              :in-month="periodType === 1"
+              @select="onPeriodSelected"
+            ></PeriodSelector>
           </div>
-          <div class="amount-config">
+          <div class="period-type-config">
+            <label for="period-type-selector">表示単位</label>
+            <div id="period-type-selector" class="selector">
+              <input
+                type="button"
+                :class="{selected: periodType === 0}"
+                @click="dispByDay"
+                value="日"
+              />
+              <input
+                type="button"
+                :class="{selected: periodType === 1}"
+                @click="dispByMonth"
+                value="月"
+              />
+            </div>
+          </div>
+          <div class="amount-config" v-show="periodType === 0">
             <input id="only-current-period" type="checkbox" v-model="onlyCurrentPeriod" />
             <label for="only-current-period">今期累積額のみ表示</label>
           </div>
@@ -17,13 +38,14 @@
       </div>
       <div class="main">
         <div class="graphs">
-          <div class="amount-graph" :key="chartKey">
+          <div class="amount-graph">
             <LedgerChart
               v-if="isReady"
               :ledger="ledger"
               :begin-with="periodBeginWith"
               :end-with="periodEndWith"
               :start-value="graphStartValue"
+              :by-month="periodType === 1"
             ></LedgerChart>
           </div>
         </div>
@@ -43,9 +65,11 @@
               <div class="row" v-for="(detail, index) in details" :key="-index">
                 <div class="cell date">{{ detail.accountAt.toString() }}</div>
                 <div class="cell name">
-                  <router-link
-                    :to="`/journalize/edit/${detail.origin.id}`"
-                  >{{ detail.category ? detail.category.name : "" }}</router-link>
+                  <router-link :to="`/journalize/edit/${detail.origin.id}`">
+                    {{
+                    detail.category ? detail.category.name : ""
+                    }}
+                  </router-link>
                 </div>
                 <div class="cell amount">{{ detail.amount }}</div>
               </div>
@@ -93,18 +117,15 @@ export default class GeneralLedger extends Vue {
 
   public graphStartValue: number = 0;
 
-  public chartKey: number = 0;
+  /* 表示方法 0:日 1:月 */
+  public periodType: number = 0;
 
   @Watch("onlyCurrentPeriod")
   public onGraphConditionChanged() {
     this.updateLedger();
   }
-  @Watch("periodBeginWith")
-  public onPeriodBeginWithChanged() {
-    this.updateLedger();
-  }
-  @Watch("periodEndWith")
-  public onPeriodEndWithChanged() {
+
+  public onPeriodSelected(begin: IJournalDate, end: IJournalDate) {
     this.updateLedger();
   }
 
@@ -114,6 +135,18 @@ export default class GeneralLedger extends Vue {
       this.periodBeginWith,
       this.periodEndWith
     );
+  }
+
+  public dispByDay() {
+    AppModule.setPeriodBeginWith(this.periodEndWith.firstDayOfUser);
+    this.periodType = 0;
+  }
+
+  public dispByMonth() {
+    AppModule.setPeriodBeginWith(
+      this.periodEndWith.getPreviousYear().getNextMonth().firstDayOfUser
+    );
+    this.periodType = 1;
   }
 
   public async updateLedger() {
@@ -129,7 +162,6 @@ export default class GeneralLedger extends Vue {
       .filter((led) => led.category.id === this.categoryItemId);
     const ledger = ledgers.shift();
     this.ledger = ledger ? ledger : null;
-    this.chartKey++;
   }
 
   public ledger: AccountLedger | null = null;
@@ -165,10 +197,12 @@ export default class GeneralLedger extends Vue {
 
 <style lang="scss" scoped>
 .ledger-detail {
-  padding: 10px 0px;
+  padding: 0px 0px 10px 0px;
   .h {
     background-color: #ffffff;
+    padding-top: 10px;
     .top {
+      padding: 0px 6px;
       h1 {
         font-size: 2rem;
         color: $color-main;
@@ -189,7 +223,8 @@ export default class GeneralLedger extends Vue {
         max-width: 620px;
       }
       .amount-config {
-        width: calc(35% - 12px);
+        // width: calc(35% - 12px);
+        width: 200px;
         padding: 12px 0px;
         display: flex;
         align-items: flex-end;
@@ -199,6 +234,34 @@ export default class GeneralLedger extends Vue {
         label {
           display: inline-block;
           padding: 4px 0px 4px 5px;
+        }
+      }
+      .period-type-config {
+        padding: 16px 10px 0px 0px;
+        label {
+          font-size: 0.75rem;
+        }
+        .selector {
+          padding: 4px 2px;
+          input {
+            border: 1px solid $color-main;
+            color: $color-main;
+            background-color: #ffffff;
+            padding: 4px 8px;
+            min-width: 65px;
+            margin-right: -4px;
+            outline: none;
+            &:first-child {
+              border-radius: 3px 0px 0px 3px;
+            }
+            &:last-child {
+              border-radius: 0px 3px 3px 0px;
+            }
+            &.selected {
+              background-color: $color-main;
+              color: #ffffff;
+            }
+          }
         }
       }
     }

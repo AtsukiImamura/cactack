@@ -1,44 +1,52 @@
 import IJournalDate from "@/model/interface/IJournalDate";
-import IApiResponse from "@/functions/base/IApiResponse";
 
-import * as firebase from "firebase";
+import "firebase/functions";
 import { container } from "tsyringe";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
 import { BalanceSummaryDto } from "@/model/dto/BalanceSummaryDto";
 import { BalanceSummaryResponseItem } from "@/functions/base/balance/BalanceResponse";
 import { ICategoryItem } from "@/model/interface/ICategory";
-export default class BalanceInfoLoader {
-  public static async load(date: IJournalDate) {
-    const ledgersResult = (await firebase
-      .functions()
-      .httpsCallable("getBalance")({
-      date: date.toString(),
-    })) as {
-      data: IApiResponse<BalanceSummaryResponseItem[]>;
-    };
+import LoaderBase from "./LoaderBase";
+import * as helper from "@/functions/service/ApiService";
 
-    if (ledgersResult.data.code !== 200) {
-      throw new Error("error has occured in loading chart data.");
+export default class BalanceInfoLoader extends LoaderBase<BalanceLoadResult> {
+  public async load(date: IJournalDate): Promise<BalanceLoadResult | null> {
+    this.startLoading();
+
+    const ledgersResult = await helper.api.call<BalanceSummaryResponseItem[]>(
+      "getBalance",
+      {
+        date: date.toString(),
+      }
+    );
+
+    if (!ledgersResult || ledgersResult.code !== 200) {
+      console.warn(`balance info aquisition faild.`);
+      return this.finishLoading(new BalanceLoadResult([]));
     }
 
-    return new BalanceInfoLoader(
-      ledgersResult.data.data.map((info) => {
-        const item = container
-          .resolve(UserCategoryItemFlyweight)
-          .get(info.itemId)!;
-        return {
-          item: item,
-          amount: (item.type.isDebit ? 1 : -1) * info.amount,
-        };
-      })
+    return this.finishLoading(
+      new BalanceLoadResult(
+        ledgersResult.data.map((info) => {
+          const item = container
+            .resolve(UserCategoryItemFlyweight)
+            .get(info.itemId)!;
+          return {
+            item: item,
+            amount: (item.type.isDebit ? 1 : -1) * info.amount,
+          };
+        })
+      )
     );
   }
+}
 
-  private values: BalanceSummaryDto[] = [];
+export class BalanceLoadResult {
+  private _values: BalanceSummaryDto[] = [];
 
   public get list(): BalanceSummaryDto[] {
-    return this.values;
+    return this._values;
   }
 
   public get bandled(): BalanceSummaryDto[] {
@@ -65,6 +73,6 @@ export default class BalanceInfoLoader {
   }
 
   constructor(values: BalanceSummaryDto[]) {
-    this.values = values;
+    this._values = values;
   }
 }

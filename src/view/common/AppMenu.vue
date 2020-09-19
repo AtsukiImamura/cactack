@@ -45,6 +45,9 @@
               <router-link tag="div" to="/" class="disabled" :event="''">資産</router-link>
             </li>
             <li>
+              <router-link tag="div" to="/badget">予算</router-link>
+            </li>
+            <li>
               <router-link tag="div" to="/category/list">勘定科目一覧</router-link>
             </li>
           </ul>
@@ -87,8 +90,8 @@
           <MenuItem
             title="仕訳一覧"
             regex="/journal/?.*"
-            image-path="image/badget.svg"
-            hilight-image-path="image/badget-white.svg"
+            image-path="image/journals.svg"
+            hilight-image-path="image/journals-white.svg"
             url="/journal"
           ></MenuItem>
         </div>
@@ -96,8 +99,8 @@
           <MenuItem
             title="貸借対照表"
             regex="/balance/?.*"
-            image-path="image/badget.svg"
-            hilight-image-path="image/badget-white.svg"
+            image-path="image/balance.svg"
+            hilight-image-path="image/balance-white.svg"
             url="/balance"
           ></MenuItem>
         </div>
@@ -132,18 +135,18 @@
           <MenuItem
             title="予算"
             regex="/badget/?.*"
-            image-path="image/store-skeleton.svg"
-            hilight-image-path="image/store-skeleton.svg"
+            image-path="image/badget.svg"
+            hilight-image-path="image/badget-white.svg"
             url="/badget"
-            :disabled="true"
+            :disabled="false"
           ></MenuItem>
         </div>
         <div class="item">
           <MenuItem
             title="勘定科目一覧"
             regex="/category/?.*"
-            image-path="image/store.svg"
-            hilight-image-path="image/store-skeleton.svg"
+            image-path="image/category.svg"
+            hilight-image-path="image/category-white.svg"
             url="/category/list"
           ></MenuItem>
         </div>

@@ -128,6 +128,8 @@ export default class BalanceCorrection extends Vue {
 
   public debitCorrectionItemId!: string;
 
+  private loader = new BalanceInfoLoader();
+
   public get canExecute(): boolean {
     return (
       this.debitValues.filter((v) => v.amount !== v.actualAmount).length > 0 ||
@@ -169,14 +171,17 @@ export default class BalanceCorrection extends Vue {
     await Promise.all([
       this.loadDebitCorrenctionItem(),
       this.loadCreditCorrenctionItem(),
-      BalanceInfoLoader.load(JournalDate.today()).then((loader) => {
+      this.loader.load(JournalDate.today()).then((res) => {
+        if (!res) {
+          return;
+        }
         this.debitValues = this.toCorrectionInfo(
-          loader.list.filter(
+          res.list.filter(
             (info) => info.item.type.isReal && info.item.type.isDebit
           )
         );
         this.creditValues = this.toCorrectionInfo(
-          loader.list.filter(
+          res.list.filter(
             (info) => info.item.type.isReal && info.item.type.isCredit
           )
         );
@@ -208,12 +213,11 @@ export default class BalanceCorrection extends Vue {
     }
     const journal = Journal.simple("修正", creditDetails, debitDetails);
     journal.execute();
-    const inserted = await container
+    await container
       .resolve<IJournalRepository>("JournalRepository")
       .insert(journal);
-    await AppModule.init().then(() =>
-      this.$router.push(`/journalize/edit/${inserted.id}`)
-    );
+    await AppModule.init();
+    this.$router.push(`/balance`);
   }
 
   private async loadDebitCorrenctionItem() {

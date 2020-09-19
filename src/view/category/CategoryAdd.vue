@@ -4,7 +4,6 @@ import CategoryEditor from "./CategoryEditor.vue";
 import { container } from "tsyringe";
 import CategoryService from "@/service/CategoryService";
 import UserCategory from "@/model/UserCategory";
-import AppModule from "@/store/ApplicationStore";
 
 @Component({})
 export default class CategoryAdd extends Mixins(CategoryEditor) {
@@ -20,7 +19,6 @@ export default class CategoryAdd extends Mixins(CategoryEditor) {
       .insertUserCategory(
         UserCategory.simple(this.name, this.accountType.code)
       );
-    await AppModule.init();
   }
 }
 </script>

@@ -6,6 +6,7 @@ import { DJournal } from "@/model/interface/DJournal";
 import JournalTransformer from "@/repository/transformer/JournalTransformer";
 import UserIdentifiedRepositoryBase from "./UserIdentifiedRepositoryBase";
 import UserAuthService from "@/service/UserAuthService";
+import * as service from "@/functions/service/ApiService";
 
 @singleton()
 export default class JournalRepository
@@ -52,6 +53,19 @@ export default class JournalRepository
     if (!userId) {
       return [];
     }
-    return this.getByKey("userId", userId, false);
+    const resRawJournals: DJournal[] = [];
+    const cacheItems = this.cache.get("userId", userId);
+    if (cacheItems && cacheItems.length > 0) {
+      resRawJournals.push(...cacheItems);
+    } else {
+      const res = await service.api.call<DJournal[]>("getJournalsAll");
+      if (!res || !res.code || res.code !== 200) {
+        return [];
+      }
+      resRawJournals.push(...res.data);
+      this.cache.addAll(res.data);
+    }
+
+    return Promise.all(resRawJournals.map((jnl) => this.aggregate(jnl)));
   }
 }

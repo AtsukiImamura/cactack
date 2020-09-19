@@ -8,7 +8,13 @@
     </div>
     <div class="area email">
       <label for="ur-email">email</label>
-      <input id="ur-email" name="email" type="text" v-model="email" placeholder="email" />
+      <input
+        id="ur-email"
+        name="email"
+        type="text"
+        v-model="email"
+        placeholder="email"
+      />
     </div>
     <div class="area password">
       <label for="ur-password">password</label>
@@ -21,7 +27,11 @@
       />
     </div>
     <div class="area actions">
-      <ProcessButton value="LOGIN" :click="signIn" :disabled="!canLogin"></ProcessButton>
+      <ProcessButton
+        value="LOGIN"
+        :click="signIn"
+        :disabled="!canLogin"
+      ></ProcessButton>
       <div class="new-user">
         <span>ユーザー登録は</span>
         <router-link to="/auth/create">こちら</router-link>
@@ -41,7 +51,7 @@ import UserAuthService from "@/service/UserAuthService";
 import AuthFrame from "@/view/auth/AuthFrame.vue";
 import ErrorMessage from "@/model/error/ErrorMessage";
 import ProcessButton from "@/view/common/ProcessButton.vue";
-// import AppModule from "@/store/ApplicationStore";
+import "firebase/functions";
 import EmailVerificationError from "@/model/error/custome/EmailVerificationError";
 
 @Component({ components: { AuthFrame, ProcessButton } })

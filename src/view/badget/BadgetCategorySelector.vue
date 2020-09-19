@@ -4,18 +4,17 @@
 
 <script lang="ts">
 import { Component, Vue, Emit, Prop } from "vue-property-decorator";
-import CategorySelector, {
-  CategorySelectorTab,
-} from "@/view/register/components/CategorySelector.vue";
+import CategorySelector from "@/view/register/components/CategorySelector.vue";
 import AppModule from "@/store/ApplicationStore";
 import { ICategoryItem, IUserCategoryItem } from "@/model/interface/ICategory";
 import { container } from "tsyringe";
 import UserTagFlyweight from "@/repository/flyweight/UserTagFlyweight";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 import AccountType from "@/model/AccountType";
+import { CategorySelectorTab } from "@/view/register/components/CategorySelectionModal.vue";
 
 @Component({ components: { CategorySelector } })
-export default class BadgerCategorySelector extends Vue {
+export default class BadgetCategorySelector extends Vue {
   @Prop() item?: IUserCategoryItem;
 
   public get tabs(): CategorySelectorTab[] {

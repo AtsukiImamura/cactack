@@ -11,7 +11,7 @@
         <span>{{ message }}</span>
       </div>
       <div class="attr select-item" v-if="!canDelete">
-        <TransferCategorySelector @select="alternativeItem = $event"></TransferCategorySelector>
+        <CategorySelector @select="alternativeItem = $event"></CategorySelector>
       </div>
     </template>
     <template #f>
@@ -32,7 +32,7 @@ import { ICategoryItem, IUserCategoryItem } from "@/model/interface/ICategory";
 import Selector from "@/view/common/Selector.vue";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import AppModule from "@/store/ApplicationStore";
-import TransferCategorySelector from "@/view/register/components/TransferCategorySelector.vue";
+import CategorySelector from "@/view/register/components/CategorySelector.vue";
 import { container } from "tsyringe";
 import IJournalRepository from "@/repository/interface/IJournalRepository";
 import Journal from "@/model/Journal";
@@ -44,7 +44,7 @@ import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFl
     OpenableModal,
     Selector,
     ProcessButton,
-    TransferCategorySelector,
+    CategorySelector,
   },
 })
 export default class ItemDelete extends Vue {
@@ -82,7 +82,6 @@ export default class ItemDelete extends Vue {
 
   public async onClickOk(): Promise<void> {
     await this.execute();
-    await AppModule.init();
     this.close();
   }
 

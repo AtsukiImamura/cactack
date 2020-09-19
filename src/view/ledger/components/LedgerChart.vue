@@ -12,25 +12,31 @@ export default class LedgerChart extends Mixins(Bar) {
   @Prop({ default: () => JournalDate.today() }) beginWith!: IJournalDate;
   @Prop({ default: () => JournalDate.today() }) endWith!: IJournalDate;
   @Prop({ default: () => 0 }) startValue!: number;
+  @Prop({ default: () => false }) byMonth!: number;
 
   @Watch("ledger")
   public onLedgerGiven(): void {
     if (!this.ledger) {
       return;
     }
-    this.renderChart(this.chartData, this.options);
+    this.update();
   }
-  // @Watch("startValue")
-  // @Watch("beginWith")
-  // @Watch("endWith")
-  // public onStartValueChanged(): void {
-  //   this.renderChart(this.chartData, this.options);
-  // }
+
+  @Watch("byMonth")
+  public onPeriodTypeChanged() {
+    this.update();
+    console.log(`begin: ${this.beginWith.toString()}`);
+    console.log(`end  : ${this.endWith.toString()}`);
+  }
 
   public mounted(): void {
+    this.update();
+  }
+
+  public update(): void {
     this.renderChart(this.chartData, this.options);
   }
-  public get chartData(): ChartData {
+  public get dataByDay() {
     const amountPerDay = this.ledger.getAmountPerDay();
     let date = this.beginWith;
     let dataBases: {
@@ -60,16 +66,64 @@ export default class LedgerChart extends Mixins(Bar) {
       /* order: 2 */
       date = date.getNextDay();
     }
-    dataBases = dataBases.sort((a, b) =>
+    return dataBases;
+  }
+
+  public get dataByMonth() {
+    const monthMap: Map<
+      string,
+      {
+        date: IJournalDate;
+        dispDate: string;
+        amount: number;
+        acc: number;
+      }
+    > = new Map<
+      string,
+      {
+        date: IJournalDate;
+        dispDate: string;
+        amount: number;
+        acc: number;
+      }
+    >();
+    for (const data of this.dataByDay) {
+      const key = `${data.date.yearOfUser}/${data.date.monthOfUser}`;
+      if (!monthMap.has(key)) {
+        monthMap.set(key, {
+          date: data.date,
+          dispDate: key,
+          amount: 0,
+          acc: 0,
+        });
+      }
+      monthMap.get(key)!.amount += data.amount;
+    }
+    const targets = Array.from(monthMap.values()).sort((a, b) =>
       a.date.beforeThanOrEqualsTo(b.date) ? -1 : 1
     );
+    let sum = 0;
+    for (const t of targets) {
+      sum += t.amount;
+      t.acc = sum;
+    }
+    return targets;
+  }
+
+  public get chartData(): ChartData {
+    const dataBases = (this.byMonth
+      ? this.dataByMonth
+      : this.dataByDay
+    ).sort((a, b) => (a.date.beforeThanOrEqualsTo(b.date) ? -1 : 1));
     return {
       labels: dataBases.map((d) => d.dispDate),
       datasets: [
         {
           label: "累積額",
           yAxisID: "accumulated-amount",
-          data: dataBases.map((d) => d.acc + this.startValue),
+          data: dataBases.map(
+            (d) => d.acc + (this.byMonth ? 0 : this.startValue)
+          ),
           borderWidth: 1,
           borderColor: "#009000",
           // backgroundColor: "#009000",
@@ -77,7 +131,7 @@ export default class LedgerChart extends Mixins(Bar) {
           cubicInterpolationMode: "monotone",
         },
         {
-          label: "日額",
+          label: `${this.byMonth ? "月" : "日"}額`,
           yAxisID: "amount-per-day",
           data: dataBases.map((d) => d.amount),
           borderWidth: 1,

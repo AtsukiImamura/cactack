@@ -7,29 +7,21 @@
         </div>
         <div class="config">
           <div class="period-config">
-            <PeriodSelector></PeriodSelector>
-          </div>
-          <div class="type-selections">
-            <div
-              v-for="type in allTypes"
-              :key="type.code"
-              class="selection"
-              :class="{ selected: dispTypes.includes(type.code) }"
-            >
-              <input
-                :id="`type-selection-${type.code}`"
-                class="check"
-                type="checkbox"
-                :value="type.code"
-                v-model="dispTypes"
-                @click="dispType = type.code"
-              />
-              <label :for="`type-selection-${type.code}`">{{ type.name }}</label>
-            </div>
+            <PeriodSelector @select="onPeriodChanged"></PeriodSelector>
           </div>
         </div>
+        <div class="types">
+          <input
+            v-for="type in allTypes"
+            :key="type.code"
+            type="button"
+            :class="`type ${dispType === type.code ? `selected category-color c-${type.code} border` : ''}`"
+            :value="type.name"
+            @click="changeType(type.code)"
+          />
+        </div>
       </div>
-      <div class="results" :key="ledgerKey + dispTypes.length">
+      <div class="results" :key="ledgerKey + dispType">
         <div
           class="ledgers"
           v-masonry="'dispLedgers'"
@@ -59,9 +51,6 @@ import AppModule from "@/store/ApplicationStore";
 import IJournal from "@/model/interface/IJournal";
 import AccountType from "@/model/AccountType";
 import PeriodSelector from "@/view/common/PeriodSelector.vue";
-import { container } from "tsyringe";
-import UserConfigFlyweight from "@/repository/flyweight/UserConfigFlyweight";
-import { UserConfigKey } from "@/model/interface/IUserConfig";
 
 @Component({
   components: {
@@ -73,13 +62,14 @@ import { UserConfigKey } from "@/model/interface/IUserConfig";
   },
 })
 export default class GeneralLedger extends Vue {
-  public dispTypes: number[] = [AccountType.TYPE_ASSET];
+  public dispType: number = AccountType.TYPE_ASSET;
 
   public allTypes: AccountType[] = [
     new AccountType(AccountType.TYPE_ASSET),
     new AccountType(AccountType.TYPE_DEBT),
     new AccountType(AccountType.TYPE_SPENDING),
     new AccountType(AccountType.TYPE_INCOME),
+    new AccountType(AccountType.TYPE_NET_ASSET),
     new AccountType(AccountType.TYPE_OTHER),
   ];
 
@@ -94,8 +84,8 @@ export default class GeneralLedger extends Vue {
   public ledgers: AccountLedger[] = [];
 
   public get dispLedgers(): AccountLedger[] {
-    return this.ledgers.filter((led) =>
-      this.dispTypes.includes(led.category.type.code)
+    return this.ledgers.filter(
+      (led) => this.dispType === led.category.type.code
     );
   }
 
@@ -107,19 +97,12 @@ export default class GeneralLedger extends Vue {
     return AppModule.journals;
   }
 
-  @Watch("periodBeginWith")
-  public onPeriodBeginWithChanged() {
-    this.updateLedgers();
+  public changeType(type: number) {
+    this.dispType = type;
+    this.$router.push("/ledger/general/" + type);
   }
 
-  @Watch("periodEndWith")
-  public onPeriodEndWithChanged() {
-    const monthlyDisp = container
-      .resolve(UserConfigFlyweight)
-      .getByConfigKey(UserConfigKey.ENABLE_MONTHLY_DISP);
-    if (monthlyDisp && monthlyDisp.value > 0) {
-      return;
-    }
+  public onPeriodChanged() {
     this.updateLedgers();
   }
 
@@ -138,6 +121,10 @@ export default class GeneralLedger extends Vue {
   }
 
   public mounted(): void {
+    const type = this.$route.params.type;
+    if (type && this.allTypes.map((t) => t.code).includes(Number(type))) {
+      this.dispType = Number(type);
+    }
     this.updateLedgers();
   }
 }
@@ -176,38 +163,21 @@ export default class GeneralLedger extends Vue {
         min-width: auto;
       }
     }
-    .type-selections {
-      display: flex;
-      margin: 12px 0px;
-      width: 50%;
-      max-height: 36px;
-      @include sm {
-        width: 100%;
-        margin: 7px 0px;
-      }
-      .selection {
-        display: flex;
-        align-items: center;
-        margin-right: 5px;
-        padding: 3px 10px 3px 6px;
-        border-radius: 3px;
-        max-width: 60px;
-        @include sm {
-          padding: 3px 7px 3px 2px;
-        }
-        &.selected {
-          background-color: $color-main-skeleton;
-        }
-        .check {
-          width: 22px;
-          height: 22px;
-          position: relative;
-          margin-right: 4px;
-        }
-        label {
-          display: block;
-          margin-left: 4px;
-        }
+  }
+  .types {
+    padding-top: 6px;
+    display: flex;
+    .type {
+      width: 70px;
+      padding: 4px 0px 6px 0px;
+      border: none;
+      outline: none;
+      background-color: #ffffff;
+      cursor: pointer;
+      &.selected {
+        border-bottom-style: solid;
+        border-bottom-width: 2px;
+        padding: 4px 0px 4px 0px;
       }
     }
   }

@@ -25,4 +25,10 @@ export default class UserCategoryItemFlyweight extends UserFlyweightBase<
       (item) => item.simplify().parentId === parentId
     );
   }
+
+  public getByTagId(tagId: string): IUserCategoryItem[] {
+    return this.getAll().filter((item) =>
+      item.simplify().tagIds.includes(tagId)
+    );
+  }
 }

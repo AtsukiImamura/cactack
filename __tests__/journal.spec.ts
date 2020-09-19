@@ -9,7 +9,7 @@ import JournalDetail from "../src/model/JournalDetail";
 import IJournalRepository from "../src/repository/interface/IJournalRepository";
 import { IUserCategoryItem } from "../src/model/interface/ICategory";
 
-import * as firebase from "firebase/app";
+import firebase from "firebase/app";
 import "firebase/firestore";
 
 beforeAll(() => {

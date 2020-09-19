@@ -9,14 +9,6 @@ export default class JournalService {
     return container.resolve("JournalRepository");
   }
 
-  // private get journalDetailRepository(): IJournalDetailRepository {
-  //   return container.resolve("JournalDetailRepository");
-  // }
-
-  // private get badgetRepository(): IBadgetRepository {
-  //   return container.resolve("BadgetRepository");
-  // }
-
   /**
    * for TEST?
    * @param journal

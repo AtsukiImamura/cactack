@@ -6,27 +6,25 @@
         <div class="date-config" v-if="isReady">
           <PeriodSelector></PeriodSelector>
         </div>
-        <div class="gragh" v-intro="'今月の資産変動を表示しています。左が月初、右が月末です。'" v-intro-step="1">
+        <div
+          class="gragh"
+          v-intro="'今月の資産変動を表示しています。左が月初、右が月末です。'"
+          v-intro-step="1"
+        >
           <div class="charts">
             <div class="chart balance">
-              <div class="loading" v-if="balanceSummaries.length === 0">
+              <!-- <div class="loading" v-if="balanceSummaries.length === 0">
                 <div class="loading-linear"></div>
-              </div>
-              <BalanceChart
-                :date="periodEndWith"
-                :values="balanceSummaries"
-                v-if="balanceSummaries.length > 0"
-              ></BalanceChart>
+              </div> -->
+              <BalanceChart :date="periodEndWith"></BalanceChart>
             </div>
             <div class="chart spendings">
-              <div class="loading" v-if="spendingSummaries.length === 0">
+              <!-- <div class="loading" v-if="spendingSummaries.length === 0">
                 <div class="loading-linear"></div>
-              </div>
+              </div> -->
               <SpendingsChart
                 :begin-with="periodBeginWith"
                 :end-with="periodEndWith"
-                :values="spendingSummaries"
-                v-if="spendingSummaries.length > 0"
               ></SpendingsChart>
             </div>
           </div>
@@ -37,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import IJournal from "@/model/interface/IJournal";
 import AppModule from "@/store/ApplicationStore";
 import { container } from "tsyringe";
@@ -48,9 +46,6 @@ import DatePicker from "vuejs-datepicker";
 import TopNoticeModal from "./TopNoticeModal.vue";
 import BalanceChart from "@/view/top/components/BalanceChart.vue";
 import SpendingsChart from "@/view/top/components/SpendingsChart.vue";
-import BalanceInfoLoader from "@/functions/loader/BalanceInfoLoader";
-import { BalanceSummaryDto } from "@/model/dto/BalanceSummaryDto";
-import LedgerLoader from "@/functions/loader/LedgerLoader";
 import PeriodSelector from "@/view/common/PeriodSelector.vue";
 
 @Component({
@@ -64,10 +59,6 @@ import PeriodSelector from "@/view/common/PeriodSelector.vue";
   },
 })
 export default class App extends Vue {
-  public balanceSummaries: BalanceSummaryDto[] = [];
-
-  public spendingSummaries: BalanceSummaryDto[] = [];
-
   public isReady: boolean = false;
 
   public get periodBeginWith(): IJournalDate {
@@ -81,27 +72,29 @@ export default class App extends Vue {
   public async mounted() {
     await Promise.all([AppModule.init(), this.doIntro()]);
     this.isReady = true;
-    await this.loadSummaries();
+    // await this.loadSummaries();
   }
 
-  public async loadSummaries() {
-    this.balanceSummaries = (
-      await BalanceInfoLoader.load(this.periodEndWith)
-    ).bandled;
-    this.spendingSummaries = (
-      await LedgerLoader.load(this.periodBeginWith, this.periodEndWith)
-    ).bandled;
-  }
+  // public async loadSummaries() {
+  //   this.balanceSummaries = (
+  //     await BalanceInfoLoader.load(this.periodEndWith)
+  //   ).bandled;
+  //   this.spendingSummaries = (
+  //     await LedgerLoader.load(this.periodBeginWith, this.periodEndWith)
+  //   ).bandled;
+  // }
 
-  @Watch("periodBeginWith")
-  public onPeriodBeginWithChanged() {
-    this.loadSummaries();
-  }
+  // @Watch("periodBeginWith")
+  // public onPeriodBeginWithChanged() {
+  //   console.log("------- onPeriodBeginWithChanged");
+  //   this.loadSummaries();
+  // }
 
-  @Watch("periodEndWith")
-  public onPeriodEndWithChanged() {
-    this.loadSummaries();
-  }
+  // @Watch("periodEndWith")
+  // public onPeriodEndWithChanged() {
+  //   console.log("------- onPeriodEndWithChanged");
+  //   this.loadSummaries();
+  // }
 
   public async doIntro() {
     if (document.body.clientWidth <= 760) {

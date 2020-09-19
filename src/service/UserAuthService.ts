@@ -1,6 +1,6 @@
 import { singleton, container } from "tsyringe";
-import * as firebase from "firebase/app";
-// import "firebase/firestore";
+import firebase from "firebase/app";
+import "firebase/firestore";
 import "firebase/auth";
 import IUserRepository from "@/repository/interface/IUserRepository";
 import User from "@/model/User";

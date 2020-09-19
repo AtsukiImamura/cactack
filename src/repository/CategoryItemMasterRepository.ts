@@ -8,7 +8,8 @@ import ICategoryItemMasterRepository from "./interface/ICategoryItemMasterReposi
 import CategoryItemMasterTransaformer from "./transformer/CategoryItemMasterTransaformer";
 import AccountType from "@/model/AccountType";
 import JournalDate from "@/model/common/JournalDate";
-import * as firebase from "firebase/app";
+import firebase from "firebase/app";
+import "firebase/firestore";
 
 @singleton()
 export default class CategoryItemMasterRepository

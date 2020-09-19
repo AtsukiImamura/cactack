@@ -5,46 +5,24 @@ import { ChartData } from "chart.js";
 import IJournalDate from "@/model/interface/IJournalDate";
 import JournalDate from "@/model/common/JournalDate";
 import Color from "color";
-// import { container } from "tsyringe";
 import BalanceInfoLoader from "@/functions/loader/BalanceInfoLoader";
 import { BalanceSummaryDto } from "@/model/dto/BalanceSummaryDto";
-// import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
 
 @Component
 export default class BalanceChart extends Mixins(Doughnut) {
   @Prop({ default: () => JournalDate.today() }) date!: IJournalDate;
 
-  @Prop({ default: () => [] }) values!: BalanceSummaryDto[];
+  private values: BalanceSummaryDto[] = [];
 
-  private currentValues: BalanceSummaryDto[] = [];
+  private loader: BalanceInfoLoader = new BalanceInfoLoader();
 
-  @Watch("values")
+  @Watch("date")
   public async updateGrapgh() {
-    const summaries = await this.loadSummaries();
-    if (!this.needDraw(summaries)) {
-      return;
-    }
-    this.currentValues = summaries;
-    this.renderChart(this.createChartData(summaries), {
+    await this.loadSummaries();
+    this.renderChart(this.createChartData(this.values), {
       responsive: true,
       maintainAspectRatio: false,
     });
-  }
-
-  private needDraw(values: BalanceSummaryDto[]): boolean {
-    if (this.currentValues.length !== values.length) {
-      return true;
-    }
-    const sortedValues = values.sort((a, b) => a.amount - b.amount);
-    const sortedCurrentValues = this.currentValues.sort(
-      (a, b) => a.amount - b.amount
-    );
-    for (const [index, value] of sortedValues.entries()) {
-      if (sortedCurrentValues[index].item.id !== value.item.id) {
-        return true;
-      }
-    }
-    return false;
   }
 
   public mounted(): void {
@@ -52,10 +30,20 @@ export default class BalanceChart extends Mixins(Doughnut) {
   }
 
   public async loadSummaries() {
-    return (this.values.length > 0
-      ? this.values
-      : (await BalanceInfoLoader.load(this.date)).bandled
-    ).filter((info) => info.item.type.isDebit && info.item.type.isReal);
+    this.values = await (async () => {
+      try {
+        const loadRes = await this.loader.load(this.date);
+        if (!loadRes) {
+          return [];
+        }
+        const data = loadRes.bandled;
+        return data.filter(
+          (info) => info.item.type.isDebit && info.item.type.isReal
+        );
+      } catch (e) {
+        return [];
+      }
+    })();
   }
 
   public createChartData(summaries: BalanceSummaryDto[]): ChartData {

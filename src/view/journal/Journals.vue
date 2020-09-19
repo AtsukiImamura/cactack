@@ -8,12 +8,12 @@
         <div class="config">
           <div class="date-config">
             <!-- 日付選択時に仕訳一覧が切り替わらないので一旦期間の自由選択は禁止する -->
-            <PeriodSelector :edit-period="false"></PeriodSelector>
+            <PeriodSelector :edit-period="false" @select="onPeriodChanged"></PeriodSelector>
           </div>
           <div class="filters">
-            <div class="filter item">
+            <!-- <div class="filter item">
               <div class="selector">
-                <TransferCategorySelector @select="addFilter"></TransferCategorySelector>
+                <CategorySelector @select="addFilter"></CategorySelector>
               </div>
               <div class="filter-items">
                 <div class="f-item" v-for="(filter, index) in filterItems" :key="index">
@@ -23,7 +23,8 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </div>-->
+            <CategoryMultiSelector @change="onFilterChanged"></CategoryMultiSelector>
           </div>
         </div>
         <paginate-links
@@ -176,9 +177,9 @@ import AppModule from "@/store/ApplicationStore";
 import HiddenActions from "@/view/common/HiddenActions.vue";
 import VirtualBook from "@/model/virtual/VirtualBook";
 import JournalDelete from "@/view/journal/JournalDelete.vue";
-import TransferCategorySelector from "@/view/register/components/TransferCategorySelector.vue";
 import { ICategoryItem } from "@/model/interface/ICategory";
 import PeriodSelector from "@/view/common/PeriodSelector.vue";
+import CategoryMultiSelector from "@/view/register/components/CategoryMultiSelector.vue";
 
 @Component({
   components: {
@@ -186,8 +187,8 @@ import PeriodSelector from "@/view/common/PeriodSelector.vue";
     DatePicker,
     HiddenActions,
     JournalDelete,
-    TransferCategorySelector,
     PeriodSelector,
+    CategoryMultiSelector,
   },
 })
 export default class Journals extends Vue {
@@ -199,6 +200,10 @@ export default class Journals extends Vue {
 
   public get periodEndWith(): IJournalDate {
     return AppModule.periodEndWith;
+  }
+
+  public get appJournals(): IJournal[] {
+    return AppModule.journals;
   }
 
   /** 並び変え方法 */
@@ -216,21 +221,8 @@ export default class Journals extends Vue {
 
   private filterItems: ICategoryItem[] = [];
 
-  public addFilter(item: ICategoryItem) {
-    if (this.filterItems.map((item) => item.id).includes(item.id)) {
-      return;
-    }
-    this.filterItems.push(item);
-    this.updateJournals();
-  }
-
-  public removeFilter(item: ICategoryItem) {
-    const index = this.filterItems.indexOf(item);
-    if (index < 0) {
-      return;
-    }
-    this.filterItems.splice(index, 1);
-    this.updateJournals();
+  public onFilterChanged(filters: ICategoryItem[]) {
+    this.filterItems = filters;
   }
 
   public get journals(): IJournal[] {
@@ -288,13 +280,12 @@ export default class Journals extends Vue {
     this.virtualJournals = await virtualBook.getVirtualJournals();
   }
 
-  @Watch("periodBeginWith")
-  public onPeriodBeginWithChanged() {
+  public onPeriodChanged() {
     this.updateJournals();
   }
 
-  @Watch("periodEndWith")
-  public onPeriodEndWithChanged() {
+  @Watch("appJournals")
+  public onAppJournalsChanged() {
     this.updateJournals();
   }
 
@@ -416,48 +407,6 @@ ul {
         width: 45%;
         @include sm {
           width: 100%;
-        }
-        .filter {
-          padding-bottom: 10px;
-          &.item {
-            position: relative;
-            margin: 25px 5px 5px 5px;
-            min-width: 150px;
-            &:before {
-              content: "勘定科目で絞り込み";
-              position: absolute;
-              top: -20px;
-              left: 0px;
-            }
-            .selector {
-              max-width: 140px;
-            }
-            .filter-items {
-              display: flex;
-              flex-wrap: wrap;
-              .f-item {
-                display: block;
-                padding: 0px 5px 4px;
-                border-radius: 3px;
-                background-color: #f6f6f6;
-                margin: 3px 3px;
-                display: flex;
-                align-items: center;
-                .name {
-                  display: block;
-                  margin: 2px 4px 0px 0px;
-                }
-                .delete {
-                  margin-top: -5px;
-                  .delete-button {
-                    margin-top: -6px;
-                    display: block;
-                    @include round-delete-button;
-                  }
-                }
-              }
-            }
-          }
         }
       }
     }

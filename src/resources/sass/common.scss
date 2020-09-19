@@ -94,6 +94,7 @@
     overflow: hidden;
     background-color: $color-main;
     color: #ffffff;
+    max-height: 36px;
     &:hover {
       background-color: $color-main-light;
     }
@@ -425,97 +426,34 @@ body {
   }
 }
 
+@mixin type-category-color($color) {
+  color: $color;
+  * {
+    color: $color;
+  }
+  &.border {
+    border-color: $color;
+  }
+}
+
 .category-color {
-  display: inline-block;
-  &.c-1 {
-    color: $color-debt;
-    * {
-      color: $color-debt;
-    }
-    &.border {
-      border: 1px solid $color-debt;
-    }
-  }
-  &.c-106 {
-    color: $color-receivable;
-    * {
-      color: $color-receivable;
-    }
-    &.border {
-      border: 1px solid $color-receivable;
-    }
-  }
-  &.c-3 {
-    color: $color-net-asset;
-    * {
-      color: $color-net-asset;
-    }
-    &.border {
-      border: 1px solid $color-net-asset;
-    }
-  }
-  &.c-101 {
-    color: $color-cash;
-    * {
-      color: $color-cash;
-    }
-    &.border {
-      border: 1px solid $color-cash;
-    }
-  }
-  &.c-102 {
-    color: $color-cash-equivalent;
-    * {
-      color: $color-cash-equivalent;
-    }
-    &.border {
-      border: 1px solid $color-cash-equivalent;
-    }
-  }
-  &.c-103 {
-    color: $color-stock;
-    * {
-      color: $color-stock;
-    }
-    &.border {
-      border: 1px solid $color-stock;
-    }
-  }
-  &.c-104 {
-    color: $color-deposit;
-    * {
-      color: $color-deposit;
-    }
-    &.border {
-      border: 1px solid $color-deposit;
-    }
-  }
-  &.c-105 {
-    color: $color-durable-asset;
-    * {
-      color: $color-durable-asset;
-    }
-    &.border {
-      border: 1px solid $color-durable-asset;
-    }
-  }
-  &.c-900 {
-    color: $color-unknown;
-    * {
-      color: $color-unknown;
-    }
-    &.border {
-      border: 1px solid $color-unknown;
-    }
-  }
   &.c-0 {
-    color: $color-unknown;
-    * {
-      color: $color-unknown;
-    }
-    &.border {
-      border: 1px solid $color-unknown;
-    }
+    @include type-category-color($color-asset);
+  }
+  &.c-1 {
+    @include type-category-color($color-spending);
+  }
+  &.c-2 {
+    @include type-category-color($color-income);
+  }
+  &.c-10 {
+    @include type-category-color($color-debt);
+  }
+  &.c-11 {
+    @include type-category-color($color-net-asset);
+  }
+  &.c-99 {
+    @include type-category-color($color-other);
   }
 }
 

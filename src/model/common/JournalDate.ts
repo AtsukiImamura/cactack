@@ -1,5 +1,8 @@
 import IJournalDate from "@/model/interface/IJournalDate";
 import dayjs from "dayjs";
+import { container } from "tsyringe";
+import UserConfigFlyweight from "@/repository/flyweight/UserConfigFlyweight";
+import { UserConfigKey } from "../interface/IUserConfig";
 
 var localeData = require("dayjs/plugin/localeData");
 dayjs.extend(localeData);
@@ -121,6 +124,10 @@ export default class JournalDate implements IJournalDate {
     return new JournalDate(this.date.startOf("month"));
   }
 
+  public get lastDay(): IJournalDate {
+    return new JournalDate(this.date.endOf("month"));
+  }
+
   public beforeThan(date: IJournalDate): boolean {
     return this.date.isBefore(dayjs(date.toDate()));
   }
@@ -143,6 +150,10 @@ export default class JournalDate implements IJournalDate {
 
   public toString(): string {
     return `${this.year}/${this.month}${this.day > 0 ? `/${this.day}` : ""}`;
+  }
+
+  public format(format: string) {
+    return this.date.format(format);
   }
 
   public toDate(): Date {
@@ -174,7 +185,139 @@ export default class JournalDate implements IJournalDate {
   }
 
   public isInMonthOf(date: IJournalDate) {
-    return date.year === this.year && date.month === this.month;
+    if (this.monthlyDisp) {
+      return (
+        this.afterThanOrEqualsTo(date.firstDayOfUser) &&
+        this.beforeThanOrEqualsTo(date.lastDayOfUser)
+      );
+    } else {
+      return date.year === this.year && date.month === this.month;
+    }
+  }
+
+  public isInYearOf(date: IJournalDate) {
+    if (this.monthlyDisp) {
+      if (this.year === date.year && this.month > 1 && this.month < 12) {
+        return true;
+      }
+      const userFirstDayOfMonth = Number(
+        container
+          .resolve(UserConfigFlyweight)
+          .getByConfigKey(UserConfigKey.FIRST_DAY_OF_MONTH)?.value
+      );
+
+      if (this.includeFirstDayToNextMonth) {
+        return (
+          this.isInMonthOf(
+            JournalDate.byDay(
+              date.year,
+              1,
+              userFirstDayOfMonth
+            ).getPreviousDay()
+          ) ||
+          this.isInMonthOf(
+            JournalDate.byDay(
+              date.year,
+              1,
+              userFirstDayOfMonth
+            ).getPreviousDay()
+          )
+        );
+      } else {
+        return (
+          this.isInMonthOf(
+            JournalDate.byDay(date.year, 1, userFirstDayOfMonth)
+          ) ||
+          this.isInMonthOf(JournalDate.byDay(date.year, 1, userFirstDayOfMonth))
+        );
+      }
+    } else {
+      return date.year === this.year;
+    }
+  }
+
+  public get firstDayOfUser(): IJournalDate {
+    const userFirstDayOfMonth = Number(
+      container
+        .resolve(UserConfigFlyweight)
+        .getByConfigKey(UserConfigKey.FIRST_DAY_OF_MONTH)?.value
+    );
+
+    if (this.day >= userFirstDayOfMonth) {
+      return JournalDate.byDay(this.year, this.month, userFirstDayOfMonth);
+    } else {
+      const prevMonth = this.getPreviousMonth();
+      return JournalDate.byDay(
+        prevMonth.year,
+        prevMonth.month,
+        userFirstDayOfMonth
+      );
+    }
+  }
+
+  public get lastDayOfUser(): IJournalDate {
+    const userFirstDayOfMonth = Number(
+      container
+        .resolve(UserConfigFlyweight)
+        .getByConfigKey(UserConfigKey.FIRST_DAY_OF_MONTH)?.value
+    );
+
+    if (this.day < userFirstDayOfMonth) {
+      return JournalDate.byDay(
+        this.year,
+        this.month,
+        userFirstDayOfMonth
+      ).getPreviousDay();
+    } else {
+      const nextMonth = this.getNextMonth();
+      return JournalDate.byDay(
+        nextMonth.year,
+        nextMonth.month,
+        userFirstDayOfMonth
+      ).getPreviousDay();
+    }
+  }
+
+  public get yearOfUser(): number {
+    if (
+      this.includeFirstDayToNextMonth &&
+      this.day >= this.firstDayOfUser.day
+    ) {
+      return this.getNextMonth().year;
+    } else {
+      return this.year;
+    }
+  }
+
+  public get monthOfUser(): number {
+    if (
+      this.includeFirstDayToNextMonth &&
+      this.day >= this.firstDayOfUser.day
+    ) {
+      return this.getNextMonth().month;
+    } else {
+      return this.month;
+    }
+  }
+
+  private get monthlyDisp(): boolean {
+    const config = container
+      .resolve(UserConfigFlyweight)
+      .getByConfigKey(UserConfigKey.ENABLE_MONTHLY_DISP);
+    if (!config) {
+      return false;
+    }
+    return config.value > 0;
+  }
+
+  private get includeFirstDayToNextMonth(): boolean {
+    const userConfigIncludeFirstDayToNextMonth = container
+      .resolve(UserConfigFlyweight)
+      .getByConfigKey(UserConfigKey.INCLUDE_FIRST_DAY_TO_NEXT_MONTH);
+    if (!userConfigIncludeFirstDayToNextMonth) {
+      return false;
+    }
+    return Number(userConfigIncludeFirstDayToNextMonth.value) > 0;
   }
 
   public getMonthsOfAfter(num: number): IJournalDate[] {
@@ -187,6 +330,10 @@ export default class JournalDate implements IJournalDate {
 
   public getPreviousMonth(): IJournalDate {
     return this.getBeforeMonthOf(1);
+  }
+
+  public getPreviousYear(): IJournalDate {
+    return new JournalDate(this.date.subtract(1, "year").toDate());
   }
 
   public getBeforeMonthOf(val: number): IJournalDate {
@@ -207,7 +354,7 @@ export default class JournalDate implements IJournalDate {
   }
 
   private static countDayBetween(from: IJournalDate, to: IJournalDate): number {
-    return dayjs(from.toDate()).diff(dayjs(to.toDate()), "date");
+    return dayjs(from.toDate()).diff(dayjs(to.toDate()), "day");
   }
 }
 

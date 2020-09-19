@@ -1,53 +1,56 @@
 import IJournalDate from "@/model/interface/IJournalDate";
-import IApiResponse from "@/functions/base/IApiResponse";
-
-import * as firebase from "firebase";
+import "firebase/functions";
 import { container } from "tsyringe";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
-import { IUserCategoryItem, ICategoryItem } from "@/model/interface/ICategory";
+import { ICategoryItem } from "@/model/interface/ICategory";
 import { BalanceSummaryDto } from "@/model/dto/BalanceSummaryDto";
-export default class LedgerLoader {
-  public static async load(begin: IJournalDate, end: IJournalDate) {
-    const ledgersResult = (await firebase
-      .functions()
-      .httpsCallable("getLedgers")({
-      begin: begin.toString(),
-      end: end.toString(),
-    })) as {
-      data: IApiResponse<{
-        items: {
-          itemId: string;
-          amount: number;
-        }[];
-        tags: {
-          itemId: string;
-          amount: number;
-        }[];
-      }>;
-    };
+import LoaderBase from "./LoaderBase";
+import * as service from "@/functions/service/ApiService";
+import { ILedgerResponse } from "../base/ILedgerResponse";
 
-    if (ledgersResult.data.code !== 200) {
-      throw new Error("error has occured in loading chart data.");
+export default class LedgerLoader extends LoaderBase<LedgerLoadResult> {
+  public async load(
+    begin: IJournalDate,
+    end: IJournalDate
+  ): Promise<LedgerLoadResult | null> {
+    this.startLoading();
+
+    const ledgersResult = await service.api.call<ILedgerResponse>(
+      "getLedgers",
+      {
+        begin: begin.toString(),
+        end: end.toString(),
+      }
+    );
+
+    if (!ledgersResult || ledgersResult.code !== 200) {
+      // throw new Error("error has occured in loading chart data.");
+      console.warn(`ledger aquisition faild.`);
+      return this.finishLoading(new LedgerLoadResult([]));
     }
 
-    return new LedgerLoader(
-      ledgersResult.data.data.items.map((info) => {
-        const item = container
-          .resolve(UserCategoryItemFlyweight)
-          .get(info.itemId)!;
-        return {
-          item: item,
-          amount: (item.type.isDebit ? 1 : -1) * info.amount,
-        };
-      })
+    return this.finishLoading(
+      new LedgerLoadResult(
+        ledgersResult.data.items.map((info) => {
+          const item = container
+            .resolve(UserCategoryItemFlyweight)
+            .get(info.itemId)!;
+          return {
+            item: item,
+            amount: (item.type.isDebit ? 1 : -1) * info.amount,
+          };
+        })
+      )
     );
   }
+}
 
-  private values: BalanceSummaryDto[] = [];
+export class LedgerLoadResult {
+  private _values: BalanceSummaryDto[];
 
   public get list(): BalanceSummaryDto[] {
-    return this.values;
+    return this._values;
   }
 
   public get bandled(): BalanceSummaryDto[] {
@@ -73,12 +76,7 @@ export default class LedgerLoader {
     );
   }
 
-  constructor(
-    values: {
-      item: IUserCategoryItem;
-      amount: number;
-    }[]
-  ) {
-    this.values = values;
+  constructor(values: BalanceSummaryDto[]) {
+    this._values = values;
   }
 }

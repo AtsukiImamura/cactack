@@ -1,47 +1,44 @@
-import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 import { DataStore } from "@/repository/infrastracture/DataStore";
 import { DJournal, DJournalDetail } from "@/model/interface/DJournal";
 import JournalDate from "@/model/common/JournalDate";
 import ApiResponse from "./base/ApiResponse";
+import * as context from "@/functions/base/FunctionContext";
 import { DUserCategoryItem } from "@/model/interface/ICategory";
 export namespace BalanceData {
-  export async function getBalance(
-    data: { date: string },
-    context: functions.https.CallableContext
-  ) {
-    if (!context.auth || !data.date) {
-      return new ApiResponse(
-        400,
-        "authentication context or date was not given."
-      );
+  export async function getBalance(context: context.auth.ExecutableContext) {
+    const date = context.params.date;
+    if (!context.token.uid || !date) {
+      throw new Error("authentication context or date was not given.");
     }
-    const uid = context.auth.uid;
     const journals = (
       await new DataStore<DJournal>(
         admin.firestore().collection("journals")
-      ).getByKey("userId", uid)
+      ).getByKey("userId", context.token.uid)
     )
       .filter((jnl) => jnl.visible)
       .filter((jnl) =>
         JournalDate.cast(jnl.accountAt).beforeThanOrEqualsTo(
-          JournalDate.cast(data.date as string)
+          JournalDate.cast(date as string)
         )
       );
     return new ApiResponse(200, "", summarize(journals)).json();
   }
 
   export async function getLedgers(
-    data: { begin: string; end: string },
-    context: functions.https.CallableContext
+    context: context.auth.ExecutableContext
+    // data: { begin: string; end: string },
+    // context: functions.https.CallableContext
   ) {
-    if (!context.auth) {
-      return new ApiResponse(400, "authentication context was not given.");
+    if (!context.token.uid) {
+      throw new Error("authentication context or date was not given.");
     }
-    if (!data.begin || !data.end) {
-      return new ApiResponse(400, "date was not given.");
+    const beginWith = context.params.begin;
+    const endWith = context.params.end;
+    if (!beginWith || !endWith) {
+      throw new Error("date was not given.");
     }
-    const uid = context.auth.uid;
+    const uid = context.token.uid;
 
     const journals = (
       await new DataStore<DJournal>(
@@ -52,11 +49,10 @@ export namespace BalanceData {
       .filter((jnl) => {
         const accountAt = JournalDate.cast(jnl.accountAt);
         return (
-          accountAt.afterThanOrEqualsTo(JournalDate.cast(data.begin)) &&
-          accountAt.beforeThanOrEqualsTo(JournalDate.cast(data.end))
+          accountAt.afterThanOrEqualsTo(JournalDate.cast(beginWith)) &&
+          accountAt.beforeThanOrEqualsTo(JournalDate.cast(endWith))
         );
       });
-    console.log(journals);
 
     const userItemMap = (
       await new DataStore<DUserCategoryItem>(
@@ -113,6 +109,7 @@ export namespace BalanceData {
       // for debit
       calcLedgerAmountOf(jnl.debits, false);
     }
+
     return new ApiResponse(200, "", {
       items: Array.from(ledgerMap.entries()).map(([itemId, amount]) => ({
         itemId: itemId,
@@ -158,6 +155,15 @@ export namespace BalanceData {
         amount:
           amount -
           (creditSummaryMap.has(itemId) ? creditSummaryMap.get(itemId)! : 0),
+      });
+    }
+    for (const [itemId, amount] of creditSummaryMap.entries()) {
+      if (debitSummaryMap.has(itemId)) {
+        continue;
+      }
+      summaries.push({
+        itemId: itemId,
+        amount: -amount,
       });
     }
     return summaries;

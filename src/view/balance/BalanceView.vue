@@ -23,9 +23,9 @@
                 format="yyyy/MM/dd"
                 :value="date.toDate()"
                 @selected="
-                date = date.setDate($event);
-                updateBalance();
-              "
+                  date = date.setDate($event);
+                  updateBalance();
+                "
               ></DatePicker>
             </div>
           </div>
@@ -45,14 +45,14 @@
             <div class="left">
               <div
                 class="selection"
-                :class="{selected: mobile__isDebit}"
+                :class="{ selected: mobile__isDebit }"
                 @click="mobile__isDebit = !mobile__isDebit"
               >
                 <input type="button" value="借方" />
               </div>
               <div
                 class="selection"
-                :class="{selected: !mobile__isDebit}"
+                :class="{ selected: !mobile__isDebit }"
                 @click="mobile__isDebit = !mobile__isDebit"
               >
                 <input type="button" value="貸方" />
@@ -63,10 +63,10 @@
             <div class="loading-linear"></div>
           </div>
           <div class="view" v-if="debitSide.length > 0">
-            <div class="side" :class="{hidden: !mobile__isDebit}">
+            <div class="side" :class="{ hidden: !mobile__isDebit }">
               <BalanceSide :values="debitSide"></BalanceSide>
             </div>
-            <div class="side" :class="{hidden: mobile__isDebit}">
+            <div class="side" :class="{ hidden: mobile__isDebit }">
               <BalanceSide :values="creditSide"></BalanceSide>
             </div>
           </div>
@@ -106,13 +106,15 @@ export default class BalanceView extends Vue {
 
   public mobile__isDebit: boolean = true;
 
+  private loader = new BalanceInfoLoader();
+
   private get debitAmount(): number {
     return this.debitSide.reduce((acc, cur) => (acc += cur.amount), 0);
   }
 
   private get creditAmount(): number {
     return this.summaryValues
-      .filter((v) => v.item.type.isCredit)
+      .filter((v) => v.item.type.isCredit && v.item.type.isReal)
       .reduce((acc, cur) => (acc += cur.amount), 0);
   }
 
@@ -147,9 +149,12 @@ export default class BalanceView extends Vue {
   }
 
   public updateBalance(): void {
-    BalanceInfoLoader.load(this.date).then((loader) => {
-      this.summaryValues = loader.list;
-      this.bandledSummaries = loader.bandled;
+    this.loader.load(this.date).then((res) => {
+      if (!res) {
+        return;
+      }
+      this.summaryValues = res.list;
+      this.bandledSummaries = res.bandled;
     });
   }
 }

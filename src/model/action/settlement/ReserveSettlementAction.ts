@@ -114,21 +114,22 @@ export default class ReserveSettlementAction extends SettlementAction {
       throw new Error("user category item of credit not found.");
     }
 
-    const journal = new VirtualJournal(
-      this.title,
-      this.date,
-      [
-        new JournalDetail(
-          /*category: */ creditCategoryItem,
-          /* amount: */ this.amount
-        ),
-      ],
-      [
-        new JournalDetail(
-          /*category: */ debitCategoryItem,
-          /* amount: */ this.amount
-        ),
-      ]
+    const journal = new VirtualJournal(this.title, this.date, [], []);
+    journal.addCredit(
+      new JournalDetail(
+        /*category: */ creditCategoryItem,
+        /* amount: */ this.amount,
+        undefined,
+        journal
+      )
+    );
+    journal.addDebit(
+      new JournalDetail(
+        /*category: */ debitCategoryItem,
+        /* amount: */ this.amount,
+        undefined,
+        journal
+      )
     );
     journal.ancestorId = ancestor ? ancestor.id : "";
     return [journal];

@@ -2,8 +2,9 @@
   <div class="month-picker">
     <input
       class="disp"
+      :class="{disabled: disabled}"
       type="text"
-      :value="`${selectedYear}年 ${selectedMonth}月`"
+      :value="`${unselected ? '--' : selectedYear}年 ${unselected ? '--' : selectedMonth}月`"
       @click="openPicker"
     />
     <div class="bg" v-if="dispPicker" @click="closePicker"></div>
@@ -43,6 +44,9 @@ export default class MonthPicker extends Vue {
 
   @Prop({ default: () => new Date().getMonth() + 1 }) public month!: number;
 
+  @Prop({ default: () => false }) public disabled!: boolean;
+  @Prop({ default: () => false }) public unselected!: boolean;
+
   public selectedYear: number = new Date().getFullYear();
 
   public selectedMonth: number = new Date().getMonth() + 1;
@@ -77,6 +81,9 @@ export default class MonthPicker extends Vue {
   }
 
   public openPicker(e?: Event) {
+    if (this.disabled) {
+      return;
+    }
     if (e) {
       (e.srcElement as HTMLInputElement).blur();
     }
@@ -100,6 +107,9 @@ export default class MonthPicker extends Vue {
 .month-picker {
   position: relative;
   .disp {
+    &.disabled {
+      background-color: #f0f0f0;
+    }
   }
   .bg {
     position: fixed;

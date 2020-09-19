@@ -105,6 +105,14 @@ export default [
         /* webpackChunkName: "journal" */ "./view/register/RegisterMenu.vue"
       ),
   },
+
+  {
+    path: "/journalize/c/:journalId",
+    component: () =>
+      import(
+        /* webpackChunkName: "journal" */ "./view/register/CopyRedirect.vue"
+      ),
+  },
   {
     path: "/journalize/transfer",
     component: () =>
@@ -127,6 +135,13 @@ export default [
   },
   {
     path: "/ledger/general",
+    component: () =>
+      import(
+        /* webpackChunkName: "ledger" */ "./view/ledger/GeneralLedger.vue"
+      ),
+  },
+  {
+    path: "/ledger/general/:type",
     component: () =>
       import(
         /* webpackChunkName: "ledger" */ "./view/ledger/GeneralLedger.vue"
@@ -207,6 +222,16 @@ export default [
   },
   {
     path: "/badget/create",
+    component: () =>
+      import(/* webpackChunkName: "badget" */ "./view/badget/BadgetEditor.vue"),
+  },
+  {
+    path: "/badget/detail/:badgetId",
+    component: () =>
+      import(/* webpackChunkName: "badget" */ "./view/badget/BadgetDetail.vue"),
+  },
+  {
+    path: "/badget/edit/:badgetId",
     component: () =>
       import(/* webpackChunkName: "badget" */ "./view/badget/BadgetEditor.vue"),
   },

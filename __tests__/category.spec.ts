@@ -7,7 +7,7 @@ import UserCategoryFlyweight from "../src/repository/flyweight/UserCategoryFlywe
 import AccountType from "../src/model/AccountType";
 import UserCategory from "../src/model/UserCategory";
 
-import * as firebase from "firebase/app";
+import firebase from "firebase/app";
 import "firebase/firestore";
 import {
   IUserCategory,

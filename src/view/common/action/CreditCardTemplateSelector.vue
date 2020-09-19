@@ -9,11 +9,11 @@
         :items="bankSelections"
         @select="mapping.bank = banks[$event.seq]"
       ></Selector>
-      <TransferCategorySelector
+      <CategorySelector
         v-if="bankSelections.length === 0"
         @select="mapping.bank = $event"
         :item="mapping.bank"
-      ></TransferCategorySelector>
+      ></CategorySelector>
     </div>
     <div class="cell deadline">
       <Selector :items="mapping.deadlineSelections" @select="mapping.setDeadline($event.seq)"></Selector>
@@ -38,11 +38,11 @@ import { ICategoryItem } from "@/model/interface/ICategory";
 import CreditActionTemplate from "@/model/action/template/CreditActionTemplate";
 import { container } from "tsyringe";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
-import TransferCategorySelector from "@/view/register/components/TransferCategorySelector.vue";
+import CategorySelector from "@/view/register/components/CategorySelector.vue";
 import Selector from "@/view/common/Selector.vue";
 import hash from "object-hash";
 
-@Component({ components: { Selector, TransferCategorySelector } })
+@Component({ components: { Selector, CategorySelector } })
 export default class CreditCardTemplateSelector extends Vue {
   @Prop() command?: string;
 
@@ -52,7 +52,7 @@ export default class CreditCardTemplateSelector extends Vue {
     return this.banks.map((bk, index) => ({
       seq: index,
       content: bk.name,
-      default: !!this.mapping.bank && this.mapping.bank.id === bk.id
+      default: !!this.mapping.bank && this.mapping.bank.id === bk.id,
     }));
   }
 
@@ -99,14 +99,14 @@ export class CreditMapping {
   public day: number = 15;
 
   public get daySelections(): SelectorItem[] {
-    return this.dayOfMonthSelections.map(s => {
+    return this.dayOfMonthSelections.map((s) => {
       s.default = s.seq === this.day;
       return s;
     });
   }
 
   public get deadlineSelections(): SelectorItem[] {
-    return this.dayOfMonthSelections.map(s => {
+    return this.dayOfMonthSelections.map((s) => {
       s.default = s.seq === this.deadline;
       return s;
     });
@@ -116,8 +116,8 @@ export class CreditMapping {
     return ([
       { content: "当月", seq: 0 },
       { content: "翌月", seq: 1 },
-      { content: "翌々月", seq: 2 }
-    ] as SelectorItem[]).map(s => {
+      { content: "翌々月", seq: 2 },
+    ] as SelectorItem[]).map((s) => {
       s.default = s.seq === this.month;
       return s;
     });

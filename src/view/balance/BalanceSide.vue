@@ -3,7 +3,9 @@
     <div class="category wide" v-for="(smr, smrIndex) in summaries" :key="-smrIndex - 1">
       <div class="row h">
         <div class="cell name">
-          <span>{{ smr.item.name }}</span>
+          <span>
+            <router-link :to="`/ledger/detail/${smr.item.id}`">{{ smr.item.name }}</router-link>
+          </span>
         </div>
         <div class="cell amount">
           <span>{{ smr.amount }}</span>
@@ -12,7 +14,9 @@
       <div class="items">
         <div class="item row" v-for="(child, childIndex) in smr.children" :key="-childIndex - 1">
           <div class="cell name">
-            <span>{{ child.item.name }}</span>
+            <span>
+              <router-link :to="`/ledger/detail/${child.item.id}`">{{ child.item.name }}</router-link>
+            </span>
           </div>
           <div class="cell amount">{{ child.amount }}</div>
         </div>

@@ -4,7 +4,6 @@ import ItemEditor from "./ItemEditor.vue";
 import { container } from "tsyringe";
 import UserCategoryItem from "@/model/UserCategoryItem";
 import UserAuthService from "@/service/UserAuthService";
-import AppModule from "@/store/ApplicationStore";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 
 @Component({})
@@ -42,11 +41,10 @@ export default class ItemUpdate extends Mixins(ItemEditor) {
         this.name,
         undefined,
         false,
-        (await this.addTagsIfNotExist()).map(t => t.id),
+        (await this.addTagsIfNotExist()).map((t) => t.id),
         this.itemAction
       )
     );
-    await AppModule.init();
   }
 }
 </script>

@@ -4,7 +4,6 @@ import CategoryEditor from "./CategoryEditor.vue";
 import { container } from "tsyringe";
 import UserAuthService from "@/service/UserAuthService";
 import UserCategory from "@/model/UserCategory";
-import AppModule from "@/store/ApplicationStore";
 import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight";
 
 @Component({})
@@ -17,7 +16,7 @@ export default class CategoryUpdate extends Mixins(CategoryEditor) {
     height: "20px",
     display: "block",
     cursor: "pointer",
-    margin: "0px 0px 0px 4px"
+    margin: "0px 0px 0px 4px",
   };
 
   public async execute(): Promise<void> {
@@ -43,7 +42,6 @@ export default class CategoryUpdate extends Mixins(CategoryEditor) {
           undefined
         )
       );
-    await AppModule.init();
   }
 }
 </script>

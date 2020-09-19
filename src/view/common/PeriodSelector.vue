@@ -1,43 +1,66 @@
 <template>
   <div class="period-selector">
     <div class="date-config" :key="periodBeginWith.toString()">
-      <MonthPicker
-        class="date monthly"
-        v-if="monthlyDisp"
-        :year="year"
-        :month="month"
-        @select="selectMonth"
-      ></MonthPicker>
-      <div class="period">
-        <DatePicker
-          :disabled="!editPeriod && monthlyDisp"
+      <template v-if="inMonth">
+        <MonthPicker
           class="date from"
-          format="yyyy/MM/dd"
-          :value="periodBeginWith.toDate()"
-          @selected="periodBeginWith = periodBeginWith.setDate($event)"
-        ></DatePicker>
-        <DatePicker
-          :disabled="!editPeriod && monthlyDisp"
+          v-if="monthlyDisp"
+          :year="periodBeginWith.yearOfUser"
+          :month="periodBeginWith.monthOfUser"
+          @select="selectBeginWith"
+          :disabled="false"
+          :unselected="false"
+        ></MonthPicker>
+        <MonthPicker
           class="date to"
-          format="yyyy/MM/dd"
-          :value="periodEndWith.toDate()"
-          :disabled-dates="{ to: periodBeginWith.toDate() }"
-          @selected="periodEndWith = periodEndWith.setDate($event)"
-        ></DatePicker>
-      </div>
+          v-if="monthlyDisp"
+          :year="periodEndWith.yearOfUser"
+          :month="periodEndWith.monthOfUser"
+          @select="selectEndWith"
+          :disabled="false"
+          :unselected="false"
+        ></MonthPicker>
+      </template>
+      <template v-if="!inMonth">
+        <MonthPicker
+          class="date monthly"
+          v-if="monthlyDisp"
+          :year="year"
+          :month="month"
+          @select="selectMonth"
+          :disabled="false"
+          :unselected="isMonthUnselected"
+        ></MonthPicker>
+        <div class="period">
+          <DatePicker
+            :disabled="!editPeriod && monthlyDisp"
+            class="date from"
+            format="yyyy/MM/dd"
+            :value="periodBeginWith.toDate()"
+            @selected="selectBeginWith(periodBeginWith.setDate($event))"
+          ></DatePicker>
+          <DatePicker
+            :disabled="!editPeriod && monthlyDisp"
+            class="date to"
+            format="yyyy/MM/dd"
+            :value="periodEndWith.toDate()"
+            :disabled-dates="{ to: periodBeginWith.toDate() }"
+            @selected="selectEndWith(periodEndWith.setDate($event))"
+          ></DatePicker>
+        </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Emit, Prop } from "vue-property-decorator";
+import { Component, Vue, Emit, Prop, Watch } from "vue-property-decorator";
 
 import IJournalDate from "@/model/interface/IJournalDate";
 import AppModule from "@/store/ApplicationStore";
 import { container } from "tsyringe";
 import UserConfigFlyweight from "@/repository/flyweight/UserConfigFlyweight";
 import { UserConfigKey } from "@/model/interface/IUserConfig";
-import JournalDate from "@/model/common/JournalDate";
 import DatePicker from "vuejs-datepicker";
 import MonthPicker from "@/view/common/MonthPicker.vue";
 
@@ -49,6 +72,8 @@ import MonthPicker from "@/view/common/MonthPicker.vue";
 })
 export default class PeriodSelector extends Vue {
   @Prop({ default: () => false }) editPeriod!: boolean;
+
+  @Prop({ default: () => false }) inMonth!: boolean;
 
   public get periodBeginWith(): IJournalDate {
     return AppModule.periodBeginWith;
@@ -65,19 +90,11 @@ export default class PeriodSelector extends Vue {
   }
 
   public get month(): number {
-    if (this.includeFirstDayToNextMonth) {
-      return this.periodBeginWith.getNextMonth().month;
-    } else {
-      return this.periodBeginWith.month;
-    }
+    return this.periodBeginWith.monthOfUser;
   }
 
   public get year(): number {
-    if (this.includeFirstDayToNextMonth) {
-      return this.periodBeginWith.getNextMonth().year;
-    } else {
-      return this.periodBeginWith.year;
-    }
+    return this.periodBeginWith.yearOfUser;
   }
 
   public get monthlyDisp(): boolean {
@@ -90,40 +107,42 @@ export default class PeriodSelector extends Vue {
     return config.value > 0;
   }
 
-  public get includeFirstDayToNextMonth(): boolean {
-    const userConfigIncludeFirstDayToNextMonth = container
-      .resolve(UserConfigFlyweight)
-      .getByConfigKey(UserConfigKey.INCLUDE_FIRST_DAY_TO_NEXT_MONTH);
-    if (!userConfigIncludeFirstDayToNextMonth) {
+  public get isMonthUnselected(): boolean {
+    if (
+      this.periodBeginWith.equalsTo(
+        this.periodEndWith.getPreviousMonth().getNextDay()
+      )
+    ) {
       return false;
     }
-    return Number(userConfigIncludeFirstDayToNextMonth.value) > 0;
+
+    // TODO: １か月きっかり選択されていても別の月の可能性がある
+
+    return true;
+  }
+
+  @Watch("inMonth")
+  public onSelectingConditionChanged() {
+    this.periodBeginWith = this.periodBeginWith.firstDayOfUser;
+    this.periodEndWith = this.periodEndWith.lastDayOfUser;
+    this.select(this.periodBeginWith, this.periodEndWith);
+  }
+
+  public selectBeginWith(date: IJournalDate) {
+    const beginWith = this.inMonth ? date.firstDayOfUser : date;
+    AppModule.setPeriodBeginWith(beginWith);
+    this.select(beginWith, AppModule.periodEndWith);
+  }
+
+  public selectEndWith(date: IJournalDate) {
+    const endWith = this.inMonth ? date.lastDayOfUser : date;
+    AppModule.setPeriodEndWith(endWith);
+    this.select(AppModule.periodBeginWith, endWith);
   }
 
   public selectMonth(month: IJournalDate) {
-    const userConfigFirstDayOfMonth = container
-      .resolve(UserConfigFlyweight)
-      .getByConfigKey(UserConfigKey.FIRST_DAY_OF_MONTH);
-
-    const firstDay = userConfigFirstDayOfMonth
-      ? Number(userConfigFirstDayOfMonth.value)
-      : 1;
-    const monthBeginWith = this.includeFirstDayToNextMonth
-      ? month.getPreviousMonth()
-      : month;
-    this.periodBeginWith = JournalDate.byDay(
-      monthBeginWith.year,
-      monthBeginWith.month,
-      firstDay
-    );
-    this.periodEndWith =
-      firstDay > 1
-        ? JournalDate.byDay(
-            monthBeginWith.getNextMonth().year,
-            monthBeginWith.getNextMonth().month,
-            firstDay - 1
-          )
-        : JournalDate.lastDayOf(monthBeginWith.year, monthBeginWith.month);
+    this.periodBeginWith = month.firstDayOfUser;
+    this.periodEndWith = month.lastDayOfUser;
     this.select(this.periodBeginWith, this.periodEndWith);
   }
 

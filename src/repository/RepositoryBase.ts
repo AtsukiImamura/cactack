@@ -3,8 +3,9 @@ import Strable from "@/model/interface/common/Strable";
 import IBaseRepository from "@/repository/interface/IBaseRepository";
 import Treatable from "@/model/interface/common/Treatable";
 
-import * as firebase from "firebase/app";
+import firebase from "firebase/app";
 import "firebase/firestore";
+import "firebase/auth";
 import IdCache from "./cache/IdCache";
 import ILogicalDeletable, {
   DLogicalDeletable,
@@ -105,7 +106,7 @@ export default abstract class RepositoryBase<
     const docRef = await this.ref.add(simplyfied);
     value.id = docRef.id;
 
-    this.cache.remove(value.simplify());
+    this.cache.add(value.simplify());
     return value;
     // return (await this.getById(docRef.id)) as T;
   }

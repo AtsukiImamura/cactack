@@ -241,13 +241,11 @@ export default class CategoryList extends Vue {
 
   public async deleteCateogry(category: UserCategory) {
     await container.resolve(UserCategoryFlyweight).delete(category);
-    await AppModule.init();
   }
 
   public async reviveItem(item: IUserCategoryItem) {
     item.revive();
     await container.resolve(UserCategoryItemFlyweight).update(item);
-    await AppModule.init();
     this.topMesasge = new TemporalMessage(
       `「${item.name}」をもとに戻しました`,
       TemporalMessage.TYPE_SUCCESS
@@ -261,7 +259,6 @@ export default class CategoryList extends Vue {
       `「${item.name}」を完全に削除しました`,
       TemporalMessage.TYPE_SUCCESS
     );
-    await AppModule.init();
     this.hashSeed = [item, new Date()];
   }
 
@@ -283,16 +280,6 @@ export default class CategoryList extends Vue {
       TemporalMessage.TYPE_SUCCESS
     );
     this.hashSeed = [item, new Date()];
-  }
-
-  public async mounted() {
-    // TODO: 消す！！
-    // await container
-    //   .resolve(UserAuthService)
-    //   .signIn("imamura.amzn.code@gmail.com", "hogehoge");
-    if (this.categories.length === 0) {
-      AppModule.init();
-    }
   }
 }
 </script>

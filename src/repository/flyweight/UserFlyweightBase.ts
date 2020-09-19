@@ -1,5 +1,6 @@
 import { UserIdentifiable } from "@/model/interface/Identifiable";
-import * as firebase from "firebase/app";
+import firebase from "firebase/app";
+import "firebase/firestore";
 import Strable from "@/model/interface/common/Strable";
 import { container } from "tsyringe";
 import UserAuthService from "@/service/UserAuthService";
@@ -44,12 +45,16 @@ export default abstract class UserFlyweightBase<
     return value;
   }
 
-  public async import() {
+  public async import(force: boolean = true) {
     if (this.mapping.size > 0) {
       return;
     }
     const userId = container.resolve(UserAuthService).userId;
     if (!userId) {
+      return;
+    }
+
+    if (!force && this.realMapping.size > 0) {
       return;
     }
     const docs = await this.connection()

@@ -3,6 +3,7 @@
     <div class="register-manually">
       <div class="title">
         <h2>{{ title }}</h2>
+        <ProcessButton v-if="isEdit && !isCopy" value="コピー" :click="copy" :disabled="false"></ProcessButton>
       </div>
       <JournalEditor :journal="defaultJournal" @commit="commitJournal"></JournalEditor>
       <div v-if="canSaveAsTemplate">
@@ -176,6 +177,10 @@ export default class Manually extends Vue {
     return title;
   }
 
+  public copy(): void {
+    this.$router.push(`/journalize/c/${this.journal.id}`);
+  }
+
   public async mounted() {
     if (this.isTransfer) {
       const tempalteId = this.$route.params.templateId;
@@ -284,6 +289,8 @@ export default class Manually extends Vue {
     // width: 100%;
     background-color: #ffffff;
     padding: 25px 0px 5px;
+    display: flex;
+    justify-content: space-between;
     h2 {
       // margin: 8px 8px 8px 10%;
       // @include sm {
