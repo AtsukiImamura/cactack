@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Emit } from "vue-property-decorator";
+import { Component, Vue, Prop, Emit, Watch } from "vue-property-decorator";
 import { ICategoryItem } from "@/model/interface/ICategory";
 import CategorySelectionModal, {
   CategorySelectorTab,
@@ -24,6 +24,18 @@ export default class CategorySelector extends Vue {
   public open: boolean = false;
 
   public selectedItem: ICategoryItem | {} = {};
+
+  public mounted(): void {
+    this.updateDefaultItem();
+  }
+
+  @Watch("item")
+  public updateDefaultItem() {
+    if (!this.item) {
+      return;
+    }
+    this.selectedItem = this.item;
+  }
 
   public onItemSelected(item: ICategoryItem, e: Event) {
     this.selectedItem = item;
