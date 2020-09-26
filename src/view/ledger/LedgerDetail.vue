@@ -57,11 +57,7 @@
             <span>{{ ledger ? ledger.creditAmount : 0 }}</span>
           </div>
           <div class="detail-wapper" v-if="isReady">
-            <div
-              class="detail"
-              v-for="(details, index) in [ledger.debits, ledger.credits]"
-              :key="index + 1"
-            >
+            <div class="detail" v-for="(details, index) in sides" :key="index + 1">
               <div class="row" v-for="(detail, index) in details" :key="-index">
                 <div class="cell date">{{ detail.accountAt.toString() }}</div>
                 <div class="cell name">
@@ -85,7 +81,7 @@
 import { Component, Vue, Watch } from "vue-property-decorator";
 import CommonFrame from "@/view/common/CommonFrame.vue";
 import LedgerSummary from "@/view/ledger/LedgerSummary.vue";
-import AccountLedger from "@/model/virtual/AccountLedger";
+import AccountLedger, { ILedgerDetail } from "@/model/virtual/AccountLedger";
 import VirtualBook from "@/model/virtual/VirtualBook";
 import AppModule from "@/store/ApplicationStore";
 import DatePicker from "vuejs-datepicker";
@@ -165,6 +161,17 @@ export default class GeneralLedger extends Vue {
   }
 
   public ledger: AccountLedger | null = null;
+
+  public get sides(): ILedgerDetail[][] {
+    if (!this.ledger) {
+      return [];
+    }
+    return [this.ledger.debits, this.ledger.credits].map((details) =>
+      details.sort((a, b) =>
+        a.accountAt.beforeThanOrEqualsTo(b.accountAt) ? -1 : 1
+      )
+    );
+  }
 
   private _title: string = "";
   public get title(): string {

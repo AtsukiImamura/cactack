@@ -4,7 +4,9 @@
       <div class="row h">
         <div class="cell name">
           <span>
-            <router-link :to="`/ledger/detail/${smr.item.id}`">{{ smr.item.name }}</router-link>
+            <router-link
+              :to="smr.item.id ? `/ledger/detail/${smr.item.id}` : ''"
+            >{{ smr.item.name }}</router-link>
           </span>
         </div>
         <div class="cell amount">
@@ -15,7 +17,9 @@
         <div class="item row" v-for="(child, childIndex) in smr.children" :key="-childIndex - 1">
           <div class="cell name">
             <span>
-              <router-link :to="`/ledger/detail/${child.item.id}`">{{ child.item.name }}</router-link>
+              <router-link
+                :to="child.item.id ? `/ledger/detail/${child.item.id}` : ''"
+              >{{ child.item.name }}</router-link>
             </span>
           </div>
           <div class="cell amount">{{ child.amount }}</div>

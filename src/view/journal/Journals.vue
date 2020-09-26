@@ -11,20 +11,11 @@
             <PeriodSelector :edit-period="false" @select="onPeriodChanged"></PeriodSelector>
           </div>
           <div class="filters">
-            <!-- <div class="filter item">
-              <div class="selector">
-                <CategorySelector @select="addFilter"></CategorySelector>
-              </div>
-              <div class="filter-items">
-                <div class="f-item" v-for="(filter, index) in filterItems" :key="index">
-                  <span class="name">{{ filter.name }}</span>
-                  <div class="delete">
-                    <span class="delete-button enabled" @click="removeFilter(filter)"></span>
-                  </div>
-                </div>
-              </div>
-            </div>-->
-            <CategoryMultiSelector @change="onFilterChanged"></CategoryMultiSelector>
+            <CategoryMultiSelector
+              :key="filterItems.length"
+              :items="filterItems"
+              @change="onFilterChanged"
+            ></CategoryMultiSelector>
           </div>
         </div>
         <paginate-links
@@ -35,6 +26,7 @@
         }"
           :show-step-links="true"
           v-if="journals.length > 20"
+          :key="journalUpdateKey"
         ></paginate-links>
         <div class="actions" v-if="false">
           <div class="action-content">
@@ -180,6 +172,8 @@ import JournalDelete from "@/view/journal/JournalDelete.vue";
 import { ICategoryItem } from "@/model/interface/ICategory";
 import PeriodSelector from "@/view/common/PeriodSelector.vue";
 import CategoryMultiSelector from "@/view/register/components/CategoryMultiSelector.vue";
+import { container } from "tsyringe";
+import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 
 @Component({
   components: {
@@ -223,15 +217,19 @@ export default class Journals extends Vue {
 
   public onFilterChanged(filters: ICategoryItem[]) {
     this.filterItems = filters;
+    this.$router.push(
+      `/journal?filters=${this.filterItems.map((item) => item.id).join(",")}`
+    );
   }
 
   public get journals(): IJournal[] {
-    // console.log(this.virtualJournals.filter(jnl => !jnl.isVisible));
     const res = this.virtualJournals
-      // 可視性
-      .filter((jnl) => jnl.isVisible)
-      // 絞り込み
       .filter((jnl) => {
+        // 可視性
+        if (!jnl.isVisible) {
+          return false;
+        }
+        // フィルタ
         if (this.filterItems.length === 0) {
           return true;
         }
@@ -304,6 +302,12 @@ export default class Journals extends Vue {
   }
 
   public async mounted() {
+    const filterQuery = this.$route.query.filters;
+    if (filterQuery) {
+      this.filterItems = container
+        .resolve(UserCategoryItemFlyweight)
+        .getByIds((filterQuery as string).split(","));
+    }
     await this.updateJournals();
   }
 }
