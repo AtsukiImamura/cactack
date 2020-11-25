@@ -3,14 +3,26 @@
     <div class="register-manually">
       <div class="title">
         <h2>{{ title }}</h2>
-        <ProcessButton v-if="isEdit && !isCopy" value="コピー" :click="copy" :disabled="false"></ProcessButton>
+        <ProcessButton
+          v-if="isEdit && !isCopy"
+          value="コピー"
+          :click="copy"
+          :disabled="false"
+        ></ProcessButton>
       </div>
-      <JournalEditor :journal="defaultJournal" @commit="commitJournal"></JournalEditor>
+      <JournalEditor
+        :journal="defaultJournal"
+        @commit="commitJournal"
+      ></JournalEditor>
       <div v-if="canSaveAsTemplate">
         <div class="template">
           <div class="section">
             <div class="section template-selection">
-              <input id="need-tempalte" type="checkbox" v-model="needTemplate" />
+              <input
+                id="need-tempalte"
+                type="checkbox"
+                v-model="needTemplate"
+              />
               <label for="need-tempalte">テンプレートに登録</label>
             </div>
             <div class="section template-selection" v-show="needTemplate">
@@ -31,12 +43,19 @@
         <div class="template">
           <div class="section">
             <div class="section continuous-jnl-selection">
-              <input id="continuous-jnl" type="checkbox" v-model="isContinuous" />
+              <input
+                id="continuous-jnl"
+                type="checkbox"
+                v-model="isContinuous"
+              />
               <label for="continuous-jnl">周期的に作成</label>
             </div>
             <div class="section continuous-unit" v-show="isContinuous">
               <div :style="{ width: '100px' }">
-                <Selector :items="continuousUnitSelections" @select="continuousUnit = $event.seq"></Selector>
+                <Selector
+                  :items="continuousUnitSelections"
+                  @select="continuousUnit = $event.seq"
+                ></Selector>
               </div>
               <div v-show="continuousUnit >= 0" :style="{ width: '100px' }">
                 <Selector :items="continuousJournalDaySelections"></Selector>
@@ -46,7 +65,11 @@
         </div>
       </div>
       <div class="actions">
-        <ProcessButton value="OK" :click="register" :disabled="!canRegister"></ProcessButton>
+        <ProcessButton
+          value="OK"
+          :click="register"
+          :disabled="!canRegister"
+        ></ProcessButton>
       </div>
     </div>
   </CommonFrame>
@@ -155,7 +178,7 @@ export default class Manually extends Vue {
   }
 
   public get isEdit(): boolean {
-    return !!this.defaultJournal.id;
+    return location.hash.startsWith("#/journalize/edit");
   }
 
   public get isCopy(): boolean {
@@ -241,18 +264,29 @@ export default class Manually extends Vue {
     if (!this.journal) {
       throw new Error("Put required information first!");
     }
-    if (this.isCopy) {
-      await container
-        .resolve<IJournalRepository>("JournalRepository")
-        .insert(this.journal);
-    } else if (this.isEdit) {
-      await container
+    if (this.isEdit) {
+      console.log("@@ EDIT!");
+      const updated = await container
         .resolve<IJournalRepository>("JournalRepository")
         .update(this.journal);
+      AppModule.onJournalChanged({ before: this.journal, after: updated });
     } else {
-      await container
+      const inserted = await container
         .resolve<IJournalRepository>("JournalRepository")
-        .insert(this.journal);
+        .insert(
+          new Journal(
+            "",
+            this.journal.userId,
+            this.journal.title,
+            this.journal.createdAt,
+            this.journal.accountAt,
+            this.journal.executeAt,
+            this.journal.credits,
+            this.journal.debits,
+            this.journal.isVisible
+          )
+        );
+      AppModule.onJournalChanged({ before: null, after: inserted });
     }
 
     if (this.needTemplate) {
@@ -266,7 +300,6 @@ export default class Manually extends Vue {
           )
         );
     }
-    await AppModule.init();
     this.$router.push("/journal"); // TODO: 結果ページへ
   }
 }

@@ -150,7 +150,7 @@ export default class UserCreationMasterRepository
     ];
 
     for (const data of list) {
-      await this.ref.add(data);
+      await this.ref().add(data);
     }
   }
 }

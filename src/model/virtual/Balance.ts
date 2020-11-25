@@ -1,6 +1,5 @@
 import IJournal, { IJournalDetail } from "@/model/interface/IJournal";
 import { IAccountCategory, ICategoryItem } from "@/model/interface/ICategory";
-import { IBalanceSheetSummary } from "@/view/interface/IDiffGragh";
 import AccountType from "@/model/AccountType";
 
 /** 貸借対照表 */
@@ -9,32 +8,6 @@ export default class Balance {
 
   constructor(journals: IJournal[]) {
     this.journals = journals;
-  }
-
-  public get netAssetAmount(): number {
-    return this.creditSide
-      .filter((d) => d.item.type.code === AccountType.TYPE_NET_ASSET)
-      .reduce((acc, cur) => (acc += cur.amount), 0);
-  }
-
-  public get netAssetNegativeAmount(): number {
-    return this.netAssetAmount < 0 ? this.netAssetAmount : 0;
-  }
-
-  public get assetNegativeTotalAmount(): number {
-    return this.debitSide
-      .filter((d) => d.amount < 0)
-      .reduce((acc, cur) => (acc += cur.amount), 0);
-  }
-  public get bumpAmount(): number {
-    return Math.max(
-      Math.abs(this.assetNegativeTotalAmount),
-      Math.abs(this.netAssetNegativeAmount)
-    );
-  }
-
-  public get totalAmount(): number {
-    return this.creditSide.reduce((acc, cur) => (acc += cur.amount), 0);
   }
 
   public get creditSide(): IBalanceItem[] {
@@ -81,22 +54,6 @@ export default class Balance {
       this.debitBalanceItems,
       (detail: IJournalDetail) => detail.category
     );
-  }
-
-  public get summary(): IBalanceSheetSummary {
-    const credits = this.creditSide.map((d) => ({
-      name: d.item.name,
-      amount: d.amount,
-    }));
-    const debits = this.debitSide.map((d) => ({
-      name: d.item.name,
-      amount: d.amount,
-    }));
-
-    return {
-      credit: credits,
-      debit: debits,
-    };
   }
 
   public get virtualSummary(): IBalanceItem[] {

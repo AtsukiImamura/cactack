@@ -30,7 +30,9 @@
           </div>
           <ul class="contents">
             <li>
-              <router-link tag="div" to="/ledger/general">総勘定元帳</router-link>
+              <router-link tag="div" to="/ledger/general"
+                >総勘定元帳</router-link
+              >
             </li>
             <li>
               <router-link tag="div" to="/journal">仕訳一覧</router-link>
@@ -39,16 +41,22 @@
               <router-link tag="div" to="/balance">貸借対照表</router-link>
             </li>
             <li>
-              <router-link tag="div" to="/" class="disabled" :event="''">損益計算書</router-link>
+              <router-link tag="div" to="/" class="disabled" :event="''"
+                >損益計算書</router-link
+              >
             </li>
             <li>
-              <router-link tag="div" to="/" class="disabled" :event="''">資産</router-link>
+              <router-link tag="div" to="/" class="disabled" :event="''"
+                >資産</router-link
+              >
             </li>
             <li>
               <router-link tag="div" to="/badget">予算</router-link>
             </li>
             <li>
-              <router-link tag="div" to="/category/list">勘定科目一覧</router-link>
+              <router-link tag="div" to="/category/list"
+                >勘定科目一覧</router-link
+              >
             </li>
           </ul>
           <ul class="configs">
@@ -62,12 +70,13 @@
                 :notice-num="noticeNum"
                 class="notice-item"
                 :class="{ num: noticeNum > 0 }"
-              >お知らせ</router-link>
+                >お知らせ</router-link
+              >
             </li>
           </ul>
         </div>
       </div>
-      <router-link to="/" tag="h1" style="cursor: pointer;">Cactack</router-link>
+      <router-link to="/" tag="h1" style="cursor: pointer">Cactack</router-link>
       <div class="register-area only-wide">
         <router-link class="register-mark" tag="div" to="/journalize">
           <span class="str">仕訳</span>
@@ -178,36 +187,21 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import MenuItem from "@/view/common/MenuItem.vue";
 import AppModule from "@/store/ApplicationStore";
-import JournalDate from "@/model/common/JournalDate";
-import IJournal from "@/model/interface/IJournal";
-import VirtualBook from "@/model/virtual/VirtualBook";
 import { container } from "tsyringe";
 import UserAuthService from "@/service/UserAuthService";
 
 @Component({ components: { MenuItem } })
 export default class AppMenu extends Vue {
-  public noticeNum: number = 0;
+  public get noticeNum(): number {
+    return AppModule.book.unexecutedJournals.length;
+  }
 
   public userImageSrc: string = "image/default-user.svg";
 
   public mobileMenuOpened: boolean = false;
-
-  private get journals(): IJournal[] {
-    return AppModule.journals;
-  }
-
-  @Watch("journals")
-  public async onJournalsUpdated() {
-    const journals = await new VirtualBook(this.journals).getVirtualJournals();
-    this.noticeNum = journals.filter(
-      (jnl) =>
-        jnl.accountAt.beforeThanOrEqualsTo(JournalDate.today()) &&
-        !jnl.executeAt
-    ).length;
-  }
 
   public async mounted() {
     const user = await container.resolve(UserAuthService).getFirebaseUser();

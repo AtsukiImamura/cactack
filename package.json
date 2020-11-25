@@ -21,7 +21,7 @@
     "sass:build": "node-sass ./src/resources/sass/ -r -o ./dist/ --output-style compressed",
     "deploy": "node prepare-build.js && npm run build && npm run build:functions && firebase deploy",
     "deploy:app": "node prepare-build.js && npm run build && firebase deploy --only hosting",
-    "deploy:functions": "npm --prefix functions run build && npm --prefix functions run prepare && firebase deploy --only functions"
+    "deploy:functions": "npm --prefix functions run build && npm --prefix functions run prepare && firebase deploy --only functions:getBookContext"
   },
   "jest": {
     "moduleFileExtensions": [

@@ -15,54 +15,67 @@
             v-for="type in allTypes"
             :key="type.code"
             type="button"
-            :class="`type ${dispType === type.code ? `selected category-color c-${type.code} border` : ''}`"
+            :class="`type ${
+              dispType === type.code
+                ? `selected category-color c-${type.code} border`
+                : ''
+            }`"
             :value="type.name"
             @click="changeType(type.code)"
           />
         </div>
       </div>
-      <div class="results" :key="ledgerKey + dispType">
-        <div
+      <div class="results" v-if="isReady">
+        <!-- <div
           class="ledgers"
           v-masonry="'dispLedgers'"
           transition-duration="0.1s"
           item-selector=".ledger"
         >
-          <div v-masonry-tile class="ledger" v-for="(led, index) in dispLedgers" :key="index">
-            <LedgerSummary :ledger="led" @detail="toLedgerDetail"></LedgerSummary>
+          <div
+            v-masonry-tile
+            class="ledger"
+            v-for="(led, index) in dispLedgers"
+            :key="index"
+            :id="led.id"
+          >
+            <LedgerSummary
+              :ledger="led"
+              @detail="toLedgerDetail"
+            ></LedgerSummary>
           </div>
-        </div>
+        </div> -->
+        <LedgerResults :type="dispType"></LedgerResults>
       </div>
     </div>
   </CommonFrame>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import CommonFrame from "@/view/common/CommonFrame.vue";
 import LedgerSummary from "@/view/ledger/LedgerSummary.vue";
-import AccountLedger from "@/model/virtual/AccountLedger";
-import VirtualBook from "@/model/virtual/VirtualBook";
-import DatePicker from "vuejs-datepicker";
+import LedgerResults from "@/view/ledger/components/LedgerResults.vue";
+// import AccountLedger from "@/model/virtual/AccountLedger";
 import MonthPicker from "@/view/common/MonthPicker.vue";
-import IJournalDate from "@/model/interface/IJournalDate";
-import hash from "object-hash";
 import AppModule from "@/store/ApplicationStore";
-import IJournal from "@/model/interface/IJournal";
 import AccountType from "@/model/AccountType";
 import PeriodSelector from "@/view/common/PeriodSelector.vue";
+import TheLedger from "@/model/virtual/TheLedger";
 
 @Component({
   components: {
     CommonFrame,
     LedgerSummary,
-    DatePicker,
     MonthPicker,
     PeriodSelector,
+    LedgerResults,
   },
 })
 export default class GeneralLedger extends Vue {
   public dispType: number = AccountType.TYPE_ASSET;
+
+  public isReady: boolean = false;
 
   public allTypes: AccountType[] = [
     new AccountType(AccountType.TYPE_ASSET),
@@ -73,60 +86,39 @@ export default class GeneralLedger extends Vue {
     new AccountType(AccountType.TYPE_OTHER),
   ];
 
-  public get periodBeginWith(): IJournalDate {
-    return AppModule.periodBeginWith;
+  public get ledgers(): TheLedger[] {
+    return AppModule.book.ledgers;
   }
 
-  public get periodEndWith(): IJournalDate {
-    return AppModule.periodEndWith;
-  }
-
-  public ledgers: AccountLedger[] = [];
-
-  public get dispLedgers(): AccountLedger[] {
-    return this.ledgers.filter(
-      (led) => this.dispType === led.category.type.code
-    );
-  }
-
-  public get ledgerKey(): string {
-    return hash(this.ledgers);
-  }
-
-  public get journals(): IJournal[] {
-    return AppModule.journals;
-  }
+  // public get dispLedgers(): TheLedger[] {
+  //   return this.ledgers.filter(
+  //     (led) => this.dispType === led.category.type.code
+  //   );
+  // }
 
   public changeType(type: number) {
     this.dispType = type;
     this.$router.push("/ledger/general/" + type);
   }
 
-  public onPeriodChanged() {
-    this.updateLedgers();
-  }
+  public onPeriodChanged() {}
 
-  @Watch("journals")
-  public async updateLedgers() {
-    const book = new VirtualBook(
-      this.journals,
-      this.periodBeginWith,
-      this.periodEndWith
-    );
-    this.ledgers = await book.getVirtualLedgers();
-  }
-
-  public toLedgerDetail(ledger: AccountLedger) {
-    this.$router.push(`/ledger/detail/${ledger.id}`);
-  }
+  // public toLedgerDetail(ledger: AccountLedger) {
+  //   this.$router.push(`/ledger/detail/${ledger.id}`);
+  // }
 
   public mounted(): void {
     const type = this.$route.params.type;
     if (type && this.allTypes.map((t) => t.code).includes(Number(type))) {
       this.dispType = Number(type);
     }
-    this.updateLedgers();
+    // setTimeout(() => (this.isReady = true), 500);
+    this.isReady = true;
   }
+
+  // public updated() {
+  //   this.isReady = true;
+  // }
 }
 </script>
 
@@ -188,17 +180,17 @@ export default class GeneralLedger extends Vue {
     @include sm {
       min-height: calc(100vh - 237px);
     }
-    .ledgers {
-      display: flex;
-      flex-wrap: wrap;
-      .ledger {
-        width: calc(33% - 7px);
-        margin: 4px 10px 4px 0px;
-        @include xs {
-          width: 100%;
-        }
-      }
-    }
+    // .ledgers {
+    //   display: flex;
+    //   flex-wrap: wrap;
+    //   .ledger {
+    //     width: calc(33% - 7px);
+    //     margin: 4px 10px 4px 0px;
+    //     @include xs {
+    //       width: 100%;
+    //     }
+    //   }
+    // }
   }
 }
 </style>

@@ -27,7 +27,10 @@
               <span>{{ tag.name }}</span>
             </div>
             <div class="delete">
-              <span class="delete-button enabled" @click="removeTag(tag)"></span>
+              <span
+                class="delete-button enabled"
+                @click="removeTag(tag)"
+              ></span>
             </div>
           </div>
         </div>
@@ -56,7 +59,11 @@
     </template>
     <template #f>
       <div class="actions">
-        <ProcessButton value="OK" :click="onClickOk" :disabled="!canExecute"></ProcessButton>
+        <ProcessButton
+          value="OK"
+          :click="onClickOk"
+          :disabled="!canExecute"
+        ></ProcessButton>
       </div>
     </template>
   </OpenableModal>
@@ -66,6 +73,7 @@
 import { Component, Vue, Prop } from "vue-property-decorator";
 import OpenableModal from "@/view/common/OpenableModal.vue";
 import {
+  DCategoryItemActionBase,
   IAccountCategory,
   IUserCategoryItem,
 } from "@/model/interface/ICategory";
@@ -99,7 +107,7 @@ export default class ItemEditor extends Vue {
 
   public name: string = "";
 
-  public command: string = "";
+  public action: DCategoryItemActionBase | undefined;
 
   public actionType: "none" | "credit" = "none";
 
@@ -124,7 +132,7 @@ export default class ItemEditor extends Vue {
     this.name = this.item.name;
     this.tags = this.item.tags;
     // TODO: クレジット以外もつくったら対応
-    if (this.item.action) {
+    if (this.item.actions.length > 0) {
       this.actionType = "credit";
     }
   }

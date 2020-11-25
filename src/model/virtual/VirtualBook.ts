@@ -8,7 +8,7 @@ import {
   IAccountCategory,
 } from "@/model/interface/ICategory";
 import UserCategory from "@/model/UserCategory";
-import Balance, { IBalanceItem } from "./Balance";
+import Balance from "./Balance";
 import IJournalDate from "@/model/interface/IJournalDate";
 import SettlementActionFactory from "@/model/action/settlement/SettlementActionFactory";
 import UserCategoryItem from "@/model/UserCategoryItem";
@@ -29,44 +29,6 @@ export default class VirtualBook {
 
   public async getVirtualLedgers() {
     return this.createLedgers(await this.getVirtualJournals());
-  }
-
-  private getDateValidated(from: IJournalDate, to: IJournalDate) {
-    const virtualJournals = this.journals.filter(
-      (jnl) =>
-        jnl.accountAt.afterThanOrEqualsTo(from) &&
-        jnl.accountAt.beforeThanOrEqualsTo(to)
-    );
-    // 有効期間のあるものを処理
-    for (const jnl of virtualJournals) {
-      if (
-        !jnl.period ||
-        jnl.period.finishAt.beforeThan(from) ||
-        jnl.period.startAt.afterThan(to)
-      ) {
-        continue;
-      }
-      // この仮想帳簿で対象とする期間の長さ
-      const targetDayCount = JournalDate.max(
-        from,
-        jnl.period.startAt
-      ).countDayFrom(JournalDate.min(to, jnl.period.finishAt));
-      // 仕訳が対象とする期間の長さ
-      const jnlPeriodCount = jnl.period.startAt.countDayFrom(
-        jnl.period.finishAt
-      );
-      // 日割りの金額
-      const amount = Math.floor(jnl.amount * (targetDayCount / jnlPeriodCount));
-      const virtual = Journal.simple(
-        "",
-        [new JournalDetail(jnl.period.credit as IUserCategoryItem, amount)],
-        [new JournalDetail(jnl.period.debit as IUserCategoryItem, amount)]
-      );
-      virtual.accountAt = JournalDate.min(to, jnl.period.finishAt);
-      virtual.ancestorId = jnl.id;
-      virtualJournals.push(virtual);
-    }
-    return virtualJournals;
   }
 
   public async getVirtualJournals(
@@ -142,14 +104,6 @@ export default class VirtualBook {
         await this.getVirtualJournals(JournalDate.byDay(1970, 1, 1))
       ).filter((jnl) => jnl.accountAt.beforeThanOrEqualsTo(this.periodFinishAt))
     );
-  }
-
-  /**
-   * 期首から期末にかけての資産変動要因を取り出す。
-   * = 仮想科目の勘定元帳だけを取り出す
-   *  */
-  public async generateDiffFactors(): Promise<IBalanceItem[]> {
-    return new Balance(await this.getVirtualJournals()).virtualSummary;
   }
 
   constructor(
@@ -272,5 +226,43 @@ export default class VirtualBook {
         new UserCategory(id, userId, name, AccountType.TYPE_OTHER, undefined)
       );
     return category;
+  }
+
+  private getDateValidated(from: IJournalDate, to: IJournalDate) {
+    const virtualJournals = this.journals.filter(
+      (jnl) =>
+        jnl.accountAt.afterThanOrEqualsTo(from) &&
+        jnl.accountAt.beforeThanOrEqualsTo(to)
+    );
+    // 有効期間のあるものを処理
+    for (const jnl of virtualJournals) {
+      if (
+        !jnl.period ||
+        jnl.period.finishAt.beforeThan(from) ||
+        jnl.period.startAt.afterThan(to)
+      ) {
+        continue;
+      }
+      // この仮想帳簿で対象とする期間の長さ
+      const targetDayCount = JournalDate.max(
+        from,
+        jnl.period.startAt
+      ).countDayFrom(JournalDate.min(to, jnl.period.finishAt));
+      // 仕訳が対象とする期間の長さ
+      const jnlPeriodCount = jnl.period.startAt.countDayFrom(
+        jnl.period.finishAt
+      );
+      // 日割りの金額
+      const amount = Math.floor(jnl.amount * (targetDayCount / jnlPeriodCount));
+      const virtual = Journal.simple(
+        "",
+        [new JournalDetail(jnl.period.credit as IUserCategoryItem, amount)],
+        [new JournalDetail(jnl.period.debit as IUserCategoryItem, amount)]
+      );
+      virtual.accountAt = JournalDate.min(to, jnl.period.finishAt);
+      virtual.ancestorId = jnl.id;
+      virtualJournals.push(virtual);
+    }
+    return virtualJournals;
   }
 }

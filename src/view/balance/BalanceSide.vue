@@ -1,12 +1,17 @@
 <template>
   <div class="balance-side">
-    <div class="category wide" v-for="(smr, smrIndex) in summaries" :key="-smrIndex - 1">
+    <div
+      class="category wide"
+      v-for="(smr, smrIndex) in summaries"
+      :key="-smrIndex - 1"
+    >
       <div class="row h">
         <div class="cell name">
           <span>
             <router-link
               :to="smr.item.id ? `/ledger/detail/${smr.item.id}` : ''"
-            >{{ smr.item.name }}</router-link>
+              >{{ smr.item.name }}</router-link
+            >
           </span>
         </div>
         <div class="cell amount">
@@ -14,12 +19,18 @@
         </div>
       </div>
       <div class="items">
-        <div class="item row" v-for="(child, childIndex) in smr.children" :key="-childIndex - 1">
+        <div
+          :data-item-id="child.item.id"
+          class="item row"
+          v-for="(child, childIndex) in smr.children"
+          :key="-childIndex - 1"
+        >
           <div class="cell name">
             <span>
               <router-link
                 :to="child.item.id ? `/ledger/detail/${child.item.id}` : ''"
-              >{{ child.item.name }}</router-link>
+                >{{ child.item.name }}</router-link
+              >
             </span>
           </div>
           <div class="cell amount">{{ child.amount }}</div>

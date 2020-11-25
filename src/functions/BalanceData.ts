@@ -8,7 +8,7 @@ import { DUserCategoryItem } from "@/model/interface/ICategory";
 export namespace BalanceData {
   export async function getBalance(context: context.auth.ExecutableContext) {
     const date = context.params.date;
-    if (!context.token.uid || !date) {
+    if (!context.token || !date) {
       throw new Error("authentication context or date was not given.");
     }
     const journals = (
@@ -30,7 +30,7 @@ export namespace BalanceData {
     // data: { begin: string; end: string },
     // context: functions.https.CallableContext
   ) {
-    if (!context.token.uid) {
+    if (!context.token) {
       throw new Error("authentication context or date was not given.");
     }
     const beginWith = context.params.begin;

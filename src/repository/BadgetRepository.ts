@@ -24,7 +24,7 @@
 //   }
 
 //   public async getDataAllBySetting(settingId: string): Promise<DBadget[]> {
-//     const aqrs = await this.ref.where("parentId", "==", settingId).get();
+//     const aqrs = await this.ref().where("parentId", "==", settingId).get();
 //     return aqrs.docs.map((d) => {
 //       const data = d.data();
 //       data.id = d.id;

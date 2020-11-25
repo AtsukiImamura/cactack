@@ -193,7 +193,7 @@ export default class CategoryItemMasterRepository
         });
       console.log(`   ${data.id}`);
       for (const child of item.children) {
-        await this.ref.add({
+        await this.ref().add({
           parentId: data.id,
           name: child,
           date: JournalDate.today().toString(),

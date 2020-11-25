@@ -19,7 +19,11 @@
     </div>
     <div class="section details-cps float">
       <div class="section details debits cell with-label">
-        <div class="section detail debit" v-for="(detail, index) in debits" :key="index + 1">
+        <div
+          class="section detail debit"
+          v-for="(detail, index) in debits"
+          :key="index + 1"
+        >
           <div class="cell category">
             <CategorySelector
               :item="detail.item"
@@ -31,10 +35,18 @@
             ></CategorySelector>
           </div>
           <div class="cell amount">
-            <NumberInput v-model="detail.amount" 　 place-holder="金額を入力"></NumberInput>
+            <NumberInput
+              v-model="detail.amount"
+              　
+              place-holder="金額を入力"
+            ></NumberInput>
           </div>
           <div class="cell delete">
-            <div class="delete-button" :class="{ enabled: index > 0 }" @click="deleteDebit(index)"></div>
+            <div
+              class="delete-button"
+              :class="{ enabled: index > 0 }"
+              @click="deleteDebit(index)"
+            ></div>
           </div>
         </div>
         <div class="section add-detail">
@@ -48,7 +60,11 @@
         <div class="message" v-show="creditsMessage">
           <span>{{ creditsMessage }}</span>
         </div>
-        <div class="section detail credit" v-for="(detail, index) in credits" :key="-index">
+        <div
+          class="section detail credit"
+          v-for="(detail, index) in credits"
+          :key="-index"
+        >
           <div class="cell category">
             <CategorySelector
               :item="detail.item"
@@ -60,10 +76,17 @@
             ></CategorySelector>
           </div>
           <div class="cell amount">
-            <NumberInput v-model="detail.amount" place-holder="金額を入力"></NumberInput>
+            <NumberInput
+              v-model="detail.amount"
+              place-holder="金額を入力"
+            ></NumberInput>
           </div>
           <div class="cell delete">
-            <div class="delete-button" :class="{ enabled: index > 0 }" @click="deleteCredit(index)"></div>
+            <div
+              class="delete-button"
+              :class="{ enabled: index > 0 }"
+              @click="deleteCredit(index)"
+            ></div>
           </div>
         </div>
         <div class="section add-detail">
@@ -86,7 +109,10 @@
               @selected="selectPeriodStartAt"
             ></DatePicker>
           </div>
-          <div class="cell with-label period-finish-at" :key="period.startAt.toString()">
+          <div
+            class="cell with-label period-finish-at"
+            :key="period.startAt.toString()"
+          >
             <DatePicker
               format="yyyy/MM/dd"
               :value="period.finishAt.toString()"
@@ -127,14 +153,14 @@
 import { Component, Vue, Watch, Emit, Prop } from "vue-property-decorator";
 import IJournal, {
   IJournalPeriodInfo,
-  IJournalDetail,
+  // IJournalDetail,
 } from "@/model/interface/IJournal";
 import IJournalDate from "@/model/interface/IJournalDate";
 import JournalDate from "@/model/common/JournalDate";
 import { IUserCategoryItem } from "@/model/interface/ICategory";
 import Journal from "@/model/Journal";
-import CreditActionBuilder from "@/model/action/builder/CreditActionBuilder";
-import CreditCardSettlementAction from "@/model/action/settlement/CreditCardSettlementAction";
+// import CreditActionBuilder from "@/model/action/builder/CreditActionBuilder";
+// import CreditCardSettlementAction from "@/model/action/settlement/CreditCardSettlementAction";
 import { container } from "tsyringe";
 import NumberInput from "@/view/common/NumberInput.vue";
 import UserAuthService from "@/service/UserAuthService";
@@ -203,8 +229,8 @@ export default class JournalEditor extends Vue {
     if (!this.journal || !this.journal.createdAt || !this.journal.debits) {
       return;
     }
-    this.createdAt = this.journal.createdAt;
-    this.accountAt = this.journal.accountAt;
+    this.createdAt = JournalDate.cast(this.journal.createdAt.toString());
+    this.accountAt = JournalDate.cast(this.journal.accountAt.toString());
     this.debits = this.journal.debits.map((d) => {
       const c = this.createDebit(d.amount, d.category);
       c.origin = this.journal;
@@ -281,15 +307,15 @@ export default class JournalEditor extends Vue {
             origin: c.origin,
           };
           // ここではなく、仮想帳簿で生成する
-          if (
-            item.action &&
-            item.action.startsWith(CreditCardSettlementAction.COMMAND_NAME)
-          ) {
-            const command = CreditActionBuilder.begin(item.action)
-              .setJournalAccountAt(this.accountAt)
-              .build(detail as IJournalDetail, true);
-            detail.action = command;
-          }
+          // if (
+          //   item.action &&
+          //   item.action.startsWith(CreditCardSettlementAction.COMMAND_NAME)
+          // ) {
+          //   const command = CreditActionBuilder.begin(item.action)
+          //     .setJournalAccountAt(this.accountAt)
+          //     .build(detail as IJournalDetail, true);
+          //   detail.action = command;
+          // }
           return new JournalDetail(
             detail.category,
             detail.amount,

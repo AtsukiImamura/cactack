@@ -32,7 +32,7 @@ export default class CategoryMasterRepository
     if (item) {
       return await this.aggregate(item);
     }
-    return this.ref
+    return this.ref()
       .doc(id)
       .get()
       .then((doc) => {

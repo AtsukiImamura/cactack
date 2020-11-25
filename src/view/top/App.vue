@@ -11,21 +11,12 @@
           v-intro="'今月の資産変動を表示しています。左が月初、右が月末です。'"
           v-intro-step="1"
         >
-          <div class="charts">
+          <div class="charts" v-if="canShowCharts">
             <div class="chart balance">
-              <!-- <div class="loading" v-if="balanceSummaries.length === 0">
-                <div class="loading-linear"></div>
-              </div> -->
-              <BalanceChart :date="periodEndWith"></BalanceChart>
+              <BalanceChart></BalanceChart>
             </div>
             <div class="chart spendings">
-              <!-- <div class="loading" v-if="spendingSummaries.length === 0">
-                <div class="loading-linear"></div>
-              </div> -->
-              <SpendingsChart
-                :begin-with="periodBeginWith"
-                :end-with="periodEndWith"
-              ></SpendingsChart>
+              <SpendingsChart></SpendingsChart>
             </div>
           </div>
         </div>
@@ -41,8 +32,6 @@ import AppModule from "@/store/ApplicationStore";
 import { container } from "tsyringe";
 import UserAuthService from "@/service/UserAuthService";
 import CommonFrame from "@/view/common/CommonFrame.vue";
-import IJournalDate from "@/model/interface/IJournalDate";
-import DatePicker from "vuejs-datepicker";
 import TopNoticeModal from "./TopNoticeModal.vue";
 import BalanceChart from "@/view/top/components/BalanceChart.vue";
 import SpendingsChart from "@/view/top/components/SpendingsChart.vue";
@@ -51,7 +40,6 @@ import PeriodSelector from "@/view/common/PeriodSelector.vue";
 @Component({
   components: {
     CommonFrame,
-    DatePicker,
     TopNoticeModal,
     BalanceChart,
     SpendingsChart,
@@ -61,17 +49,13 @@ import PeriodSelector from "@/view/common/PeriodSelector.vue";
 export default class App extends Vue {
   public isReady: boolean = false;
 
-  public get periodBeginWith(): IJournalDate {
-    return AppModule.periodBeginWith;
-  }
-
-  public get periodEndWith(): IJournalDate {
-    return AppModule.periodEndWith;
+  public get canShowCharts(): boolean {
+    return AppModule.book.cylinder.ledgers.length > 0;
   }
 
   public async mounted() {
-    await Promise.all([AppModule.init(), this.doIntro()]);
-    this.isReady = true;
+    // await Promise.all([AppModule.init(), this.doIntro()]);
+    // this.isReady = true;
     // await this.loadSummaries();
   }
 

@@ -18,6 +18,7 @@
         v-for="(child, index) in ledger.children"
         :key="index"
         @click="toLedgerDetail(child)"
+        :id="child.id"
       >
         <div class="cell name">
           <span>{{ child.name }}</span>
@@ -32,11 +33,13 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, Emit } from "vue-property-decorator";
+// import { ILedgerDetail } from "@/model/virtual/AccountLedger";
+import TheLedger from "@/model/virtual/TheLedger";
 import AccountLedger, { ILedgerDetail } from "@/model/virtual/AccountLedger";
 
 @Component({})
 export default class LedgerSummary extends Vue {
-  @Prop() ledger!: AccountLedger;
+  @Prop() ledger!: TheLedger;
 
   public get detailsList(): ILedgerDetail[][] {
     return [this.ledger.debits, this.ledger.credits];

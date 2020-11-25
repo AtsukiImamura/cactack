@@ -5,7 +5,13 @@
         <h1>予算リスト</h1>
       </div>
       <div>
-        <router-link to="/badget/create" tag="input" type="button" class="btn ok-btn" value="新規予算"></router-link>
+        <router-link
+          to="/badget/create"
+          tag="input"
+          type="button"
+          class="btn ok-btn"
+          value="新規予算"
+        ></router-link>
       </div>
     </div>
     <div class="body">
@@ -32,17 +38,25 @@
         </div>
         <div
           class="badget"
-          :class="{waiting: !(config.current.expectedAmount > 0 || config.current.actualAmount > 0)}"
+          :class="{
+            waiting: !(
+              config.current.expectedAmount > 0 ||
+              config.current.actualAmount > 0
+            ),
+          }"
           v-for="config in targetConfigs"
           :key="config.id"
         >
-          <template v-if="config.current.expectedAmount > 0 || config.current.actualAmount > 0">
+          <template
+            v-if="
+              config.current.expectedAmount > 0 ||
+              config.current.actualAmount > 0
+            "
+          >
             <div class="attr title">
               <span>
                 <router-link :to="`/badget/detail/${config.id}`">
-                  {{
-                  config.title
-                  }}
+                  {{ config.title }}
                 </router-link>
               </span>
             </div>
@@ -52,14 +66,17 @@
                 v-for="item in config.items"
                 :key="item.id"
                 @click="toLedgerDetail(item.id)"
-              >{{ item.name }}</span>
+                >{{ item.name }}</span
+              >
             </div>
             <div class="attr unit">
               <span>{{ config.unitAsString }}</span>
             </div>
             <div class="attr amount">
               <span>{{ config.current.expectedAmount }}円</span>
-              <span v-if="config.managementUnit === 2">/{{ config.managementUnitAsString }}</span>
+              <span v-if="config.managementUnit === 2"
+                >/{{ config.managementUnitAsString }}</span
+              >
             </div>
             <div class="attr actual-amount">
               <span>{{ config.current.actualAmount }}円</span>
@@ -68,9 +85,9 @@
               <span
                 class="value"
                 :class="{
-                positive: config.current.burningRate > 0,
-                negative: config.current.burningRate < 0,
-              }"
+                  positive: config.current.burningRate > 0,
+                  negative: config.current.burningRate < 0,
+                }"
               >
                 {{ config.current.burningRate > 0 ? "+" : ""
                 }}{{ Math.floor(config.current.burningRate * 1000) / 10 }}%

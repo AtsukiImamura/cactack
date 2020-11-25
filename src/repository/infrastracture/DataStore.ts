@@ -13,6 +13,22 @@ export class DataStore<S extends Identifiable> {
     this.collection = collection;
   }
 
+  public async get(): Promise<S[]> {
+    const res: S[] = [];
+    const snapShot = await this.collection.get();
+
+    snapShot.forEach((s) => {
+      const data = s.data() as S;
+      if (!data) {
+        return;
+      }
+      data.id = s.id;
+      res.push(data);
+    });
+
+    return res;
+  }
+
   public async getById(id: string): Promise<S | undefined> {
     const doc = await this.collection.doc(id).get();
     if (!doc.exists) {

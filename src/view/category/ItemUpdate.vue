@@ -5,19 +5,20 @@ import { container } from "tsyringe";
 import UserCategoryItem from "@/model/UserCategoryItem";
 import UserAuthService from "@/service/UserAuthService";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
+import { DCategoryItemActionBase } from "@/model/interface/ICategory";
 
 @Component({})
 export default class ItemUpdate extends Mixins(ItemEditor) {
   protected dispStr: string = "編集";
 
-  protected get itemAction(): string | undefined {
+  protected get itemAction(): DCategoryItemActionBase[] {
     if (this.actionType === "none") {
-      return "";
+      return [];
     }
-    if (this.command) {
-      return this.command;
+    if (this.action) {
+      return [this.action];
     }
-    return this.item!.action;
+    return this.item!.actions;
   }
 
   public async execute(): Promise<void> {

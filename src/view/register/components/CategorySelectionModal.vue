@@ -1,7 +1,12 @@
 <template>
   <div class="selector" :style="{ 'max-width': `${selectorMaxWidth}px` }">
-    <div class="disp-hidden-items" @click="enableHiddenItems = !enableHiddenItems">
-      <span>{{ enableHiddenItems ? "非表示の科目を隠す" : "非表示の科目も表示"}}</span>
+    <div
+      class="disp-hidden-items"
+      @click="enableHiddenItems = !enableHiddenItems"
+    >
+      <span>{{
+        enableHiddenItems ? "非表示の科目を隠す" : "非表示の科目も表示"
+      }}</span>
     </div>
     <div class="tabs">
       <div
@@ -38,11 +43,16 @@
           </div>
         </div>
       </div>
-      <div class="items only-mobile" v-show="isMobile && selectedSections.length > 0">
+      <div
+        class="items only-mobile"
+        v-show="isMobile && selectedSections.length > 0"
+      >
         <div class="back-to-categry" @click="selectedSections = []"></div>
         <div
           class="item"
-          v-for="(item, index) in  selectedSections.length === 0 ? [] : selectedSections[0].items"
+          v-for="(item, index) in selectedSections.length === 0
+            ? []
+            : selectedSections[0].items"
           :key="index"
           @click="select(item, $event)"
         >
@@ -71,7 +81,7 @@ export interface CategorySelectorTab {
 
 interface CategorySelectorSection {
   name: string;
-  items: IUserCategoryItem[] | IUserTag[];
+  items: (IUserCategoryItem | IUserTag)[];
 }
 
 @Component({})
@@ -95,7 +105,8 @@ export default class CategorySelectionModal extends Vue {
         .map((section) => ({
           name: section.name,
           items: section.items.filter(
-            (item) => this.enableHiddenItems || !item.disabled
+            (item) =>
+              this.enableHiddenItems || !(item as IUserCategoryItem).disabled
           ),
         }))
         .filter((section) => section.items.length > 0),

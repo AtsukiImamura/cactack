@@ -33,7 +33,9 @@ export default class ItemAdd extends Mixins(ItemEditor) {
       this.name,
       (await this.addTagsIfNotExist()).map((t) => t.id)
     );
-    item.action = this.command;
+    if (this.action) {
+      item.actions = [this.action];
+    }
     await container.resolve(UserCategoryItemFlyweight).insert(item);
   }
 }

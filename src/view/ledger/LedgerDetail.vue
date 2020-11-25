@@ -10,7 +10,6 @@
             <PeriodSelector
               :edit-period="true"
               :in-month="periodType === 1"
-              @select="onPeriodSelected"
             ></PeriodSelector>
           </div>
           <div class="period-type-config">
@@ -18,20 +17,24 @@
             <div id="period-type-selector" class="selector">
               <input
                 type="button"
-                :class="{selected: periodType === 0}"
+                :class="{ selected: periodType === 0 }"
                 @click="dispByDay"
                 value="日"
               />
               <input
                 type="button"
-                :class="{selected: periodType === 1}"
+                :class="{ selected: periodType === 1 }"
                 @click="dispByMonth"
                 value="月"
               />
             </div>
           </div>
           <div class="amount-config" v-show="periodType === 0">
-            <input id="only-current-period" type="checkbox" v-model="onlyCurrentPeriod" />
+            <input
+              id="only-current-period"
+              type="checkbox"
+              v-model="onlyCurrentPeriod"
+            />
             <label for="only-current-period">今期累積額のみ表示</label>
           </div>
         </div>
@@ -57,14 +60,16 @@
             <span>{{ ledger ? ledger.creditAmount : 0 }}</span>
           </div>
           <div class="detail-wapper" v-if="isReady">
-            <div class="detail" v-for="(details, index) in sides" :key="index + 1">
+            <div
+              class="detail"
+              v-for="(details, index) in sides"
+              :key="index + 1"
+            >
               <div class="row" v-for="(detail, index) in details" :key="-index">
                 <div class="cell date">{{ detail.accountAt.toString() }}</div>
                 <div class="cell name">
                   <router-link :to="`/journalize/edit/${detail.origin.id}`">
-                    {{
-                    detail.category ? detail.category.name : ""
-                    }}
+                    {{ detail.category ? detail.category.name : "" }}
                   </router-link>
                 </div>
                 <div class="cell amount">{{ detail.amount }}</div>
@@ -78,13 +83,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import CommonFrame from "@/view/common/CommonFrame.vue";
 import LedgerSummary from "@/view/ledger/LedgerSummary.vue";
-import AccountLedger, { ILedgerDetail } from "@/model/virtual/AccountLedger";
-import VirtualBook from "@/model/virtual/VirtualBook";
+import { ILedgerDetail } from "@/model/virtual/AccountLedger";
 import AppModule from "@/store/ApplicationStore";
-import DatePicker from "vuejs-datepicker";
 import IJournalDate from "@/model/interface/IJournalDate";
 import LedgerChart from "@/view/ledger/components/LedgerChart.vue";
 import PeriodSelector from "@/view/common/PeriodSelector.vue";
@@ -93,7 +96,6 @@ import PeriodSelector from "@/view/common/PeriodSelector.vue";
   components: {
     CommonFrame,
     LedgerSummary,
-    DatePicker,
     LedgerChart,
     PeriodSelector,
   },
@@ -116,23 +118,6 @@ export default class GeneralLedger extends Vue {
   /* 表示方法 0:日 1:月 */
   public periodType: number = 0;
 
-  @Watch("onlyCurrentPeriod")
-  public onGraphConditionChanged() {
-    this.updateLedger();
-  }
-
-  public onPeriodSelected(begin: IJournalDate, end: IJournalDate) {
-    this.updateLedger();
-  }
-
-  public get book(): VirtualBook {
-    return new VirtualBook(
-      AppModule.journals,
-      this.periodBeginWith,
-      this.periodEndWith
-    );
-  }
-
   public dispByDay() {
     AppModule.setPeriodBeginWith(this.periodEndWith.firstDayOfUser);
     this.periodType = 0;
@@ -145,22 +130,19 @@ export default class GeneralLedger extends Vue {
     this.periodType = 1;
   }
 
-  public async updateLedger() {
+  public get ledger() {
     if (this.onlyCurrentPeriod) {
       this.graphStartValue = 0;
     } else {
-      const balance = await this.book.generateBalanceOfBeginning();
+      const balance = AppModule.book.getBalanceOf(this.periodBeginWith);
       this.graphStartValue = balance.getItemValueOf(this.categoryItemId);
     }
 
-    const ledgers = (await this.book.getVirtualLedgers())
+    const ledgers = AppModule.book.ledgers
       .reduce((acc, cur) => [...acc, cur, ...cur.children], [])
       .filter((led) => led.category.id === this.categoryItemId);
-    const ledger = ledgers.shift();
-    this.ledger = ledger ? ledger : null;
+    return ledgers.shift();
   }
-
-  public ledger: AccountLedger | null = null;
 
   public get sides(): ILedgerDetail[][] {
     if (!this.ledger) {
@@ -193,7 +175,6 @@ export default class GeneralLedger extends Vue {
       return;
     }
     this.categoryItemId = categoryItemId;
-    await this.updateLedger();
     if (!this.ledger) {
       this.$router.push("/ledger/general");
       return;

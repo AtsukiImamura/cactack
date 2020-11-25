@@ -1,4 +1,8 @@
+import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
+import { container } from "tsyringe";
+import AccountType from "./AccountType";
 import IdBase from "./IdBase";
+import { IUserCategoryItem } from "./interface/ICategory";
 import { IUserTag, DUserTag } from "./interface/ITag";
 
 export default class UserTag extends IdBase implements IUserTag {
@@ -16,6 +20,7 @@ export default class UserTag extends IdBase implements IUserTag {
     this._name = name;
   }
 
+  public readonly type: AccountType = new AccountType(AccountType.TYPE_OTHER);
   /**
    * Getter name
    * @return {string }
@@ -30,6 +35,10 @@ export default class UserTag extends IdBase implements IUserTag {
    */
   public get userId(): string {
     return this._userId;
+  }
+
+  public get items(): IUserCategoryItem[] {
+    return container.resolve(UserCategoryItemFlyweight).getByTagId(this._id);
   }
 
   public simplify(): DUserTag {

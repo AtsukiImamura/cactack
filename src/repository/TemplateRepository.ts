@@ -20,7 +20,7 @@ export default class TemplateRepository
   }
 
   public async getAll(): Promise<ITemplate[]> {
-    return this.ref
+    return this.ref()
       .where("userId", "==", container.resolve(UserAuthService).userId)
       .get()
       .then((value) => {

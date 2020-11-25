@@ -6,10 +6,10 @@ import { ICategoryItem } from "./interface/ICategory";
 import { DBadget } from "./interface/DBadget";
 import AppModule from "@/store/ApplicationStore";
 import JournalDate from "./common/JournalDate";
-import VirtualBook from "./virtual/VirtualBook";
 import Badget from "./Badget";
 import DBadgetSetting from "./interface/DBadget";
 import UserDate from "./common/UserDate";
+import SliceByCateogryItem from "./virtual/slicer/SliceByCateogryItem";
 
 export default class BadgetSetting extends IdBase implements IBadgetSetting {
   public static parse(raw: DBadgetSetting) {
@@ -111,17 +111,15 @@ export default class BadgetSetting extends IdBase implements IBadgetSetting {
     return this._managementUnit;
   }
 
-  private _badgets: IBadget[] = [];
-
   /**
    * Getter badgets
    * @return {DBadget[] }
    */
   public get badgets(): IBadget[] {
-    return this._badgets;
+    return this.aggregateBadgets();
   }
 
-  private async aggregateBadgets(): Promise<IBadget[]> {
+  private aggregateBadgets(): IBadget[] {
     const targetBadgets: DBadget[] = [];
     const today = JournalDate.today();
     switch (this._unit) {
@@ -139,40 +137,30 @@ export default class BadgetSetting extends IdBase implements IBadgetSetting {
           targetBadgets.push(...this._dBadgets);
           break;
         }
-        let date = JournalDate.today();
-        for (const jnl of AppModule.journals) {
-          if (jnl.accountAt.beforeThan(date)) {
-            date = jnl.accountAt;
-          }
-        }
-        date = date.firstDayOfUser;
-        while (
-          date.beforeThan(JournalDate.today().firstDayOfUser.getAfterMonthOf(8))
-        ) {
+        let date = JournalDate.today().getAfterMonthOf(3).lastDayOfUser;
+        for (let cnt = 0; cnt < 12; cnt++) {
           targetBadgets.push({
             year: date.year,
             month: date.month,
             expectedAmount: this.amount,
           });
-          date = date.getNextMonth();
+          date = date.getPreviousMonth();
         }
         break;
       case BadgetUnit.DAY:
         return [];
     }
-    return Promise.all(
-      targetBadgets.map(async (b) => {
-        return new Badget(
-          this,
-          b.expectedAmount,
-          await this.calcAmount(b.year, b.month),
-          this._unit,
-          this._managementUnit,
-          b.year,
-          b.month
-        );
-      })
-    );
+    return targetBadgets.map((b) => {
+      return new Badget(
+        this,
+        b.expectedAmount,
+        this.calcAmount(b.year, b.month),
+        this._unit,
+        this._managementUnit,
+        b.year,
+        b.month
+      );
+    });
   }
 
   /**
@@ -191,30 +179,23 @@ export default class BadgetSetting extends IdBase implements IBadgetSetting {
     return {} as IBadget; // TODO
   }
 
-  private async calcAmount(year: number, month?: number): Promise<number> {
-    const book = await (month && month !== 0
-      ? this.getMonthlyBook(year, month)
-      : this.getAnualBook(year));
-    const ledgers = (await book.getVirtualLedgers())
-      .reduce((acc, cur) => [...acc, cur, ...cur.children], [])
-      .filter((led) => led.category.id.endsWith(this._itemId));
-    if (ledgers.length === 0) {
-      return 0;
-    }
-    return ledgers.shift()!.amount;
+  private calcAmount(year: number, month?: number): number {
+    const cylinder =
+      month && month !== 0
+        ? this.getMonthlyCylinder(year, month)
+        : this.getAnualCylinder(year);
+    return cylinder.slice(new SliceByCateogryItem(this.items)).amount;
   }
 
-  private async getMonthlyBook(year: number, month: number) {
-    return new VirtualBook(
-      AppModule.journals,
+  private getMonthlyCylinder(year: number, month: number) {
+    return AppModule.book.cylinder.scoop(
       UserDate.firstDayOfMonth(year, month),
       UserDate.lastDayOfMonth(year, month)
     );
   }
 
-  private async getAnualBook(year: number) {
-    return new VirtualBook(
-      AppModule.journals,
+  private getAnualCylinder(year: number) {
+    return AppModule.book.cylinder.scoop(
       UserDate.firstDayOfYear(year),
       UserDate.lastDayOfYear(year)
     );
@@ -238,8 +219,6 @@ export default class BadgetSetting extends IdBase implements IBadgetSetting {
     this._unit = unit;
     this._managementUnit = managementUnit;
     this._dBadgets = dbadgets;
-
-    this.aggregateBadgets().then((badgets) => (this._badgets = badgets));
   }
 
   public get current(): IBadget {

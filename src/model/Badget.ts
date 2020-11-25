@@ -39,6 +39,9 @@ export default class Badget implements IBadget {
    * @return {number }
    */
   public get burningRate(): number {
+    // console.log(
+    //   `periodRate=${this.periodRate} actualAmount=${this.actualAmount} unitAmount=${this.unitAmount}`
+    // );
     return this.periodRate - this.actualAmount / this.unitAmount;
   }
 

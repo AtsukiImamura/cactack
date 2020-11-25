@@ -1,40 +1,18 @@
 <script lang="ts">
-import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
+import { Component, Mixins, Watch } from "vue-property-decorator";
 import { Doughnut } from "vue-chartjs";
 import { ChartData } from "chart.js";
-import IJournalDate from "@/model/interface/IJournalDate";
-import JournalDate from "@/model/common/JournalDate";
 import Color from "color";
-// import LedgerLoader from "@/functions/loader/LedgerLoader";
-import { BalanceSummaryDto } from "@/model/dto/BalanceSummaryDto";
-import LedgerLoader from "@/functions/loader/LedgerLoader";
+import AppModule from "@/store/ApplicationStore";
+import AccountType from "@/model/AccountType";
 
 @Component
-export default class BalanceChart extends Mixins(Doughnut) {
-  @Prop({ default: () => JournalDate.today().getPreviousMonth() })
-  beginWith!: IJournalDate;
-
-  @Prop({ default: () => JournalDate.today() }) endWith!: IJournalDate;
-
-  values: BalanceSummaryDto[] = [];
-
-  private loader: LedgerLoader = new LedgerLoader();
-
-  @Watch("beginWith")
-  public onBeginWithChanged() {
-    this.updateGrapgh();
-  }
-
-  @Watch("endWith")
-  public onEndWithChanged() {
-    this.updateGrapgh();
-  }
-
-  public async updateGrapgh() {
-    await this.loadSummaries();
-    this.renderChart(this.createChartData(this.values), {
+export default class SpendingsChart extends Mixins(Doughnut) {
+  public updateGrapgh() {
+    this.renderChart(this.chartData, {
       responsive: true,
       maintainAspectRatio: false,
+      animation: { duration: 0 },
     });
   }
 
@@ -42,40 +20,32 @@ export default class BalanceChart extends Mixins(Doughnut) {
     this.updateGrapgh();
   }
 
-  private async loadSummaries() {
-    this.values = await (async () => {
-      try {
-        const loadRes = await this.loader.load(this.beginWith, this.endWith);
-        if (!loadRes) {
-          return [];
-        }
-        const data = loadRes.bandled;
-        return data.filter(
-          (info) => info.item.type.isDebit && info.item.type.isVirtual
-        );
-      } catch (e) {
-        return [];
-      }
-    })();
-  }
-
-  public createChartData(summaries: BalanceSummaryDto[]): ChartData {
+  public get chartData(): ChartData {
+    const ledgers = AppModule.book.currentCylinder.ledgers.filter(
+      (led) =>
+        led.category.type.code === AccountType.TYPE_SPENDING && led.amount > 0
+    );
     return {
-      labels: summaries.map((d) => d.item.name),
+      labels: ledgers.map((led) => led.name),
       datasets: [
         {
-          label: "資産",
-          data: summaries.map((d) => d.amount),
+          label: "費用",
+          data: ledgers.map((led) => led.amount),
           borderWidth: 1,
           borderColor: "#ffffff",
-          backgroundColor: summaries.map((d, index) =>
-            Color.hsl((index / summaries.length) * 360, 50, 40)
+          backgroundColor: ledgers.map((d, index) =>
+            Color.hsl((index / ledgers.length) * 360, 50, 40)
               .rgb()
               .string()
           ),
         },
       ],
     } as ChartData;
+  }
+
+  @Watch("chartData")
+  public onChartDataChanged(): void {
+    this.updateGrapgh();
   }
 }
 </script>

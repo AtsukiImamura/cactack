@@ -16,7 +16,7 @@
           </div>
         </div>
         <div class="contents">
-          <UnExecutedJournals :journals="unExecutedJournals"></UnExecutedJournals>
+          <UnExecutedJournals></UnExecutedJournals>
         </div>
       </div>
     </div>
@@ -24,34 +24,16 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import PublicFrame from "@/view/common/PublicFrame.vue";
 import IJournal from "@/model/interface/IJournal";
 import AppModule from "@/store/ApplicationStore";
-import VirtualBook from "@/model/virtual/VirtualBook";
-import JournalDate from "@/model/common/JournalDate";
 import UnExecutedJournals from "@/view/notice/UnExecutedJournals.vue";
 
 @Component({ components: { PublicFrame, UnExecutedJournals } })
 export default class Notices extends Vue {
-  public unExecutedJournals: IJournal[] = [];
-
-  private get journals(): IJournal[] {
-    return AppModule.journals;
-  }
-
-  @Watch("journals")
-  public async onJournalsUpdated() {
-    const journals = await new VirtualBook(this.journals).getVirtualJournals();
-    this.unExecutedJournals = journals.filter(
-      (jnl) =>
-        jnl.accountAt.beforeThanOrEqualsTo(JournalDate.today()) &&
-        !jnl.executeAt
-    );
-  }
-
-  public mounted(): void {
-    this.onJournalsUpdated();
+  public get unExecutedJournals(): IJournal[] {
+    return AppModule.book.unexecutedJournals;
   }
 }
 </script>

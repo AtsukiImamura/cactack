@@ -86,7 +86,11 @@
       </div>
     </div>
     <div class="actions">
-      <ProcessButton value="OK" :click="exec" :disabled="!canExecute"></ProcessButton>
+      <ProcessButton
+        value="OK"
+        :click="exec"
+        :disabled="!canExecute"
+      ></ProcessButton>
     </div>
   </CommonFrame>
 </template>
@@ -103,12 +107,11 @@ import UserAuthService from "@/service/UserAuthService";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import { ICategoryItem } from "@/model/interface/ICategory";
 import { BalanceSummaryDto } from "@/model/dto/BalanceSummaryDto";
-import BalanceInfoLoader from "@/functions/loader/BalanceInfoLoader";
-import JournalDate from "@/model/common/JournalDate";
 import JournalDetail from "@/model/JournalDetail";
 import IJournalRepository from "@/repository/interface/IJournalRepository";
 import Journal from "@/model/Journal";
 import AppModule from "@/store/ApplicationStore";
+import { IBalanceItem } from "@/model/virtual/CutSurface";
 
 interface BalanceCorrectionDto extends BalanceSummaryDto {
   item: ICategoryItem;
@@ -127,8 +130,6 @@ export default class BalanceCorrection extends Vue {
   public creditCorrectionItemId!: string;
 
   public debitCorrectionItemId!: string;
-
-  private loader = new BalanceInfoLoader();
 
   public get canExecute(): boolean {
     return (
@@ -159,7 +160,7 @@ export default class BalanceCorrection extends Vue {
     return this.debitDiff - this.creditDiff;
   }
 
-  private toCorrectionInfo(list: BalanceSummaryDto[]): BalanceCorrectionDto[] {
+  private toCorrectionInfo(list: IBalanceItem[]): BalanceCorrectionDto[] {
     return list.map((v) => ({
       item: v.item as ICategoryItem,
       amount: v.amount,
@@ -171,22 +172,26 @@ export default class BalanceCorrection extends Vue {
     await Promise.all([
       this.loadDebitCorrenctionItem(),
       this.loadCreditCorrenctionItem(),
-      this.loader.load(JournalDate.today()).then((res) => {
-        if (!res) {
-          return;
-        }
-        this.debitValues = this.toCorrectionInfo(
-          res.list.filter(
-            (info) => info.item.type.isReal && info.item.type.isDebit
-          )
-        );
-        this.creditValues = this.toCorrectionInfo(
-          res.list.filter(
-            (info) => info.item.type.isReal && info.item.type.isCredit
-          )
-        );
-      }),
+      // this.loader.load(JournalDate.today()).then((res) => {
+      //   if (!res) {
+      //     return;
+      //   }
+      //   this.debitValues = this.toCorrectionInfo(
+      //     res.list.filter(
+      //       (info) => info.item.type.isReal && info.item.type.isDebit
+      //     )
+      //   );
+      //   this.creditValues = this.toCorrectionInfo(
+      //     res.list.filter(
+      //       (info) => info.item.type.isReal && info.item.type.isCredit
+      //     )
+      //   );
+      // }),
     ]);
+    this.debitValues = this.toCorrectionInfo(AppModule.book.balance.debitSide);
+    this.creditValues = this.toCorrectionInfo(
+      AppModule.book.balance.creditSide
+    );
   }
 
   public async exec() {
@@ -213,10 +218,10 @@ export default class BalanceCorrection extends Vue {
     }
     const journal = Journal.simple("修正", creditDetails, debitDetails);
     journal.execute();
-    await container
+    const inserted = await container
       .resolve<IJournalRepository>("JournalRepository")
       .insert(journal);
-    await AppModule.init();
+    AppModule.onJournalChanged({ before: null, after: inserted });
     this.$router.push(`/balance`);
   }
 

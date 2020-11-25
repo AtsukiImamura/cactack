@@ -137,11 +137,11 @@ export default class JournalDate implements IJournalDate {
   }
 
   public equalsTo(date: IJournalDate) {
-    return this.date.diff(dayjs(date.toDate()), "date") === 0;
+    return this.date.diff(dayjs(date.toDate()), "day") === 0;
   }
 
   public afterThan(date: IJournalDate) {
-    return !this.beforeThan(date) && !this.equalsTo(date);
+    return this.date.diff(dayjs(date.toDate()), "day") > 0;
   }
 
   public afterThanOrEqualsTo(date: IJournalDate) {
@@ -346,15 +346,11 @@ export default class JournalDate implements IJournalDate {
   }
 
   public countDayFrom(date: IJournalDate): number {
-    if (date.beforeThan(this)) {
-      return JournalDate.countDayBetween(date, this);
-    } else {
-      return JournalDate.countDayBetween(this, date);
-    }
+    return JournalDate.countDayBetween(date, this);
   }
 
   private static countDayBetween(from: IJournalDate, to: IJournalDate): number {
-    return dayjs(from.toDate()).diff(dayjs(to.toDate()), "day");
+    return Math.abs(dayjs(from.toDate()).diff(dayjs(to.toDate()), "day")) + 1;
   }
 }
 

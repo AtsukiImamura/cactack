@@ -2,13 +2,25 @@
   <div class="un-executed-journals">
     <div class="journal" v-for="(jnl, index) in journals" :key="index">
       <div class="message">
-        <span>{{ jnl.accountAt.toString() }}に執行予定の仕訳を確定させてください。</span>
+        <span
+          >{{
+            jnl.accountAt.toString()
+          }}に執行予定の仕訳を確定させてください。</span
+        >
       </div>
       <div class="content">
         <!-- <span>{{ jnl }}</span> -->
         <div class="disp" v-if="!handling.id || handling.id !== jnl.id">
-          <div class="side" v-for="(details, side) in [jnl.debits, jnl.credits]" :key="side">
-            <div class="detail" v-for="(detail, dIndex) in details" :key="dIndex">
+          <div
+            class="side"
+            v-for="(details, side) in [jnl.debits, jnl.credits]"
+            :key="side"
+          >
+            <div
+              class="detail"
+              v-for="(detail, dIndex) in details"
+              :key="dIndex"
+            >
               <div class="attr name">
                 <span>{{ detail.category.name }}</span>
               </div>
@@ -23,10 +35,18 @@
         </div>
         <div class="actions">
           <div class="action">
-            <ProcessButton value="編集" :click="edit(jnl)" :disabled="handling.id === jnl.id"></ProcessButton>
+            <ProcessButton
+              value="編集"
+              :click="edit(jnl)"
+              :disabled="handling.id === jnl.id"
+            ></ProcessButton>
           </div>
           <div class="action">
-            <ProcessButton value="確定" :click="settle(jnl)" :disabled="false"></ProcessButton>
+            <ProcessButton
+              value="確定"
+              :click="settle(jnl)"
+              :disabled="false"
+            ></ProcessButton>
           </div>
         </div>
       </div>
@@ -35,7 +55,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import IJournal from "@/model/interface/IJournal";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import { container } from "tsyringe";
@@ -48,31 +68,9 @@ import JournalDate from "@/model/common/JournalDate";
 
 @Component({ components: { ProcessButton, JournalEditor } })
 export default class UnExecutedJournals extends Vue {
-  @Prop() journals!: IJournal[];
-
-  // public get targetJournals(): IJournal[] {
-  //   // 同日付で借方・貸方の同じものをまとめる
-  //   const jnlMap = new Map<string, IJournal>();
-  //   for (const jnl of this.journals) {
-  //     const patternId = jnl.patternId;
-  //     if (jnlMap.has(patternId)) {
-  //       const target = jnlMap.get(patternId)!;
-  //       target.addCredit(Object.assign(jnl.credits[0], { origin: jnl }));
-  //       target.addDebit(Object.assign(jnl.debits[0], { origin: jnl }));
-  //       continue;
-  //     }
-  //     jnlMap.set(vid, jnl);
-  //   }
-  //   return Array.from(jnlMap.values());
-  // }
-
-  // public get targets(): IJournal[] {
-  //   return this.journals.map(jnl =>
-  //     this.handling && jnl.id === (this.handling as IJournal).id
-  //       ? (this.handling as IJournal)
-  //       : jnl
-  //   );
-  // }
+  public get journals(): IJournal[] {
+    return AppModule.book.unexecutedJournals;
+  }
 
   public handling: IJournal | {} = {};
 
@@ -115,10 +113,10 @@ export default class UnExecutedJournals extends Vue {
       }
 
       targetJournal.execute();
-      await container
+      const inserted = await container
         .resolve<IJournalRepository>("JournalRepository")
         .insert(targetJournal);
-      await AppModule.init();
+      AppModule.onJournalChanged({ before: null, after: inserted });
     };
   }
 }

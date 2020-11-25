@@ -2,13 +2,13 @@
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 import { Bar } from "vue-chartjs";
 import { ChartData, ChartOptions } from "chart.js";
-import AccountLedger from "@/model/virtual/AccountLedger";
 import IJournalDate from "@/model/interface/IJournalDate";
 import JournalDate from "@/model/common/JournalDate";
+import TheLedger from "@/model/virtual/TheLedger";
 
 @Component
 export default class LedgerChart extends Mixins(Bar) {
-  @Prop() ledger!: AccountLedger;
+  @Prop() ledger!: TheLedger;
   @Prop({ default: () => JournalDate.today() }) beginWith!: IJournalDate;
   @Prop({ default: () => JournalDate.today() }) endWith!: IJournalDate;
   @Prop({ default: () => 0 }) startValue!: number;
@@ -37,7 +37,7 @@ export default class LedgerChart extends Mixins(Bar) {
     this.renderChart(this.chartData, this.options);
   }
   public get dataByDay() {
-    const amountPerDay = this.ledger.getAmountPerDay();
+    const amountPerDay = this.ledger.amountPerDay;
     let date = this.beginWith;
     let dataBases: {
       date: IJournalDate;

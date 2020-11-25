@@ -2,6 +2,8 @@ import {
   IUserCategoryItem,
   DUserCategoryItem,
   IAccountCategory,
+  DCategoryItemActionBase,
+  ICategoryItem,
 } from "./interface/ICategory";
 import IJournalDate from "./interface/IJournalDate";
 import JournalDate from "./common/JournalDate";
@@ -12,9 +14,21 @@ import UserCategoryFlyweight from "@/repository/flyweight/UserCategoryFlyweight"
 import UserAuthService from "@/service/UserAuthService";
 import { IUserTag } from "./interface/ITag";
 import UserTagFlyweight from "@/repository/flyweight/UserTagFlyweight";
+import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
 
 export default class UserCategoryItem extends IdBase
   implements IUserCategoryItem {
+  public static cast(item: IAccountCategory | ICategoryItem | string) {
+    if (typeof item !== "string") {
+      return item;
+    }
+    const cItem = container.resolve(UserCategoryItemFlyweight).get(item);
+    if (!cItem) {
+      throw new Error("item not found!");
+    }
+    return cItem;
+  }
+
   public static parse(raw: DUserCategoryItem) {
     return new UserCategoryItem(
       raw.id,
@@ -24,7 +38,7 @@ export default class UserCategoryItem extends IdBase
       raw.deletedAt,
       raw.disabled,
       raw.tagIds ? raw.tagIds : [],
-      raw.action
+      raw.actions
     );
   }
 
@@ -52,7 +66,7 @@ export default class UserCategoryItem extends IdBase
 
   private _parentId: string = "";
 
-  private _action?: string;
+  private _actions: DCategoryItemActionBase[] = [];
 
   private _name: string;
 
@@ -108,12 +122,16 @@ export default class UserCategoryItem extends IdBase
     return this.parent.type;
   }
 
-  public get action(): string | undefined {
-    return this._action;
+  public get actions(): DCategoryItemActionBase[] {
+    return this._actions;
   }
 
-  public set action(action: string | undefined) {
-    this._action = action;
+  public set actions(actions: DCategoryItemActionBase[]) {
+    this._actions = actions;
+  }
+
+  public set action(action: DCategoryItemActionBase) {
+    this._actions.push(action);
   }
 
   public get isDeleted(): boolean {
@@ -147,7 +165,7 @@ export default class UserCategoryItem extends IdBase
     deletedAt: string | undefined,
     disabled: boolean | undefined,
     tagIds: string[],
-    action?: string
+    actions?: DCategoryItemActionBase[]
   ) {
     super(id);
     this._userId = userId;
@@ -156,8 +174,8 @@ export default class UserCategoryItem extends IdBase
     if (deletedAt) {
       this._deletedAt = JournalDate.cast(deletedAt);
     }
-    if (action) {
-      this._action = action;
+    if (actions) {
+      this._actions = actions;
     }
     this._disabled = disabled === undefined ? false : disabled;
     this._tagIds = tagIds;
@@ -205,10 +223,8 @@ export default class UserCategoryItem extends IdBase
       parentId: this.parent.id,
       disabled: this.disabled,
       tagIds: this._tagIds,
+      actions: this.actions,
     } as DUserCategoryItem;
-    if (this._action) {
-      item.action = this._action;
-    }
     if (this.deletedAt) {
       item.deletedAt = this.deletedAt.toString();
     }

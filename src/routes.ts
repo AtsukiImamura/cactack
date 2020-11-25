@@ -90,6 +90,11 @@ export default [
   /** ------------------------------- アプリ -------------------------------------- */
 
   {
+    path: "/init",
+    component: () =>
+      import(/* webpackChunkName: "app" */ "./view/top/InitApp.vue"),
+  },
+  {
     path: "/",
     component: () => import(/* webpackChunkName: "app" */ "./view/top/App.vue"),
   },

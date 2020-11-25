@@ -53,6 +53,7 @@ import ErrorMessage from "@/model/error/ErrorMessage";
 import ProcessButton from "@/view/common/ProcessButton.vue";
 import "firebase/functions";
 import EmailVerificationError from "@/model/error/custome/EmailVerificationError";
+// import AppModule from "@/store/ApplicationStore";
 
 @Component({ components: { AuthFrame, ProcessButton } })
 export default class UserLogin extends Vue {
@@ -108,6 +109,7 @@ export default class UserLogin extends Vue {
       this.message = "パスワードを入力して下さい";
       return Promise.reject();
     }
+    this.message = "";
 
     try {
       await container
@@ -118,8 +120,8 @@ export default class UserLogin extends Vue {
         this.needEmailVerification = true;
         throw new EmailVerificationError();
       }
-      this.$router.push("/");
       // await AppModule.init();
+      this.$router.push("/init");
     } catch (err) {
       const message = new ErrorMessage(err.code);
       this.message = message.value;

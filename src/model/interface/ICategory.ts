@@ -6,6 +6,7 @@ import ILogicalDeletable, {
   DLogicalDeletable,
 } from "./common/LogicalDeletable";
 import { IUserTag } from "./ITag";
+import IJournalDate from "./IJournalDate";
 
 interface ICategoryBase extends Identifiable {
   name: string;
@@ -69,7 +70,7 @@ export interface DUserCategoryItem
 
   tagIds: string[];
 
-  action?: string;
+  actions?: DCreditCardAction[];
 }
 
 export interface IUserCategoryItem
@@ -77,7 +78,7 @@ export interface IUserCategoryItem
     UserIdentifiable,
     Treatable<DUserCategoryItem>,
     ILogicalDeletable {
-  action?: string;
+  actions: DCategoryItemActionBase[];
 
   logicalDelete: () => void;
 
@@ -96,4 +97,45 @@ export interface IUserCategoryItem
   disabled: boolean;
 
   tags: IUserTag[];
+}
+
+export interface ICategoryItemActionBase {
+  type: number;
+
+  disabled?: boolean;
+
+  // createdAt: IJournalDate;
+
+  // lastModyfiedAt: IJournalDate;
+
+  /* 0:all 1:for credit 2:for debit */
+  target: number;
+}
+
+export interface DCategoryItemActionBase extends ICategoryItemActionBase {}
+
+export interface ICreditCardAction extends ICategoryItemActionBase {
+  deadline: IJournalDate;
+
+  paymentDate: IJournalDate;
+
+  item: IUserCategoryItem;
+
+  isForCredit: boolean;
+
+  isForDebit: boolean;
+}
+
+export interface DCreditCardAction extends DCategoryItemActionBase {
+  // createdAt: string;
+
+  // lastModifiedAt: string;
+
+  deadline: number;
+
+  month: number;
+
+  day: number;
+
+  itemId: string;
 }

@@ -19,8 +19,17 @@
     </template>
     <template #f>
       <div class="actions">
-        <input type="button" class="btn cancel-btn" value="キャンセル" @click="close" />
-        <ProcessButton value="OK" :click="onClickOk" :disabled="!canExecute"></ProcessButton>
+        <input
+          type="button"
+          class="btn cancel-btn"
+          value="キャンセル"
+          @click="close"
+        />
+        <ProcessButton
+          value="OK"
+          :click="onClickOk"
+          :disabled="!canExecute"
+        ></ProcessButton>
       </div>
     </template>
   </OpenableModal>
@@ -61,7 +70,7 @@ export default class JournalDelete extends Vue {
     await container
       .resolve<IJournalRepository>("JournalRepository")
       .delete(this.journal);
-    await AppModule.init();
+    AppModule.onJournalChanged({ before: this.journal, after: null });
   }
 }
 </script>

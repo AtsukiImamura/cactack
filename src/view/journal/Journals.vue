@@ -8,26 +8,26 @@
         <div class="config">
           <div class="date-config">
             <!-- 日付選択時に仕訳一覧が切り替わらないので一旦期間の自由選択は禁止する -->
-            <PeriodSelector :edit-period="false" @select="onPeriodChanged"></PeriodSelector>
+            <PeriodSelector :edit-period="false"></PeriodSelector>
           </div>
           <div class="filters">
             <CategoryMultiSelector
-              :key="filterItems.length"
               :items="filterItems"
               @change="onFilterChanged"
             ></CategoryMultiSelector>
           </div>
         </div>
-        <paginate-links
+        <!-- <paginate-links
           for="journals"
           :container="{
-          state: paginate.journals,
-          el: $refs.page,
-        }"
+            state: paginate.journals,
+            el: $refs.page,
+          }"
           :show-step-links="true"
           v-if="journals.length > 20"
           :key="journalUpdateKey"
-        ></paginate-links>
+        ></paginate-links> -->
+        <PageLinks :total="totalPage" @select="page = $event"></PageLinks>
         <div class="actions" v-if="false">
           <div class="action-content">
             <input
@@ -99,94 +99,112 @@
           <div class="cell jnl-actions"></div>
         </div>
 
-        <paginate
+        <!-- <paginate
           name="journals"
           :list="journals"
           :per="20"
           :container="this"
           :key="journalUpdateKey"
+        > -->
+        <div
+          class="jnl"
+          v-for="(jnl, index) in displayJournals"
+          :key="index + 1"
+          :journal-id="jnl.id"
         >
-          <div class="jnl" v-for="(jnl, index) in paginated('journals')" :key="index + 1">
-            <div class="cell reality" :class="{ virtual: !jnl.executeAt }"></div>
-            <div class="cell check" v-if="false">
-              <input type="checkbox" v-model="selectedJournals" :value="jnl" />
-            </div>
-            <div class="cell date">
-              <div class="cell">
-                <span>{{ jnl.accountAt.toString() }}</span>
-              </div>
-            </div>
-            <div class="cell details debits">
-              <div class="detail" v-for="(detail, dIndex) in jnl.debits" :key="-dIndex">
-                <router-link
-                  :to="`/ledger/detail/${detail.category.id}`"
-                  tag="div"
-                  class="cell category"
-                >{{ detail.category.name }}</router-link>
-                <div class="cell amount">{{ detail.amount }}</div>
-              </div>
-            </div>
-            <div class="cell details credits">
-              <div class="detail" v-for="(detail, dIndex) in jnl.credits" :key="-dIndex">
-                <router-link
-                  :to="`/ledger/detail/${detail.category.id}`"
-                  tag="div"
-                  class="cell category"
-                >{{ detail.category.name }}</router-link>
-                <div class="cell amount">{{ detail.amount }}</div>
-              </div>
-            </div>
-            <div class="cell jnl-actions">
-              <HiddenActions v-if="jnl.executeAt">
-                <div class="nomal-action" @click="editJournal(jnl)">
-                  <span>編集</span>
-                </div>
-                <div class="nomal-action" @click="copyJournal(jnl)">
-                  <span>コピー</span>
-                </div>
-                <div class="dangerous-action">
-                  <JournalDelete :journal="jnl"></JournalDelete>
-                </div>
-              </HiddenActions>
-            </div>
-            <div class="cell memo" v-if="jnl.title">
-              <span>{{ jnl.title }}</span>
+          <div class="cell reality" :class="{ virtual: !jnl.executeAt }"></div>
+          <div class="cell check" v-if="false">
+            <input type="checkbox" v-model="selectedJournals" :value="jnl" />
+          </div>
+          <div class="cell date">
+            <div class="cell">
+              <span>{{ jnl.accountAt.toString() }}</span>
             </div>
           </div>
-        </paginate>
+          <div class="cell details debits">
+            <div
+              class="detail"
+              v-for="(detail, dIndex) in jnl.debits"
+              :key="-dIndex"
+            >
+              <router-link
+                :to="`/ledger/detail/${detail.category.id}`"
+                tag="div"
+                class="cell category"
+                >{{ detail.category.name }}</router-link
+              >
+              <div class="cell amount">{{ detail.amount }}</div>
+            </div>
+          </div>
+          <div class="cell details credits">
+            <div
+              class="detail"
+              v-for="(detail, dIndex) in jnl.credits"
+              :key="-dIndex"
+            >
+              <router-link
+                :to="`/ledger/detail/${detail.category.id}`"
+                tag="div"
+                class="cell category"
+                >{{ detail.category.name }}</router-link
+              >
+              <div class="cell amount">{{ detail.amount }}</div>
+            </div>
+          </div>
+          <div class="cell jnl-actions">
+            <HiddenActions v-if="jnl.executeAt">
+              <div class="nomal-action" @click="editJournal(jnl)">
+                <span>編集</span>
+              </div>
+              <div class="nomal-action" @click="copyJournal(jnl)">
+                <span>コピー</span>
+              </div>
+              <div class="dangerous-action">
+                <JournalDelete :journal="jnl"></JournalDelete>
+              </div>
+            </HiddenActions>
+          </div>
+          <div class="cell memo" v-if="jnl.title">
+            <span>{{ jnl.title }}</span>
+          </div>
+        </div>
+        <!-- </paginate> -->
       </div>
     </div>
   </CommonFrame>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import CommonFrame from "@/view/common/CommonFrame.vue";
-import DatePicker from "vuejs-datepicker";
 import IJournal from "@/model/interface/IJournal";
 import IJournalDate from "@/model/interface/IJournalDate";
 import AppModule from "@/store/ApplicationStore";
 import HiddenActions from "@/view/common/HiddenActions.vue";
-import VirtualBook from "@/model/virtual/VirtualBook";
 import JournalDelete from "@/view/journal/JournalDelete.vue";
 import { ICategoryItem } from "@/model/interface/ICategory";
 import PeriodSelector from "@/view/common/PeriodSelector.vue";
 import CategoryMultiSelector from "@/view/register/components/CategoryMultiSelector.vue";
 import { container } from "tsyringe";
 import UserCategoryItemFlyweight from "@/repository/flyweight/UserCategoryItemFlyweight";
+import PageLinks from "@/view/common/page/PageLinks.vue";
 
 @Component({
   components: {
     CommonFrame,
-    DatePicker,
     HiddenActions,
     JournalDelete,
     PeriodSelector,
     CategoryMultiSelector,
+    PageLinks,
   },
 })
 export default class Journals extends Vue {
-  public journalUpdateKey: number = 0;
+  public page: number = 1;
+
+  public get totalPage(): number {
+    return Math.floor((this.journals.length - 1) / 20) + 1;
+  }
 
   public get periodBeginWith(): IJournalDate {
     return AppModule.periodBeginWith;
@@ -211,7 +229,7 @@ export default class Journals extends Vue {
 
   public paginate = ["journals"];
 
-  private virtualJournals: IJournal[] = [];
+  // private virtualJournals: IJournal[] = [];
 
   private filterItems: ICategoryItem[] = [];
 
@@ -223,68 +241,54 @@ export default class Journals extends Vue {
   }
 
   public get journals(): IJournal[] {
-    const res = this.virtualJournals
-      .filter((jnl) => {
-        // 可視性
-        if (!jnl.isVisible) {
-          return false;
-        }
-        // フィルタ
-        if (this.filterItems.length === 0) {
-          return true;
-        }
-        const filterItemIds = this.filterItems.map((item) => item.id);
-        return (
-          [...jnl.credits, ...jnl.debits].filter((d) =>
-            filterItemIds.includes(d.category.id)
-          ).length > 0
-        );
-      })
-      // ソート
-      .sort((a, b) => {
-        switch (this.sortMethod) {
-          case "by_date_asc":
-            return a.accountAt.afterThanOrEqualsTo(b.accountAt) ? 1 : -1;
-          case "by_date_desc":
-            return a.accountAt.beforeThanOrEqualsTo(b.accountAt) ? 1 : -1;
-          case "by_debit_asc":
-            return a.debits[0].category.name > b.debits[0].category.name
-              ? 1
-              : -1;
-          case "by_debit_desc":
-            return a.debits[0].category.name < b.debits[0].category.name
-              ? 1
-              : -1;
-          case "by_credit_asc":
-            return a.credits[0].category.name > b.credits[0].category.name
-              ? 1
-              : -1;
-          case "by_credit_desc":
-            return a.credits[0].category.name < b.credits[0].category.name
-              ? 1
-              : -1;
-        }
-      });
-    this.journalUpdateKey++;
-    return res;
-  }
-
-  public async updateJournals() {
-    const virtualBook = new VirtualBook(
-      AppModule.journals,
-      this.periodBeginWith,
-      this.periodEndWith
+    return (
+      AppModule.book.currentCylinder.bundledJournals
+        .filter((jnl) => {
+          // 可視性
+          if (!jnl.isVisible) {
+            return false;
+          }
+          // フィルタ
+          if (this.filterItems.length === 0) {
+            return true;
+          }
+          const filterItemIds = this.filterItems.map((item) => item.id);
+          return (
+            [...jnl.credits, ...jnl.debits].filter((d) =>
+              filterItemIds.includes(d.category.id)
+            ).length > 0
+          );
+        })
+        // ソート
+        .sort((a, b) => {
+          switch (this.sortMethod) {
+            case "by_date_asc":
+              return a.accountAt.afterThanOrEqualsTo(b.accountAt) ? 1 : -1;
+            case "by_date_desc":
+              return a.accountAt.beforeThanOrEqualsTo(b.accountAt) ? 1 : -1;
+            case "by_debit_asc":
+              return a.debits[0].category.name > b.debits[0].category.name
+                ? 1
+                : -1;
+            case "by_debit_desc":
+              return a.debits[0].category.name < b.debits[0].category.name
+                ? 1
+                : -1;
+            case "by_credit_asc":
+              return a.credits[0].category.name > b.credits[0].category.name
+                ? 1
+                : -1;
+            case "by_credit_desc":
+              return a.credits[0].category.name < b.credits[0].category.name
+                ? 1
+                : -1;
+          }
+        })
     );
-    this.virtualJournals = await virtualBook.getVirtualJournals();
   }
 
-  public onPeriodChanged() {
-    this.updateJournals();
-  }
-
-  @Watch("appJournals")
-  public onAppJournalsChanged() {
-    this.updateJournals();
+  public get displayJournals(): IJournal[] {
+    return this.journals.slice(20 * (this.page - 1), 20 * this.page);
   }
 
   public selectedJournals: IJournal[] = [];
@@ -308,7 +312,7 @@ export default class Journals extends Vue {
         .resolve(UserCategoryItemFlyweight)
         .getByIds((filterQuery as string).split(","));
     }
-    await this.updateJournals();
+    // await this.updateJournals();
   }
 }
 </script>

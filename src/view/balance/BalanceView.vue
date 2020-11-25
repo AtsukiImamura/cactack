@@ -22,22 +22,16 @@
               <DatePicker
                 format="yyyy/MM/dd"
                 :value="date.toDate()"
-                @selected="
-                  date = date.setDate($event);
-                  updateBalance();
-                "
+                @selected="date = date.setDate($event)"
               ></DatePicker>
             </div>
           </div>
         </div>
       </div>
-      <div class="result" :key="debitAmount + creditAmount">
+      <div class="result">
         <div class="graph">
-          <div class="loading" v-if="bandledSummaries.length === 0">
-            <div class="loading-linear"></div>
-          </div>
-          <div class="chart" v-if="bandledSummaries.length > 0">
-            <BalanceChart :value="bandledSummaries"></BalanceChart>
+          <div class="chart">
+            <BalanceChart></BalanceChart>
           </div>
         </div>
         <div class="matlix">
@@ -59,10 +53,7 @@
               </div>
             </div>
           </div>
-          <div class="loading" v-if="bandledSummaries.length > 0 && debitSide.length === 0">
-            <div class="loading-linear"></div>
-          </div>
-          <div class="view" v-if="debitSide.length > 0">
+          <div class="view">
             <div class="side" :class="{ hidden: !mobile__isDebit }">
               <BalanceSide :values="debitSide"></BalanceSide>
             </div>
@@ -84,10 +75,7 @@ import JournalDate from "@/model/common/JournalDate";
 import DatePicker from "vuejs-datepicker";
 import BalanceSide from "@/view/balance/BalanceSide.vue";
 import BalanceChart from "@/view/top/components/BalanceChart.vue";
-import BalanceInfoLoader from "@/functions/loader/BalanceInfoLoader";
-import { BalanceSummaryDto } from "@/model/dto/BalanceSummaryDto";
-import { IAccountCategory } from "@/model/interface/ICategory";
-import AccountType from "@/model/AccountType";
+import AppModule from "@/store/ApplicationStore";
 
 @Component({
   components: {
@@ -100,62 +88,14 @@ import AccountType from "@/model/AccountType";
 export default class BalanceView extends Vue {
   public date: IJournalDate = JournalDate.today();
 
-  public summaryValues: BalanceSummaryDto[] = [];
-
-  public bandledSummaries: BalanceSummaryDto[] = [];
-
   public mobile__isDebit: boolean = true;
 
-  private loader = new BalanceInfoLoader();
-
-  private get debitAmount(): number {
-    return this.debitSide.reduce((acc, cur) => (acc += cur.amount), 0);
-  }
-
-  private get creditAmount(): number {
-    return this.summaryValues
-      .filter((v) => v.item.type.isCredit && v.item.type.isReal)
-      .reduce((acc, cur) => (acc += cur.amount), 0);
-  }
-
   public get debitSide() {
-    return this.summaryValues.filter(
-      (v) => v.item.type.isDebit && v.item.type.isReal
-    );
-    // .reduce(
-    //   (acc, cur) => [...acc, ...(cur.children ? cur.children : [])],
-    //   []
-    // );
+    return AppModule.book.getBalanceOf(this.date).debitSide;
   }
 
   public get creditSide() {
-    const values = this.summaryValues.filter(
-      (v) => v.item.type.isCredit && v.item.type.isReal
-    );
-    values.push({
-      item: ({
-        name: "利益剰余金",
-        type: new AccountType(AccountType.TYPE_NET_ASSET),
-        items: [],
-      } as any) as IAccountCategory,
-      amount: this.debitAmount - this.creditAmount,
-      children: [],
-    });
-    return values;
-  }
-
-  public mounted(): void {
-    this.updateBalance();
-  }
-
-  public updateBalance(): void {
-    this.loader.load(this.date).then((res) => {
-      if (!res) {
-        return;
-      }
-      this.summaryValues = res.list;
-      this.bandledSummaries = res.bandled;
-    });
+    return AppModule.book.getBalanceOf(this.date).creditSide;
   }
 }
 </script>

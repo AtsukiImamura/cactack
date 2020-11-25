@@ -24,7 +24,7 @@ export default abstract class RepositoryBase<
 
   public abstract aggregate(value: S): Promise<T>;
 
-  protected get ref(): firebase.firestore.CollectionReference {
+  protected ref(): firebase.firestore.CollectionReference {
     return firebase.firestore().collection(this.dbKey);
   }
 
@@ -33,7 +33,9 @@ export default abstract class RepositoryBase<
     if (item) {
       return item;
     }
-    const doc = await this.ref.doc(id).get();
+    const doc = await this.ref()
+      .doc(id)
+      .get();
     if (!doc.exists) {
       return undefined;
     }
@@ -74,7 +76,11 @@ export default abstract class RepositoryBase<
     }
 
     const docs = await Promise.all(
-      idNeedSearch.map((id) => this.ref.doc(id).get())
+      idNeedSearch.map((id) =>
+        this.ref()
+          .doc(id)
+          .get()
+      )
     );
     const values = await Promise.all(
       docs
@@ -103,12 +109,8 @@ export default abstract class RepositoryBase<
     }
 
     simplyfied.id = "";
-    const docRef = await this.ref.add(simplyfied);
-    value.id = docRef.id;
-
-    this.cache.add(value.simplify());
-    return value;
-    // return (await this.getById(docRef.id)) as T;
+    const docRef = await this.ref().add(simplyfied);
+    return (await this.getById(docRef.id)) as T;
   }
 
   public async batchInsert(values: T[]): Promise<T[]> {
@@ -117,12 +119,12 @@ export default abstract class RepositoryBase<
     //   .firestore()
     //   .runTransaction(transaction => {
     //     // This code may get re-run multiple times if there are conflicts.
-    //     return transaction.get(this.ref.doc()).then(docs => {
+    //     return transaction.get(this.ref().doc()).then(docs => {
     //       if (!docs.exists) {
     //         throw "Document does not exist!";
     //       }
     //       for (const val of values) {
-    //         transaction.set(this.ref.doc(), val.simplify());
+    //         transaction.set(this.ref().doc(), val.simplify());
     //       }
     //     });
     //   })
@@ -137,7 +139,9 @@ export default abstract class RepositoryBase<
   }
 
   public async update(value: T): Promise<T> {
-    await this.ref.doc(value.id).set(value.simplify());
+    await this.ref()
+      .doc(value.id)
+      .set(value.simplify());
     this.cache.remove(value.simplify());
     return value;
   }
@@ -146,7 +150,9 @@ export default abstract class RepositoryBase<
     return Promise.all(
       values.map((val) => {
         this.cache.add(val.simplify());
-        return this.ref.doc(val.id).set(val.simplify());
+        return this.ref()
+          .doc(val.id)
+          .set(val.simplify());
       })
     ).then(() => {
       return values;
@@ -154,7 +160,7 @@ export default abstract class RepositoryBase<
   }
 
   public delete(value: T): Promise<void> {
-    return this.ref
+    return this.ref()
       .doc(value.id)
       .delete()
       .then(() => this.cache.remove(value.simplify()));
@@ -163,33 +169,39 @@ export default abstract class RepositoryBase<
   public async logicalDelete(value: T & ILogicalDeletable) {
     const data = value.simplify() as S & DLogicalDeletable;
     data.deletedAt = JournalDate.today().toString();
-    await this.ref.doc(value.id).set(data);
+    await this.ref()
+      .doc(value.id)
+      .set(data);
     this.cache.remove(value.simplify());
     return value;
   }
 
   // 実質使えん気がする
   public async getAll(): Promise<T[]> {
-    return this.ref.get().then((value) => {
-      const aggregations: Promise<T>[] = [];
-      value.forEach((doc) => {
-        const val = doc.data() as S;
-        val.id = doc.id;
-        this.cache.add(val);
-        aggregations.push(this.aggregate(val));
+    return this.ref()
+      .get()
+      .then((value) => {
+        const aggregations: Promise<T>[] = [];
+        value.forEach((doc) => {
+          const val = doc.data() as S;
+          val.id = doc.id;
+          this.cache.add(val);
+          aggregations.push(this.aggregate(val));
+        });
+        return Promise.all(aggregations).then((values) => {
+          return values;
+        });
       });
-      return Promise.all(aggregations).then((values) => {
-        return values;
-      });
-    });
   }
 
   protected async getAllWithoutConvert(): Promise<S[]> {
-    return this.ref.get().then((value) => {
-      return Promise.all(
-        value.docs.filter((doc) => doc.exists).map((doc) => doc.data() as S)
-      );
-    });
+    return this.ref()
+      .get()
+      .then((value) => {
+        return Promise.all(
+          value.docs.filter((doc) => doc.exists).map((doc) => doc.data() as S)
+        );
+      });
   }
 
   public clearAll(): Promise<void> {
@@ -211,7 +223,7 @@ export default abstract class RepositoryBase<
       return [];
     }
 
-    const docs = await this.ref
+    const docs = await this.ref()
       .where("userId", "==", userId)
       .where(index, "==", key)
       .get();

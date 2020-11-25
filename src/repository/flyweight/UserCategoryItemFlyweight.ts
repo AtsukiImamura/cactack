@@ -3,8 +3,10 @@ import {
   DUserCategoryItem,
   IUserCategoryItem,
 } from "@/model/interface/ICategory";
-import { singleton } from "tsyringe";
+import { container, singleton } from "tsyringe";
 import UserCategoryItem from "@/model/UserCategoryItem";
+import UserAuthService from "@/service/UserAuthService";
+import * as service from "@/functions/service/ApiService";
 
 @singleton()
 export default class UserCategoryItemFlyweight extends UserFlyweightBase<
@@ -14,6 +16,27 @@ export default class UserCategoryItemFlyweight extends UserFlyweightBase<
   constructor() {
     super();
     this.key = "userCategoryItem";
+  }
+
+  public async import(force: boolean = true) {
+    if (this.mapping.size > 0) {
+      return;
+    }
+    const userId = container.resolve(UserAuthService).userId;
+    if (!userId) {
+      return;
+    }
+    if (!force && this.realMapping.size > 0) {
+      return;
+    }
+
+    const res = await service.api.call<DUserCategoryItem[]>(
+      "getUserCategoryItemAll"
+    );
+    if (!res || !res.code || res.code !== 200) {
+      return;
+    }
+    res.data.forEach((d) => this.putReal(d));
   }
 
   protected aggregate(data: DUserCategoryItem) {

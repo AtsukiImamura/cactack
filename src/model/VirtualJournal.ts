@@ -11,6 +11,14 @@ export default class VirtualJournal extends JournalBase {
     return false;
   }
 
+  public get id(): string {
+    return `v*${super.id}`;
+  }
+
+  public set id(val: string) {
+    this._id = val;
+  }
+
   constructor(
     title: string,
     accountAt: string | IJournalDate,
