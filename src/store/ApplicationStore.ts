@@ -17,14 +17,14 @@ import UserTagFlyweight from "@/repository/flyweight/UserTagFlyweight";
 import ITemplate from "@/model/interface/ITemplate";
 import ITemplateRepository from "@/repository/interface/ITemplateRepository";
 import UserConfigFlyweight from "@/repository/flyweight/UserConfigFlyweight";
-// import IJournalRepository from "@/repository/interface/IJournalRepository";
 import UserAuthService from "@/service/UserAuthService";
 import AccountType from "@/model/AccountType";
 import UserCategory from "@/model/UserCategory";
 import TheBook from "@/model/virtual/TheBook";
-import BookApiService, {
-  BookContextDto,
-} from "@/functions/service/ApiBookService";
+// import BookApiService, {
+//   BookContextDto,
+// } from "@/functions/service/ApiBookService";
+import IJournalRepository from "@/repository/interface/IJournalRepository";
 
 @Module({ dynamic: true, store, name: "app", namespaced: true })
 class AppStore extends VuexModule {
@@ -36,8 +36,6 @@ class AppStore extends VuexModule {
 
   private _periodEndWith: IJournalDate = JournalDate.today();
 
-  private _initCount: number = 0;
-
   private _book: TheBook = new TheBook([], null, null);
 
   /**
@@ -46,10 +44,6 @@ class AppStore extends VuexModule {
    */
   public get book(): TheBook {
     return this._book;
-  }
-
-  public get initCount(): number {
-    return this._initCount;
   }
 
   /**
@@ -114,20 +108,20 @@ class AppStore extends VuexModule {
       container.resolve(UserCategoryItemFlyweight).import(/*force=*/ false),
       container.resolve(UserCategoryFlyweight).import(/*force=*/ false),
       container.resolve(UserConfigFlyweight).import(/*force=*/ false),
-      // container
-      // .resolve<IJournalRepository>("JournalRepository")
-      // .getUsersAll()
-      // .then((journals) => {
-      //   this.INIT(journals);
-      // }),
+      container
+      .resolve<IJournalRepository>("JournalRepository")
+      .getUsersAll()
+      .then((journals) => {
+        this.INIT(journals);
+      }),
     ]);
 
-    BookApiService.getContext(
-      this._periodEndWith.firstDayOfUser,
-      this.periodEndWith.lastDayOfUser
-    ).then((bookContext) => {
-      this.INIT_WITH_BOOK_CONTEXT(bookContext);
-    });
+    // BookApiService.getContext(
+    //   this._periodEndWith.firstDayOfUser,
+    //   this.periodEndWith.lastDayOfUser
+    // ).then((bookContext) => {
+    //   this.INIT_WITH_BOOK_CONTEXT(bookContext);
+    // });
     container
       .resolve<ITemplateRepository>("TemplateRepository")
       .getUsersAll()
@@ -160,28 +154,26 @@ class AppStore extends VuexModule {
       });
   }
 
-  // @Mutation
-  // private INIT(journals?: IJournal[]) {
-  //   this._book = new TheBook(
-  //     journals ? journals : [],
-  //     this.periodBeginWith,
-  //     this.periodEndWith
-  //   );
-  //   this._initCount++;
-  // }
-
   @Mutation
-  private INIT_WITH_BOOK_CONTEXT(context: BookContextDto) {
-    this._periodBeginWith = JournalDate.today().firstDayOfUser;
-    this._periodEndWith = JournalDate.today().lastDayOfUser;
+  private INIT(journals?: IJournal[]) {
     this._book = new TheBook(
-      context.journals,
-      this._periodBeginWith,
-      this._periodEndWith,
-      context.surface
+      journals ? journals : [],
+      this.periodBeginWith,
+      this.periodEndWith
     );
-    this._initCount++;
   }
+
+  // @Mutation
+  // private INIT_WITH_BOOK_CONTEXT(context: BookContextDto) {
+  //   this._periodBeginWith = JournalDate.today().firstDayOfUser;
+  //   this._periodEndWith = JournalDate.today().lastDayOfUser;
+  //   this._book = new TheBook(
+  //     context.journals,
+  //     this._periodBeginWith,
+  //     this._periodEndWith,
+  //     context.surface
+  //   );
+  // }
 
   @Action({ rawError: true })
   public onJournalChanged(payload: {
