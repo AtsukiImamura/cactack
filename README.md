@@ -2,6 +2,8 @@
 
 個人用、でも会計・管理会計の要素を入れてちょっと本格的に管理できるようにする
 
+https://cactack-26e4c.web.app/#/top
+
 ![demo](https://github.com/AtsukiImamura/cactack/blob/image/image/demo.png)
 
 # 開発
