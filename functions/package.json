@@ -17,7 +17,7 @@
   "dependencies": {
     "dayjs": "^1.8.33",
     "firebase": "^7.13.2",
-    "firebase-admin": "^8.10.0",
+    "firebase-admin": "^11.4.1",
     "firebase-functions": "^3.6.1",
     "object-hash": "^2.0.3",
     "reflect-metadata": "^0.1.13",
